@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* Design tokens (docs/SPEC.md 12): ink and paper base, amber for attention,
+   green only for paid, red only for errors and denials. */
+:root {
+  --ink: #0f1622;
+  --ink-2: #18212f;
+  --ink-3: #243042;
+  --paper: #f6f3ec;
+  --paper-2: #ece7dc;
+  --muted: #5b6472;
+  --line: #d6d0c3;
+  --amber: #a85f00;
+  --green: #1f7a3d;
+  --red: #b42318;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --surface: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: var(--ink);
+    --foreground: #e8e4da;
+    --surface: var(--ink-2);
+    --muted: #9aa3b2;
+    --line: var(--ink-3);
+    --amber: #f2a93b;
+    --green: #4cc27a;
+    --red: #f07167;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-amber: var(--amber);
+  --color-green: var(--green);
+  --color-red: var(--red);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-plex-sans), system-ui, sans-serif;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
