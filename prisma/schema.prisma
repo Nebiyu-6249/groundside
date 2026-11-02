@@ -1,0 +1,71 @@
+// Groundside data model.
+// Phase 0 holds only the tables the PayPal spike needs. They follow docs/SPEC.md
+// section 10 so Phase 1 can add the remaining models without breaking these.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum PaymentMethod {
+  PAYPAL
+  CARD
+  OTHER
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  pnr             String        @unique
+  totalCents      Int
+  currency        String        @default("EUR")
+  paymentMethod   PaymentMethod
+  paypalOrderId   String?       @unique
+  paypalCaptureId String?       @unique
+  // PayPal-Request-Id values, stored before the call so retries reuse them.
+  orderRequestId   String?      @unique
+  captureRequestId String?      @unique
+  // CREATED, APPROVED, COMPLETED, or the PayPal status last seen.
+  orderStatus     String?
+  segments        Json?
+  isJudgeBooking  Boolean       @default(false)
+  refunds         Refund[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Refund {
+  id             String   @id @default(cuid())
+  bookingId      String
+  booking        Booking  @relation(fields: [bookingId], references: [id])
+  captureId      String
+  paypalRefundId String?  @unique
+  requestId      String   @unique
+  amountCents    Int
+  // PayPal refund status: PENDING, COMPLETED, FAILED, CANCELLED, or REQUESTED before the call.
+  status         String
+  lastError      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model WebhookEvent {
+  // PayPal event id; the primary key makes delivery idempotent.
+  id           String    @id
+  eventType    String
+  resourceType String?
+  resourceId   String?
+  verified     Boolean
+  payload      Json
+  receivedAt   DateTime  @default(now())
+  processedAt  DateTime?
+  error        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([eventType])
+  @@index([resourceId])
+}
