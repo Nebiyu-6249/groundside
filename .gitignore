@@ -1,0 +1,29 @@
+# dependencies
+/node_modules
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# prisma generated client
+/src/generated/
+
+# env files: never commit secrets; the example is committed
+.env
+.env.*
+!.env.example
+
+# misc
+.DS_Store
+Thumbs.db
+*.pem
+npm-debug.log*
+
+# local spike output that may contain sandbox emails
+/scripts/out/
