@@ -64,6 +64,17 @@ Open http://localhost:3000. `GET /api/health` reports database status.
 
 Every variable is documented in [`.env.example`](.env.example).
 
+### PayPal sandbox setup
+
+In the PayPal developer dashboard (sandbox):
+
+1. Create a **Business** account in Germany and keep the email PayPal generates (`sb-...@business.example.com`). Give it a EUR balance. A business account created with a custom email declined every checkout in our tests ("rejected due to international regulations"); see [`docs/PHASE0_RESULTS.md`](docs/PHASE0_RESULTS.md).
+2. Create a REST app linked to that business account, with Payouts enabled. Put its client ID and secret in `.env`.
+3. Create Personal accounts in Germany with generated emails for the passenger pool and the ticket buyer. List the pool in `PAYPAL_POOL_RECEIVERS`.
+4. For webhooks, expose the dev server (for example `cloudflared tunnel --url http://localhost:3000`), add a webhook for all events at `<public URL>/api/webhooks/paypal`, and put its ID in `PAYPAL_WEBHOOK_ID`.
+
+Test the checkout in a regular browser (Chrome, Edge, Firefox); embedded browser panes can break the PayPal window.
+
 ## Checks
 
 ```bash

@@ -2,21 +2,23 @@
 
 Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/PROGRESS.md`.
 
-## Where things stand (2026-11-03)
+## Where things stand (2026-11-04)
 
-- **Phase 0 in progress.** Code for every Phase 0 item is written and `npm run check` passes. `.env` exists (Neon URLs, session secret, 6 of 10 pool receivers). Migration `phase0_init` is applied on Neon and `/api/health` reports `db: up`. Still missing: PayPal client ID and secret, webhook ID, OpenAI key.
-- **Port:** another local app holds port 3000 on this machine, so `npm run dev` lands on 3001. Point the tunnel at the port `npm run dev` prints.
-- Repo: https://github.com/Nebiyu-6249/groundside (public, branch `main`).
-- Scope: **English only** (no Arabic, no Amharic), by user decision.
+- **Phase 0 is at Gate 0**, waiting for the user's review of `docs/PHASE0_RESULTS.md`. Don't start Phase 1 until the user approves.
+- Every Phase 0 item works in sandbox except cancelling an UNCLAIMED payout item (HTTP 500 every time; see PHASE0_RESULTS item 5).
+- **PayPal app:** "Groundside EU" (`APP-55E35906EM8730949`), linked to the generated business account `sb-vz8j553542468@business.example.com` (DE). It replaced the first app, whose custom-email business account declined every checkout. `.env` holds the new client ID, secret and webhook ID `6UR10068K6257654U`.
+- **Port:** the dev server runs on **3001** (`npm run dev -- --port 3001`); another local app sometimes holds 3000.
+- **Tunnel:** cloudflared quick tunnels expire. After starting a new one, update the webhook URL for `6UR10068K6257654U` in the dashboard (or via `PATCH /v1/notifications/webhooks/{id}`, with the user's OK).
+- Repo: https://github.com/Nebiyu-6249/groundside (public, branch `main`). Scope: **English only**.
 
 ## Next steps
 
-1. Done: `.env` (partly), migration, health check.
-2. The user adds `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to `.env`, then restarts `npm run dev`.
-3. Start the dev server and `cloudflared tunnel --url http://localhost:3000` in the background. The user creates a sandbox webhook pointing at `<tunnel>/api/webhooks/paypal` and puts its ID in `.env` as `PAYPAL_WEBHOOK_ID`. Restart the dev server after editing `.env`.
-4. `npm run spike:payouts`. If `pax-0001@example.com` is rejected, rerun with `-- --unregistered=<other reserved-domain address>`.
-5. The user pays on `/demo/book` with a sandbox buyer account (Claude Code must not type PayPal passwords), then clicks refund. Check the `WebhookEvent` table for payout and refund events.
-6. Write `docs/PHASE0_RESULTS.md` (every SPEC 9.9 item: request, HTTP status, debug ID, outcome), tick the tracker, commit, push, then stop at Gate 0.
+1. The user reviews PHASE0_RESULTS and answers the Gate 0 decisions:
+   - unclaimed-cancel handling in Phase 4;
+   - whether to ask on the PayPal Discord;
+   - creating the 4 remaining pool accounts;
+   - the business balance reading from the dashboard.
+2. After approval: Phase 1 (airports subset, full Prisma schema, scenarios, rule pack, EU261 engine with at least 40 tests). Post the Phase 1 plan first.
 
 ## How to run
 
@@ -25,24 +27,23 @@ cd C:\dev\groundside
 npm install
 copy .env.example .env
 notepad .env
-npx prisma migrate dev --name phase0_init
-npm run dev
+npx prisma migrate deploy
+npm run dev -- --port 3001
 ```
 
-- Checks: `npm run check`
-- Payouts spike: `npm run spike:payouts`
-- Webhook tunnel (separate window): `cloudflared tunnel --url http://localhost:3000`
-
-## `.env` values needed for Phase 0
-
-`DATABASE_URL`, `DIRECT_URL`, `SESSION_SECRET`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_ID`, `PAYPAL_POOL_RECEIVERS` (at least 2 for the spike, 10 eventually), then `PAYPAL_WEBHOOK_ID` once the webhook exists. `OPENAI_API_KEY` is not needed until Phase 2.
+- Checks: `npm run check` (27 tests passing at Gate 0)
+- Payouts spike: `npm run spike:payouts` (writes redacted JSON to `scripts/out/`)
+- Webhook tunnel (separate window): `cloudflared tunnel --url http://localhost:3001`
+- Demo booking: http://localhost:3001/demo/book in Chrome or Edge, not the desktop app's built-in browser.
 
 ## Open blockers
 
-- `.env` and the PayPal sandbox setup (user).
-- Whether Payouts is enabled for the sandbox app: unknown until the spike runs.
+- None for Phase 1.
+- Secrets to rotate before deploying to Render: the Neon password, and the old and new PayPal app secrets (all appeared in chat).
 
 ## Notes for the next session
 
 - Prisma 7: the client is generated to `src/generated/prisma` (git-ignored); `prisma.config.ts` loads `.env` itself. The app connects through `@prisma/adapter-pg` with the pooled `DATABASE_URL`.
 - `AGENTS.md` is written by `next dev`. It points to the Next 16 docs in `node_modules/next/dist/docs/`; read the relevant guide there before using an unfamiliar Next API.
+- Stopping the background `npm run dev` task can leave the Next process running; `next dev` then reports "Another next dev server is already running" with its PID.
+- The PayPal JS SDK may call `onCancel` after the buyer approved. The demo page captures on cancel too; the server captures only APPROVED orders.

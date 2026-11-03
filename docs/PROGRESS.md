@@ -55,3 +55,11 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 - **Conclusion:** the decline follows the `airport1@gmail.com` merchant account. Fix: a new PayPal-generated Business account (DE) and a new REST app linked to it, then rerun the payouts spike and the demo booking against it.
 - **Controlled retest (2026-11-04):** the identical server-created 1 EUR order with the default payee (`airport1@gmail.com`), approved by the same pool buyer `sb-rw6g453693446` in a normal browser: order `2M123986WR9373515` created HTTP 200 (debug `ca54e4b283bd4`), declined at approval with "international regulations"; order still `PAYER_ACTION_REQUIRED` (debug `f1182424ce71e`). Only the payee differs from the successful test, so the merchant account is confirmed as the cause.
 - **Side note:** inside the Claude desktop app's built-in browser the PayPal checkout window shows only a generic error ("Leider ist ein Fehler aufgetreten"); test checkout in Chrome or Edge.
+
+## 2026-11-04: Phase 0 complete, at Gate 0
+
+- New sandbox setup by the user: generated DE business account `sb-vz8j553542468@business.example.com`, REST app "Groundside EU" (`APP-55E35906EM8730949`), webhook `6UR10068K6257654U` on a new quick tunnel (the old one expired overnight).
+- Payouts spike rerun on the new app: batch `JMFR29AWPY7T2` SUCCESS in 33 s, same item results as the first run; duplicate rejected; cancel UNCLAIMED still HTTP 500; balance API still 403.
+- Demo booking: buyer approved order `6KS2677987580682D`, but the JS SDK called `onCancel`. Fixed: `onCancel` asks the server to capture, and the server captures only APPROVED orders (new unit tests). Captured (`53N346307V6339736`), refunded in full via API (`4W803013JY3640920`), `PAYMENT.CAPTURE.REFUNDED` webhook verified and stored.
+- Wrote `docs/PHASE0_RESULTS.md`; ticked the Phase 0 tracker; README gained sandbox setup steps.
+- `npm run check`: 27 tests passing.
