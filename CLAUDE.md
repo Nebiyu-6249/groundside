@@ -95,16 +95,16 @@ Act as all of these at once:
 
 Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 
-### Phase 0: Scaffold and PayPal spike (Tue Nov 3). STATUS: in progress
+### Phase 0: Scaffold and PayPal spike (Tue Nov 3). STATUS: at Gate 0, waiting for review
 - [x] Next.js app, TypeScript strict, ESLint, Vitest, Prisma connected to Neon, `/api/health` returns DB status
 - [x] `.env.example`, `.gitattributes`, `.gitignore` (includes `.env`), `LICENSE` (MIT), README skeleton
 - [x] Public GitHub repo `groundside` created and pushed (user creates it if `gh` isn't logged in)
-- [ ] `scripts/spike-payouts.ts`: OAuth token; EUR batch with 4 items (2 to the same pool account, 1 to a second pool account, 1 to an unregistered address per `docs/SPEC.md` 9.9); poll until final; record statuses and the business balance afterwards
-- [ ] Duplicate `sender_batch_id` is rejected (prove it)
-- [ ] Cancel an UNCLAIMED payout item (if the endpoint works in sandbox; record result either way)
-- [ ] Webhook endpoint with signature verification; events received via cloudflared tunnel; stored idempotently
-- [ ] Demo booking page: buy a EUR ticket with the sandbox buyer account (Orders v2 capture), then refund it via API; refund webhook received
-- [ ] `docs/PHASE0_RESULTS.md` covering every item in `docs/SPEC.md` 9.9: request type, response status, PayPal debug ID, and anything that failed
+- [x] `scripts/spike-payouts.ts`: OAuth token; EUR batch with 4 items (2 to the same pool account, 1 to a second pool account, 1 to an unregistered address per `docs/SPEC.md` 9.9); poll until final; record statuses and the business balance afterwards
+- [x] Duplicate `sender_batch_id` is rejected (prove it)
+- [x] Cancel an UNCLAIMED payout item (if the endpoint works in sandbox; record result either way)
+- [x] Webhook endpoint with signature verification; events received via cloudflared tunnel; stored idempotently
+- [x] Demo booking page: buy a EUR ticket with the sandbox buyer account (Orders v2 capture), then refund it via API; refund webhook received
+- [x] `docs/PHASE0_RESULTS.md` covering every item in `docs/SPEC.md` 9.9: request type, response status, PayPal debug ID, and anything that failed
 - **GATE 0:** user reviews PHASE0_RESULTS.md. If Payouts can't run in sandbox, stop and report; the user will escalate on the PayPal Discord.
 
 ### Phase 1: Data, EU261 engine, rule pack (Tue Nov 3 to Wed Nov 4). STATUS: not started
