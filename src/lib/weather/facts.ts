@@ -1,7 +1,7 @@
 // Turns parsed reports into numbered facts (docs/SPEC.md 7.4). The AI may refer only to these
 // IDs. Wording is neutral: facts describe what was reported, never whether a flight was possible.
 
-import { parseMetarReport, significantWeather, type ParsedMetar } from "./parse";
+import { parseMetarReport, significantWeather, type ParsedMetar, type ParsedTaf } from "./parse";
 import type { WeatherWindow, WindowRole } from "./windows";
 
 export type FactKind = "VISIBILITY_M" | "RVR_M" | "CEILING_FT" | "PRESENT_WEATHER" | "WIND" | "CAVOK" | "TAF_PERIOD" | "INDICATOR";
@@ -107,6 +107,26 @@ function indicatorFacts(obs: ParsedMetar[], w: WeatherWindow, evidenceId: string
     add("FOGSPAN", { from: bestStart.toISOString(), to: bestEnd.toISOString(), reports: best }, `Fog with visibility under ${REFERENCE.visibilityFogM} m reported at ${w.icao} in ${best} consecutive reports from ${hhmm(bestStart)} to ${hhmm(bestEnd)}`);
   }
   return facts;
+}
+
+/** One TAF_PERIOD fact per forecast period (base and change groups). */
+export function tafFacts(taf: ParsedTaf, evidenceId: string, issuedAt: Date): WeatherFact[] {
+  return taf.periods.map((p, i) => {
+    const parts = [
+      p.visibilityM !== null ? `visibility ${visText(p.visibilityM)}` : null,
+      p.ceilingFt !== null ? `ceiling ${p.ceilingFt} ft` : "no ceiling forecast",
+      p.weather.length ? `weather ${p.weather.join(" ")}` : "no significant weather forecast",
+    ].filter(Boolean);
+    return {
+      id: `TAF-${taf.station}-${stamp(issuedAt)}-P${i}`,
+      airport: taf.station,
+      observedAt: issuedAt.toISOString(),
+      kind: "TAF_PERIOD" as const,
+      value: { kind: p.kind, from: p.from, to: p.to, visibilityM: p.visibilityM, ceilingFt: p.ceilingFt, weather: p.weather },
+      text: `${taf.station} forecast issued ${hhmm(issuedAt)}, ${p.kind === "BASE" ? "base period" : p.kind} ${p.from ?? "?"} to ${p.to ?? "?"} (DDHH): ${parts.join(", ")}`,
+      sourceEvidenceId: evidenceId,
+    };
+  });
 }
 
 /**

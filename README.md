@@ -2,7 +2,7 @@
 
 When a flight from an EU airport is cancelled or badly delayed, Groundside checks the airline's stated cause against real archived weather reports, works out what every passenger is owed under EU Regulation 261/2004, and pays them through PayPal once a duty manager approves.
 
-Built for the PayPal AI Hackathon. **Status: in development (Phase 1: data, EU261 engine and rule pack).**
+Built for the PayPal AI Hackathon. **Status: in development (Phase 2: weather evidence and AI cause assessment).**
 
 - Live demo: not deployed yet
 - Demo credentials: published here once the hosted demo is up (sandbox only)
@@ -26,7 +26,19 @@ All PayPal calls use the **sandbox** only. No real money moves.
 
 ## How AI is used
 
-Described here as each AI component lands (Phase 2 onwards). Model IDs come from environment variables.
+The AI recommends; code calculates; only a human can deny compensation. Model IDs come from environment variables (`OPENAI_MODEL_*`).
+
+- **A1 cause assessment** (`src/lib/ai/a1/`, prompt `prompts/A1.v1.md`): reads the ops note, the maintenance log and numbered weather facts built by code from real archived METARs, and says whether the stated cause is supported. Output is strict JSON. Code then checks it:
+  - the schema matches
+  - every citation is a verified rule-pack ID
+  - every fact ID exists
+  - every quote is verbatim
+  - no amount of money appears
+  - the summary is short
+
+  Code, not the model, maps the result to the shown recommendation. A failed check gets one retry; a second failure shows "uncertain, a human decides". When live AI is unavailable or the daily budget (`AI_DAILY_BUDGET_USD`) is reached, a recorded result is shown with a visible label. Every call is logged with its token count and estimated cost.
+- **Evals:** `npm run eval` runs 12 cases (`data/evals/a1-cases.json`) against the live model and writes `docs/EVAL_REPORT.md`.
+- Weather: Iowa Environmental Mesonet archive (public domain). Archived forecasts (TAF) were not available for the scenario dates, so the demo uses observations only; see `data/weather/SOURCES.md`.
 
 ## Data labels
 

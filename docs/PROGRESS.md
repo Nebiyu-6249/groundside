@@ -81,3 +81,28 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - Scenario B's group split and the times of its previous flight (DEMO 206) were not in DEMO.md and were set by Claude Code, noted in the JSON.
 - **Seeding:** `npm run seed`, `npm run reset-demo` (with `-- --full`) and `npm run explain` work.
 - **Name check (OPEN_QUESTIONS Q5):** a quick web search found no aviation software product or trademark named "Groundside". This is not a trademark clearance.
+
+## 2026-11-04: Phase 2 (weather evidence, A1, evals), blocked on the OpenAI key
+
+- The user said not to wait for approvals during this phase, so Claude Code chose the scenario dates itself. The choices and the reasons are recorded in `data/scenarios/*.json` and `data/weather/SOURCES.md`.
+- **Dates from the IEM archive (Nov 2025 to Feb 2026):**
+  - A on 2026-01-24: CAVOK at EDDF and OMDB, LEMD with no ceiling. 12 dates qualified. 2025-11-12 was rejected because of a 4200 m mist report at EDDF in the departure window.
+  - B on 2026-01-22: freezing fog at LIMC from 0350Z to 0750Z, RVR down to 250 m, LPPT clear. The only qualifying date.
+- **TAF:** neither IEM nor Ogimet returned archived TAFs for these stations, so the demo uses METAR only, per SPEC 7.1. The parser and the fact builder still support TAF.
+- **Fixtures:** 5 METAR fixtures with SHA-256 sidecars, fetched by `npm run weather:fetch`. The seed now stores evidence and facts and sets the disruptions to EVIDENCE_READY.
+- **A1 built:**
+  - OpenAI Responses API with a strict JSON schema
+  - the six validators
+  - the code policy mapping
+  - one retry carrying the validation errors
+  - spend log in `AiCall` and the daily budget cap
+  - recorded-fixture fallback
+  - 20 unit tests with a scripted fake model
+- **Eval harness:** 12 cases in `data/evals/a1-cases.json`; `npm run eval` writes `docs/EVAL_REPORT.md` and records the scenario A and B fixtures.
+- **Blocked:** `OPENAI_API_KEY` is empty in `.env`, so the eval has not run and no recorded A1 fixtures exist yet. Until then the app shows "AI assessment unavailable" for A1.
+- **Expected labels set by Claude Code** where SPEC 15 does not give one:
+  - knock-on: UNCERTAIN, because the stated location is contradicted
+  - operational reasons only: UNCERTAIN
+  - arrival weather well above reference values: PAY, because the carrier has not met its burden of proof
+- **Dependencies added** (both listed in the stack): `metar-taf-parser` 9.1.3 and `openai` 7.49.0.
+- `npm run check`: 143 tests passing.
