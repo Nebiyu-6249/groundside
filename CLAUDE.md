@@ -107,7 +107,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] `docs/PHASE0_RESULTS.md` covering every item in `docs/SPEC.md` 9.9: request type, response status, PayPal debug ID, and anything that failed
 - **GATE 0:** user reviews PHASE0_RESULTS.md. If Payouts can't run in sandbox, stop and report; the user will escalate on the PayPal Discord.
 
-### Phase 1: Data, EU261 engine, rule pack (Tue Nov 3 to Wed Nov 4). STATUS: at Gate 1, waiting for review
+### Phase 1: Data, EU261 engine, rule pack (Tue Nov 3 to Wed Nov 4). STATUS: done (Gate 1 approved 2026-11-04)
 - [x] Airports subset from OurAirports (public domain) with EU/EEA/CH flag
 - [x] Prisma schema per `docs/SPEC.md` section 10; migration; seed script; `npm run reset-demo`
 - [x] Scenario definitions and synthetic manifest generator (`docs/DEMO.md` section 2)
@@ -115,9 +115,9 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] Engine per `docs/SPEC.md` section 5 with at least 40 unit tests, each naming the rule it exercises
 - **GATE 1:** test output, rule pack status table, one worked passenger example with its full trace.
 
-### Phase 2: Weather evidence, AI assessment, evals (Wed Nov 4). STATUS: not started
-- [ ] Weather fetch from archive sources, parse, facts, fixtures saved with source URL and retrieval time
-- [ ] Real dates chosen for scenarios A and B (`docs/DEMO.md`), shown to the user for approval
+### Phase 2: Weather evidence, AI assessment, evals (Wed Nov 4). STATUS: in progress
+- [x] Weather fetch from archive sources, parse, facts, fixtures saved with source URL and retrieval time
+- [x] Real dates chosen for scenarios A and B (`docs/DEMO.md`), shown to the user for approval
 - [ ] A1 cause assessment with schema, citation whitelist, fact-ID check, policy mapping, retries, spend log, fixture fallback
 - [ ] `npm run eval` with at least 12 cases; pass criteria in `docs/SPEC.md` section 15
 - **GATE 2:** eval report (case, expected, actual, pass/fail), cost so far.

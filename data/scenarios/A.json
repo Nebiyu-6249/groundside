@@ -1,25 +1,80 @@
 {
   "key": "A",
   "title": "The weather that wasn't",
-  "dateLocal": "2026-01-15",
-  "dateIsPlaceholder": true,
-  "dateNote": "Placeholder winter date. The real date is chosen from the METAR archive in Phase 2 (docs/DEMO.md 2.1).",
+  "dateLocal": "2026-01-24",
+  "dateIsPlaceholder": false,
+  "dateNote": "Real date chosen by Claude Code on 2026-11-04 (user asked not to wait for approval). IEM METARs: CAVOK at EDDF and OMDB through every window; LEMD 9999 with FEW/SCT cloud only, no ceiling. No widely reported disruption found for Frankfurt that day. Search: npm run weather:dates.",
   "type": "CANCELLATION",
-  "aircraft": { "registration": "DEMO-01", "type": "Single-aisle, 180 seats" },
-  "flight": { "number": "DEMO 412", "origin": "EDDF", "destination": "OMDB", "depLocal": "21:50", "arrLocal": "06:55", "arrDayOffset": 1 },
-  "previousFlight": { "number": "DEMO 409", "origin": "LEMD", "destination": "EDDF", "depLocal": "17:30", "arrLocal": "19:55", "dayOffset": 0 },
-  "informed": { "local": "20:30", "dayOffset": 0 },
-  "rerouting": { "number": "DEMO 414", "depLocal": "10:15", "depDayOffset": 1, "arrLocal": "19:20", "arrDayOffset": 1 },
+  "aircraft": {
+    "registration": "DEMO-01",
+    "type": "Single-aisle, 180 seats"
+  },
+  "flight": {
+    "number": "DEMO 412",
+    "origin": "EDDF",
+    "destination": "OMDB",
+    "depLocal": "21:50",
+    "arrLocal": "06:55",
+    "arrDayOffset": 1
+  },
+  "previousFlight": {
+    "number": "DEMO 409",
+    "origin": "LEMD",
+    "destination": "EDDF",
+    "depLocal": "17:30",
+    "arrLocal": "19:55",
+    "dayOffset": 0
+  },
+  "informed": {
+    "local": "20:30",
+    "dayOffset": 0
+  },
+  "rerouting": {
+    "number": "DEMO 414",
+    "depLocal": "10:15",
+    "depDayOffset": 1,
+    "arrLocal": "19:20",
+    "arrDayOffset": 1
+  },
   "onward": [
-    { "destination": "HAAB", "number": "DEMO 520", "depLocal": "09:30", "arrLocal": "12:45", "dayOffset": 1 },
-    { "destination": "HKJK", "number": "DEMO 530", "depLocal": "09:00", "arrLocal": "13:20", "dayOffset": 1 },
-    { "destination": "VABB", "number": "DEMO 540", "depLocal": "09:15", "arrLocal": "13:50", "dayOffset": 1 }
+    {
+      "destination": "HAAB",
+      "number": "DEMO 520",
+      "depLocal": "09:30",
+      "arrLocal": "12:45",
+      "dayOffset": 1
+    },
+    {
+      "destination": "HKJK",
+      "number": "DEMO 530",
+      "depLocal": "09:00",
+      "arrLocal": "13:20",
+      "dayOffset": 1
+    },
+    {
+      "destination": "VABB",
+      "number": "DEMO 540",
+      "depLocal": "09:15",
+      "arrLocal": "13:50",
+      "dayOffset": 1
+    }
   ],
   "fareCents": 38900,
   "opsNote": "DEMO 412 FRA-DXB CNL. Reason: adverse weather. Pax reprotected on DEMO 414 tomorrow 1015LT.\nHotel FRA airport area, meal allowance to be issued. OCC duty desk.",
   "maintenanceLog": "DEMO-01 tech log 2005LT. On arrival ex MAD, crew report HYD SYS 2 LO PRESS caution.\nEngineering: EDP 2 failed on ground check, part ex MAD hub on DEMO 413, est. AOG 14h.\nNo external damage found. No bird strike, no FOD.",
   "fullRun": {
-    "groups": { "public": 160, "connecting": 10, "award": 6, "staff": 4 },
-    "overlays": { "reducedMobility": 4, "unaccompaniedMinor": 2, "unregistered": 12, "noEmail": 3, "refundCardPaid": 8 }
+    "groups": {
+      "public": 160,
+      "connecting": 10,
+      "award": 6,
+      "staff": 4
+    },
+    "overlays": {
+      "reducedMobility": 4,
+      "unaccompaniedMinor": 2,
+      "unregistered": 12,
+      "noEmail": 3,
+      "refundCardPaid": 8
+    }
   }
 }
