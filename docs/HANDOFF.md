@@ -4,13 +4,15 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 2 in progress, blocked on `OPENAI_API_KEY`** (empty in `.env`). The user said not to wait for approvals in this phase.
-  - **Built and tested:**
+- **Phase 2 is at Gate 2**, waiting for the user's review of `docs/EVAL_REPORT.md`. The user said not to wait for approvals during the phase, but the gate itself still needs approval.
+  - **Built:**
     - METAR parsing, weather windows, facts, TAF facts
     - real fixtures for A (2026-01-24) and B (2026-01-22) in `data/weather/` (sources in `data/weather/SOURCES.md`)
-    - A1 in `src/lib/ai/a1/`
+    - A1 in `src/lib/ai/a1/`, prompt `prompts/A1.v2.md`
     - the eval harness, `npm run eval`
-  - **Not done:** running the eval. So `docs/EVAL_REPORT.md` and the recorded fixtures in `fixtures/ai/` don't exist yet, and until they do the app shows "AI assessment unavailable".
+  - **Eval:** 11/12 on two runs with A1.v2; all SPEC 15 criteria pass. The remaining miss (`arrival-weather-well-above`) is a policy-table question for the user.
+  - **Recorded A1 results:** `fixtures/ai/A1-scenario-{A,B}.json`, loaded with `loadA1Fixture()`.
+  - **AI spend so far:** about 0.05 USD.
 - Phases 0 and 1 are done (Gates 0 and 1 approved 2026-11-04). Results in `docs/PHASE0_RESULTS.md` and the Gate 1 docs.
 - **Rule pack:** 46 entries in `rules/` (JSON, one file each), all VERIFIED. `npm run rules:verify` re-fetches the official texts from the Publications Office CELLAR service and checks every excerpt word for word. EUR-Lex itself answers scripted requests with a bot challenge, so CELLAR is the verification source.
 - **Engine:** `src/lib/engine/`, pure functions, 64 tests. Entry point `computePassenger(disruption, passenger, { rules, policy })`; `reconcile()` for idempotent re-runs.
@@ -26,11 +28,12 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Next steps
 
-1. The user adds `OPENAI_API_KEY` to `.env` in Notepad (never in chat).
-2. Run `npm run eval` and check the pass criteria at the top of `docs/EVAL_REPORT.md`.
-3. If fewer than 11 of 12 cases match, look at the failing ones. Put any prompt change in a new file `prompts/A1.v2.md`, bump `A1_PROMPT_VERSION`, and rerun.
-4. The eval writes the scenario A and B results to `fixtures/ai/`. Commit them.
-5. Gate 2 report: the eval table and the cost so far (`AiCall` table).
+1. The user reviews Gate 2 and decides on the `arrival-weather-well-above` mapping: keep the SPEC 8.1 table (shown UNCERTAIN), or map "claim NOT_SUPPORTED + LIKELY_NOT_EXTRAORDINARY" to PAY whatever the likely-cause confidence.
+2. After approval, Phase 3: ops console, approval and denial flows, offers and passenger pages, payout orchestrator, deploy to Render. Post the Phase 3 plan first.
+3. Phase 3 wires A1 into the disruption page:
+   - store the result in `Assessment` (shownRecommendation, modelRecommendation, retries, usedFixture, costUsd)
+   - show "AI recommendation. A duty manager decides."
+   - show the fixture notice when it applies
 
 ## How to run
 
@@ -44,7 +47,7 @@ npm run reset-demo
 npm run dev -- --port 3001
 ```
 
-- Checks: `npm run check` (143 tests)
+- Checks: `npm run check` (144 tests)
 - A1 evals: `npm run eval` (live model; needs `OPENAI_API_KEY`)
 - Weather fixtures: `npm run weather:fetch -- --scenario=A` (skips existing files; `--force` replaces them)
 - Rule pack check: `npm run rules:verify` (add `-- --refresh` to re-download the texts)
