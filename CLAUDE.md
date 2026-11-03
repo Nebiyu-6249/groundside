@@ -112,7 +112,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [ ] Prisma schema per `docs/SPEC.md` section 10; migration; seed script; `npm run reset-demo`
 - [ ] Scenario definitions and synthetic manifest generator (`docs/DEMO.md` section 2)
 - [x] Rule pack: every candidate in `docs/SPEC.md` section 6 checked against EUR-Lex/CURIA; VERIFIED or UNVERIFIED with reason
-- [ ] Engine per `docs/SPEC.md` section 5 with at least 40 unit tests, each naming the rule it exercises
+- [x] Engine per `docs/SPEC.md` section 5 with at least 40 unit tests, each naming the rule it exercises
 - **GATE 1:** test output, rule pack status table, one worked passenger example with its full trace.
 
 ### Phase 2: Weather evidence, AI assessment, evals (Wed Nov 4). STATUS: not started
