@@ -118,7 +118,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 ### Phase 2: Weather evidence, AI assessment, evals (Wed Nov 4). STATUS: in progress
 - [x] Weather fetch from archive sources, parse, facts, fixtures saved with source URL and retrieval time
 - [x] Real dates chosen for scenarios A and B (`docs/DEMO.md`), shown to the user for approval
-- [ ] A1 cause assessment with schema, citation whitelist, fact-ID check, policy mapping, retries, spend log, fixture fallback
+- [x] A1 cause assessment with schema, citation whitelist, fact-ID check, policy mapping, retries, spend log, fixture fallback
 - [ ] `npm run eval` with at least 12 cases; pass criteria in `docs/SPEC.md` section 15
 - **GATE 2:** eval report (case, expected, actual, pass/fail), cost so far.
 
