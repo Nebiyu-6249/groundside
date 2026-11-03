@@ -4,14 +4,15 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-03)
 
-- **Phase 0 in progress.** Code for every Phase 0 item is written and `npm run check` passes. Nothing has run against Neon or PayPal yet, because `.env` does not exist.
+- **Phase 0 in progress.** Code for every Phase 0 item is written and `npm run check` passes. `.env` exists (Neon URLs, session secret, 6 of 10 pool receivers). Migration `phase0_init` is applied on Neon and `/api/health` reports `db: up`. Still missing: PayPal client ID and secret, webhook ID, OpenAI key.
+- **Port:** another local app holds port 3000 on this machine, so `npm run dev` lands on 3001. Point the tunnel at the port `npm run dev` prints.
 - Repo: https://github.com/Nebiyu-6249/groundside (public, branch `main`).
 - Scope: **English only** (no Arabic, no Amharic), by user decision.
 
 ## Next steps
 
-1. The user fills `.env` (see below). Check with: `npm run dev`, then open http://localhost:3000/api/health. It should show `"db":"up"` once the migration has run.
-2. Run the first migration: `npx prisma migrate dev --name phase0_init` (uses `DIRECT_URL`).
+1. Done: `.env` (partly), migration, health check.
+2. The user adds `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` and `NEXT_PUBLIC_PAYPAL_CLIENT_ID` to `.env`, then restarts `npm run dev`.
 3. Start the dev server and `cloudflared tunnel --url http://localhost:3000` in the background. The user creates a sandbox webhook pointing at `<tunnel>/api/webhooks/paypal` and puts its ID in `.env` as `PAYPAL_WEBHOOK_ID`. Restart the dev server after editing `.env`.
 4. `npm run spike:payouts`. If `pax-0001@example.com` is rejected, rerun with `-- --unregistered=<other reserved-domain address>`.
 5. The user pays on `/demo/book` with a sandbox buyer account (Claude Code must not type PayPal passwords), then clicks refund. Check the `WebhookEvent` table for payout and refund events.

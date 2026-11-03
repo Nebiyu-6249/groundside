@@ -96,7 +96,7 @@ Act as all of these at once:
 Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 
 ### Phase 0: Scaffold and PayPal spike (Tue Nov 3). STATUS: in progress
-- [ ] Next.js app, TypeScript strict, ESLint, Vitest, Prisma connected to Neon, `/api/health` returns DB status
+- [x] Next.js app, TypeScript strict, ESLint, Vitest, Prisma connected to Neon, `/api/health` returns DB status
 - [x] `.env.example`, `.gitattributes`, `.gitignore` (includes `.env`), `LICENSE` (MIT), README skeleton
 - [x] Public GitHub repo `groundside` created and pushed (user creates it if `gh` isn't logged in)
 - [ ] `scripts/spike-payouts.ts`: OAuth token; EUR batch with 4 items (2 to the same pool account, 1 to a second pool account, 1 to an unregistered address per `docs/SPEC.md` 9.9); poll until final; record statuses and the business balance afterwards
