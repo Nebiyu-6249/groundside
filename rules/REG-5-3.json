@@ -1,0 +1,14 @@
+{
+  "id": "REG-5-3",
+  "title": "Extraordinary circumstances",
+  "source": "Regulation (EC) No 261/2004, Article 5(3)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "3. An operating air carrier shall not be obliged to pay compensation in accordance with Article 7, if it can prove that the cancellation is caused by extraordinary circumstances which could not have been avoided even if all reasonable measures had been taken.",
+  "summary": "The carrier does not owe compensation if it proves the cancellation was caused by extraordinary circumstances that all reasonable measures could not have avoided.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

@@ -1,0 +1,14 @@
+{
+  "id": "POL-TRANSPORT",
+  "title": "Demo Air policy: ground transport cap",
+  "source": "Demo Air (fictional carrier) policy, data/policy/demo-air.json",
+  "url": "data/policy/demo-air.json",
+  "celex": null,
+  "excerpt": "Transport between airport and hotel up to 40 EUR each way.",
+  "summary": "Transport cap set by Demo Air policy, for care under Article 9(1)(c).",
+  "kind": "POLICY",
+  "status": "VERIFIED",
+  "verifiedAgainst": "data/policy/demo-air.json",
+  "verifiedAt": "2026-11-04",
+  "notes": "Fictional airline policy, not law."
+}

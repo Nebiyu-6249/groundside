@@ -95,7 +95,7 @@ Act as all of these at once:
 
 Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 
-### Phase 0: Scaffold and PayPal spike (Tue Nov 3). STATUS: at Gate 0, waiting for review
+### Phase 0: Scaffold and PayPal spike (Tue Nov 3). STATUS: done (Gate 0 approved 2026-11-04)
 - [x] Next.js app, TypeScript strict, ESLint, Vitest, Prisma connected to Neon, `/api/health` returns DB status
 - [x] `.env.example`, `.gitattributes`, `.gitignore` (includes `.env`), `LICENSE` (MIT), README skeleton
 - [x] Public GitHub repo `groundside` created and pushed (user creates it if `gh` isn't logged in)
@@ -107,11 +107,11 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] `docs/PHASE0_RESULTS.md` covering every item in `docs/SPEC.md` 9.9: request type, response status, PayPal debug ID, and anything that failed
 - **GATE 0:** user reviews PHASE0_RESULTS.md. If Payouts can't run in sandbox, stop and report; the user will escalate on the PayPal Discord.
 
-### Phase 1: Data, EU261 engine, rule pack (Tue Nov 3 to Wed Nov 4). STATUS: not started
+### Phase 1: Data, EU261 engine, rule pack (Tue Nov 3 to Wed Nov 4). STATUS: in progress
 - [ ] Airports subset from OurAirports (public domain) with EU/EEA/CH flag
 - [ ] Prisma schema per `docs/SPEC.md` section 10; migration; seed script; `npm run reset-demo`
 - [ ] Scenario definitions and synthetic manifest generator (`docs/DEMO.md` section 2)
-- [ ] Rule pack: every candidate in `docs/SPEC.md` section 6 checked against EUR-Lex/CURIA; VERIFIED or UNVERIFIED with reason
+- [x] Rule pack: every candidate in `docs/SPEC.md` section 6 checked against EUR-Lex/CURIA; VERIFIED or UNVERIFIED with reason
 - [ ] Engine per `docs/SPEC.md` section 5 with at least 40 unit tests, each naming the rule it exercises
 - **GATE 1:** test output, rule pack status table, one worked passenger example with its full trace.
 

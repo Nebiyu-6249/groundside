@@ -1,0 +1,14 @@
+{
+  "id": "REG-6-1",
+  "title": "Delay: care, hotel and the five-hour refund right",
+  "source": "Regulation (EC) No 261/2004, Article 6(1)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "1. When an operating air carrier reasonably expects a flight to be delayed beyond its scheduled time of departure: (a) for two hours or more in the case of flights of 1500 kilometres or less; or (b) for three hours or more in the case of all intra-Community flights of more than 1500 kilometres and of all other flights between 1500 and 3500 kilometres; or (c) for four hours or more in the case of all flights not falling under (a) or (b), passengers shall be offered by the operating air carrier: (i) the assistance specified in Article 9(1)(a) and 9(2); and (ii) when the reasonably expected time of departure is at least the day after the time of departure previously announced, the assistance specified in Article 9(1)(b) and 9(1)(c); and (iii) when the delay is at least five hours, the assistance specified in Article 8(1)(a).",
+  "summary": "A departure delay of 2, 3 or 4 hours (by distance band) gives meals and communication, a hotel if departure moves to the next day, and a refund right from 5 hours.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 115 words: the three band thresholds and the three forms of assistance are all applied by the engine."
+}

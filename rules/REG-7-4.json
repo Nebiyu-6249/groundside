@@ -1,0 +1,14 @@
+{
+  "id": "REG-7-4",
+  "title": "Great circle distance",
+  "source": "Regulation (EC) No 261/2004, Article 7(4)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "4. The distances given in paragraphs 1 and 2 shall be measured by the great circle route method.",
+  "summary": "Distances are measured by the great circle route.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

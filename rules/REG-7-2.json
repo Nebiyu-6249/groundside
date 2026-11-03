@@ -1,0 +1,14 @@
+{
+  "id": "REG-7-2",
+  "title": "50 percent reduction for re-routing that arrives close to schedule",
+  "source": "Regulation (EC) No 261/2004, Article 7(2)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "2. When passengers are offered re-routing to their final destination on an alternative flight pursuant to Article 8, the arrival time of which does not exceed the scheduled arrival time of the flight originally booked (a) by two hours, in respect of all flights of 1500 kilometres or less; or (b) by three hours, in respect of all intra-Community flights of more than 1500 kilometres and for all other flights between 1500 and 3500 kilometres; or (c) by four hours, in respect of all flights not falling under (a) or (b), the operating air carrier may reduce the compensation provided for in paragraph 1 by 50 %.",
+  "summary": "The carrier may halve compensation if the re-routed arrival is no more than 2, 3 or 4 hours (by band) after the original scheduled arrival.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 75 words."
+}

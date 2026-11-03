@@ -1,0 +1,14 @@
+{
+  "id": "REG-2-H",
+  "title": "Definition of final destination",
+  "source": "Regulation (EC) No 261/2004, Article 2(h)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "(h) \"final destination\" means the destination on the ticket presented at the check-in counter or, in the case of directly connecting flights, the destination of the last flight; alternative connecting flights available shall not be taken into account if the original planned arrival time is respected;",
+  "summary": "The final destination is the destination on the ticket, or for directly connecting flights the destination of the last flight.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

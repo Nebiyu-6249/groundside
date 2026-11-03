@@ -1,0 +1,14 @@
+{
+  "id": "REG-2-L",
+  "title": "Definition of cancellation",
+  "source": "Regulation (EC) No 261/2004, Article 2(l)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "(l) \"cancellation\" means the non-operation of a flight which was previously planned and on which at least one place was reserved.",
+  "summary": "A cancellation is the non-operation of a planned flight on which at least one seat was reserved.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

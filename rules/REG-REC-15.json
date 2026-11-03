@@ -1,0 +1,14 @@
+{
+  "id": "REG-REC-15",
+  "title": "Recital 15: air traffic management decisions",
+  "source": "Regulation (EC) No 261/2004, Recital 15",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "(15) Extraordinary circumstances should be deemed to exist where the impact of an air traffic management decision in relation to a particular aircraft on a particular day gives rise to a long delay, an overnight delay, or the cancellation of one or more flights by that aircraft, even though all reasonable measures had been taken by the air carrier concerned to avoid the delays or cancellations.",
+  "summary": "An air traffic management decision affecting a particular aircraft on a particular day can be an extraordinary circumstance if the carrier took all reasonable measures.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 60 words."
+}

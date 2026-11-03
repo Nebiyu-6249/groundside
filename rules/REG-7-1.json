@@ -1,0 +1,14 @@
+{
+  "id": "REG-7-1",
+  "title": "Compensation amounts by distance",
+  "source": "Regulation (EC) No 261/2004, Article 7(1)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "1. Where reference is made to this Article, passengers shall receive compensation amounting to: (a) EUR 250 for all flights of 1500 kilometres or less; (b) EUR 400 for all intra-Community flights of more than 1500 kilometres, and for all other flights between 1500 and 3500 kilometres; (c) EUR 600 for all flights not falling under (a) or (b). In determining the distance, the basis shall be the last destination at which the denial of boarding or cancellation will delay the passenger's arrival after the scheduled time.",
+  "summary": "Compensation is 250 EUR up to 1500 km, 400 EUR for longer intra-Community flights and other flights up to 3500 km, and 600 EUR otherwise, measured to the last delayed destination.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 75 words."
+}

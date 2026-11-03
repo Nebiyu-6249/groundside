@@ -1,0 +1,14 @@
+{
+  "id": "REG-7-3",
+  "title": "How compensation is paid",
+  "source": "Regulation (EC) No 261/2004, Article 7(3)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "3. The compensation referred to in paragraph 1 shall be paid in cash, by electronic bank transfer, bank orders or bank cheques or, with the signed agreement of the passenger, in travel vouchers and/or other services.",
+  "summary": "Compensation is paid in cash, by bank transfer, bank order or cheque; vouchers only with the passenger's signed agreement.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

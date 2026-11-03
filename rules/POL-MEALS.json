@@ -1,0 +1,14 @@
+{
+  "id": "POL-MEALS",
+  "title": "Demo Air policy: meal allowance",
+  "source": "Demo Air (fictional carrier) policy, data/policy/demo-air.json",
+  "url": "data/policy/demo-air.json",
+  "celex": null,
+  "excerpt": "15 EUR when the care trigger is reached, 15 EUR for each further 4 hours of waiting, at most 60 EUR per 24 hours.",
+  "summary": "Meal allowance amounts set by Demo Air policy, paid as care under Article 9(1)(a).",
+  "kind": "POLICY",
+  "status": "VERIFIED",
+  "verifiedAgainst": "data/policy/demo-air.json",
+  "verifiedAt": "2026-11-04",
+  "notes": "Fictional airline policy, not law."
+}

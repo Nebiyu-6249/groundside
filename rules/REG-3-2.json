@@ -1,0 +1,14 @@
+{
+  "id": "REG-3-2",
+  "title": "Scope: confirmed reservation and check-in",
+  "source": "Regulation (EC) No 261/2004, Article 3(2)(a)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "2. Paragraph 1 shall apply on the condition that passengers: (a) have a confirmed reservation on the flight concerned and, except in the case of cancellation referred to in Article 5, present themselves for check-in,",
+  "summary": "Passengers need a confirmed reservation and, except for cancellations, must present themselves for check-in on time.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

@@ -1,0 +1,14 @@
+{
+  "id": "REG-8-1",
+  "title": "Reimbursement or re-routing",
+  "source": "Regulation (EC) No 261/2004, Article 8(1)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "1. Where reference is made to this Article, passengers shall be offered the choice between: (a) - reimbursement within seven days, by the means provided for in Article 7(3), of the full cost of the ticket at the price at which it was bought, for the part or parts of the journey not made, and for the part or parts already made if the flight is no longer serving any purpose in relation to the passenger's original travel plan, together with, when relevant, - a return flight to the first point of departure, at the earliest opportunity; (b) re-routing, under comparable transport conditions, to their final destination at the earliest opportunity; or (c) re-routing, under comparable transport conditions, to their final destination at a later date at the passenger's convenience, subject to availability of seats.",
+  "summary": "Passengers choose between a refund within seven days (with a return flight when relevant), re-routing at the earliest opportunity, or re-routing at a later date.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 110 words: all three choices are offered on the passenger page."
+}

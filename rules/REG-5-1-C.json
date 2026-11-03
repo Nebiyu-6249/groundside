@@ -1,0 +1,14 @@
+{
+  "id": "REG-5-1-C",
+  "title": "Cancellation: compensation and the notice exceptions",
+  "source": "Regulation (EC) No 261/2004, Article 5(1)(c)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "(c) have the right to compensation by the operating air carrier in accordance with Article 7, unless: (i) they are informed of the cancellation at least two weeks before the scheduled time of departure; or (ii) they are informed of the cancellation between two weeks and seven days before the scheduled time of departure and are offered re-routing, allowing them to depart no more than two hours before the scheduled time of departure and to reach their final destination less than four hours after the scheduled time of arrival; or (iii) they are informed of the cancellation less than seven days before the scheduled time of departure and are offered re-routing, allowing them to depart no more than one hour before the scheduled time of departure and to reach their final destination less than two hours after the scheduled time of arrival.",
+  "summary": "Cancellation gives compensation unless the passenger was told at least 14 days ahead, or 7 to 14 days ahead with suitable re-routing, or less than 7 days ahead with re-routing departing at most 1 hour early and arriving less than 2 hours late.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 120 words, longer than the usual 60: all three notice exceptions are applied by the engine."
+}
