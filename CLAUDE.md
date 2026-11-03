@@ -115,11 +115,11 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] Engine per `docs/SPEC.md` section 5 with at least 40 unit tests, each naming the rule it exercises
 - **GATE 1:** test output, rule pack status table, one worked passenger example with its full trace.
 
-### Phase 2: Weather evidence, AI assessment, evals (Wed Nov 4). STATUS: in progress
+### Phase 2: Weather evidence, AI assessment, evals (Wed Nov 4). STATUS: at Gate 2, waiting for review
 - [x] Weather fetch from archive sources, parse, facts, fixtures saved with source URL and retrieval time
 - [x] Real dates chosen for scenarios A and B (`docs/DEMO.md`), shown to the user for approval
 - [x] A1 cause assessment with schema, citation whitelist, fact-ID check, policy mapping, retries, spend log, fixture fallback
-- [ ] `npm run eval` with at least 12 cases; pass criteria in `docs/SPEC.md` section 15
+- [x] `npm run eval` with at least 12 cases; pass criteria in `docs/SPEC.md` section 15
 - **GATE 2:** eval report (case, expected, actual, pass/fail), cost so far.
 
 ### Phase 3: Ops console, payouts, basic passenger page, deploy (Thu Nov 5). STATUS: not started

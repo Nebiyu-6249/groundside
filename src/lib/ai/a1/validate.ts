@@ -42,7 +42,11 @@ export function validateA1(raw: unknown, ctx: A1Context): A1Validation {
   if (out.statedCause.quote.trim() && !normaliseForQuote(ctx.opsNote).includes(normaliseForQuote(out.statedCause.quote))) {
     errors.push(`statedCause.quote is not verbatim from the ops note: "${out.statedCause.quote.slice(0, 80)}"`);
   }
-  for (const f of out.findings) for (const q of f.evidenceQuotes) if (!isQuote(q)) errors.push(`evidence quote is not verbatim: "${q.slice(0, 80)}"`);
+  for (const f of out.findings) {
+    for (const q of f.evidenceQuotes) {
+      if (!isQuote(q)) errors.push(`evidence quote is not verbatim from the ops note, maintenance log or other evidence (weather facts go in factIds, never in evidenceQuotes): "${q.slice(0, 80)}"`);
+    }
+  }
 
   // 5. No money in any text field.
   for (const s of allStrings(out)) if (containsMoney(s)) errors.push(`text contains a currency amount: "${s.slice(0, 80)}"`);

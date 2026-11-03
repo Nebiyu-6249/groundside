@@ -106,3 +106,23 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - arrival weather well above reference values: PAY, because the carrier has not met its burden of proof
 - **Dependencies added** (both listed in the stack): `metar-taf-parser` 9.1.3 and `openai` 7.49.0.
 - `npm run check`: 143 tests passing.
+
+## 2026-11-04: Phase 2 evals run, at Gate 2
+
+- `OPENAI_API_KEY` added by the user. Model `gpt-6-luna` (`OPENAI_MODEL_ASSESS`).
+- **First run, prompt A1.v1:** 9/12.
+  - Two cases failed validation twice: the model put weather-fact text into `evidenceQuotes`, and the validator rejected it correctly.
+  - One valid case was mapped to UNCERTAIN.
+- **Prompt A1.v2:**
+  - Weather facts are cited by ID, never quoted.
+  - Airports are shown as ICAO, IATA and city. In v1 the model read "MXP-LIS" in the ops note and "LIMC-LPPT" in the record as different routes.
+  - The retry message now says where quotes may come from.
+- **Two runs on A1.v2:** 11/12 both times, and all SPEC 15 criteria pass:
+  - schema valid 12/12
+  - no invalid citations or fact IDs shown
+  - 0 cases expected PAY shown as NO_COMP
+  - the injection case passes
+- **Remaining failure, `arrival-weather-well-above`** (expected PAY, shown UNCERTAIN). The model said NOT_SUPPORTED and LIKELY_NOT_EXTRAORDINARY, and its own label was PAY. But its likely cause was NOT_STATED with LOW confidence, and the SPEC 8.1 policy table needs MEDIUM or HIGH for PAY. This is the code policy behaving as written, not a model error. Question for the user at Gate 2.
+- **Recorded fixtures:** `fixtures/ai/A1-scenario-A.json` (PAY) and `A1-scenario-B.json` (NO_COMP, human decides) are recorded from live runs and load through `loadA1Fixture()`.
+- **AI spend so far:** 40 calls, 0 failed, 224,066 input and 55,319 output tokens, about 0.05 USD (estimated from token counts at the 2026-11-03 prices).
+- `npm run check`: 144 tests passing.
