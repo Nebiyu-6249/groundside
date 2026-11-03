@@ -2,7 +2,7 @@
 
 When a flight from an EU airport is cancelled or badly delayed, Groundside checks the airline's stated cause against real archived weather reports, works out what every passenger is owed under EU Regulation 261/2004, and pays them through PayPal once a duty manager approves.
 
-Built for the PayPal AI Hackathon. **Status: in development (Phase 0: scaffold and PayPal sandbox spike).**
+Built for the PayPal AI Hackathon. **Status: in development (Phase 1: data, EU261 engine and rule pack).**
 
 - Live demo: not deployed yet
 - Demo credentials: published here once the hosted demo is up (sandbox only)
@@ -74,6 +74,24 @@ In the PayPal developer dashboard (sandbox):
 4. For webhooks, expose the dev server (for example `cloudflared tunnel --url http://localhost:3000`), add a webhook for all events at `<public URL>/api/webhooks/paypal`, and put its ID in `PAYPAL_WEBHOOK_ID`.
 
 Test the checkout in a regular browser (Chrome, Edge, Firefox); embedded browser panes can break the PayPal window.
+
+## Demo data
+
+```bash
+npm run reset-demo            # scenarios A and B, quick run (12 passengers each)
+npm run reset-demo -- --full  # full run (180 and 150 passengers)
+npm run explain -- --scenario=A --case=4   # one passenger's entitlements with the full trace
+```
+
+Passengers, bookings and the airline (Demo Air, fictional carrier) are synthetic. Scenario dates are placeholders until real archived weather dates are chosen.
+
+## Rule pack
+
+Every legal statement cites an entry in [`rules/`](rules/): Regulation (EC) No 261/2004, CJEU judgments, the Commission's 2024 interpretative guidelines, and Demo Air policy (labelled as policy, not law). `npm run rules:verify` fetches the official English texts from the EU Publications Office and checks each excerpt word for word; it writes [`docs/RULE_PACK_STATUS.md`](docs/RULE_PACK_STATUS.md).
+
+## Entitlement engine
+
+`src/lib/engine/` is pure TypeScript with no I/O and no AI. It computes compensation, meals, hotel and transport caps and refunds, and every amount carries a trace of rule IDs and inputs. Airports come from [OurAirports](https://ourairports.com/data/) (public domain), with time zones and the EU261 scope flag added in `scripts/build-airports.ts`.
 
 ## Checks
 

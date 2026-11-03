@@ -1,0 +1,117 @@
+
+ RUN  v5.1.0 C:/dev/groundside
+
+ ✓ tests/paypal/webhooks.test.ts > webhook signature verification (SPEC 9.4) > accepts only verification_status SUCCESS 259ms
+ ✓ tests/paypal/webhooks.test.ts > webhook signature verification (SPEC 9.4) > rejects FAILURE 8ms
+ ✓ tests/paypal/webhooks.test.ts > webhook signature verification (SPEC 9.4) > rejects without calling PayPal when a transmission header is missing 3ms
+ ✓ tests/paypal/webhooks.test.ts > webhook signature verification (SPEC 9.4) > rejects when no webhook id is configured 2ms
+ ✓ tests/paypal/webhooks.test.ts > webhook signature verification (SPEC 9.4) > parses event bodies and rejects ones without id or type 5ms
+ ✓ tests/paypal/client.test.ts > token cache (SPEC 9.1) > fetches one token for many requests 258ms
+ ✓ tests/paypal/client.test.ts > token cache (SPEC 9.1) > refreshes a token within 5 minutes of expiry 5ms
+ ✓ tests/paypal/client.test.ts > token cache (SPEC 9.1) > retries once with a new token after a 401 6ms
+ ✓ tests/paypal/client.test.ts > HTTP helper logging > logs the debug id and never the token, secret or body 4ms
+ ✓ tests/paypal/client.test.ts > HTTP helper logging > sends PayPal-Request-Id when given 4ms
+ ✓ tests/paypal/client.test.ts > payout batch body (SPEC 9.2) > builds EMAIL items with two-decimal EUR amounts and sender ids 6ms
+ ✓ tests/paypal/client.test.ts > payout batch body (SPEC 9.2) > refuses to send fractional cents 6ms
+ ✓ tests/paypal/client.test.ts > sandbox guard at request time > never calls a live host 4ms
+ ✓ tests/demo/capture.test.ts > captureDemoOrder (SPEC 9.8) > refuses to capture an order the buyer did not approve, without spending a request id 7ms
+ ✓ tests/demo/capture.test.ts > captureDemoOrder (SPEC 9.8) > captures an approved order and stores the capture id 6ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-1: departure from an EU airport is in scope 31ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-1: third country to EU on a Community carrier is in scope, with a human check on third-country benefits 1ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-1: third country to EU on a non-Community carrier is out of scope 0ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-1: a UK departure is marked UK261 not supported 0ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-3: staff travel at a non-public reduced fare is out of scope with zero entitlements and a reason 1ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-3: a free-of-charge ticket is out of scope 0ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-3: a frequent flyer award ticket is covered and paid 600 EUR 1ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-2: the check-in condition is not applied to cancellations 2ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-2: a delayed passenger who did not check in on time is out of scope 1ms
+ ✓ tests/engine/scope-distance.test.ts > scope (Art 3) > REG-3-2: no confirmed reservation is out of scope 0ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > REG-7-1: Frankfurt to Dubai is band B3, 600 EUR 1ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > REG-7-1: Milan Malpensa to Lisbon is intra-Community over 1500 km, band B2 1ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > REG-7-1: Frankfurt to Vienna is band B1, 250 EUR 0ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > REG-7-1: Helsinki to Gran Canaria is intra-Community over 3500 km, so band B2 and 400 EUR 0ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > REG-7-1: a non-intra-Community flight between 1500 and 3500 km is band B2 (Frankfurt to Cairo) 0ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > CJEU-C-559-16: a connection Frankfurt-Vienna-Larnaca uses the Frankfurt to Larnaca distance 0ms
+ ✓ tests/engine/scope-distance.test.ts > distance and band (Art 7(1), 7(4), Bossen) > REG-7-4: the trace records the formula and earth radius, and the distance is rounded down 0ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-6-1: B1 delay gives care from 120 min, not at 119 29ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-6-1: B2 delay gives care from 180 min, not at 179 1ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-6-1: B3 delay gives care from 240 min, not at 239 1ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-5-1-B: scenario A cancellation re-routed next morning gets meals, one hotel night and transport 1ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-5-1-B: a same-day re-routing gives meals but no hotel 1ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-6-1: a delay whose expected departure moves to the next day gives a hotel 1ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-9-1: a duty manager overnight flag gives a hotel even for a same-day departure 1ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > POL-MEALS: 15 EUR at the trigger, 15 more per further 4 hours, at most 60 per 24 hours 0ms
+ ✓ tests/engine/care-refund.test.ts > care triggers (Art 5(1)(b), 6(1)) > REG-11: a passenger with reduced mobility is flagged for priority and the care trace says why 1ms
+ ✓ tests/engine/care-refund.test.ts > refund (Art 6(1)(iii), 8(1)) > REG-6-1: a departure delay of 299 min gives no refund right 1ms
+ ✓ tests/engine/care-refund.test.ts > refund (Art 6(1)(iii), 8(1)) > REG-6-1: a departure delay of 300 min gives a refund right of the full ticket 0ms
+ ✓ tests/engine/care-refund.test.ts > refund (Art 6(1)(iii), 8(1)) > REG-5-1-A: a cancellation offers a refund until the passenger chooses 1ms
+ ✓ tests/engine/care-refund.test.ts > refund (Art 6(1)(iii), 8(1)) > REG-8-1: a multi-segment refund covers unused segments, and flown ones only when the journey no longer serves its purpose 0ms
+ ✓ tests/engine/care-refund.test.ts > refund (Art 6(1)(iii), 8(1)) > REG-8-1: missing segment prices on a multi-segment refund need a human check 0ms
+ ✓ tests/engine/care-refund.test.ts > refund (Art 6(1)(iii), 8(1)) > COM-GL-2024-4-3-1: choosing a refund ends care, so no hotel or transport and only the first meal allowance 0ms
+ ✓ tests/engine/care-refund.test.ts > traceability and re-runs > REG-7-1: every trace step in scenario A cites a VERIFIED rule from the pack 1ms
+ ✓ tests/engine/care-refund.test.ts > traceability and re-runs > REG-7-1: a re-run never changes a paid entitlement and flags a conflict instead 3ms
+ ✓ tests/engine/care-refund.test.ts > traceability and re-runs > REG-7-1: running the engine twice on the same input gives identical output 4ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed exactly 14 days before departure, exception (i), no compensation 29ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 13 days ahead with no re-routing, compensation owed 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 13 days ahead, re-routed 2 h early and 3 h 59 min late, exception (ii), no compensation 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 13 days ahead, re-routed arriving exactly 4 h late, compensation owed 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 13 days ahead, re-routed departing 2 h 1 min early, compensation owed 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed exactly 7 days ahead falls in window (ii), so a 3 h late re-routing is exempt 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 6 days ahead, re-routed 1 h early and 1 h 59 min late, exception (iii), no compensation 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 6 days ahead, re-routed arriving exactly 2 h late, compensation owed 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: informed 6 days ahead, re-routed departing 61 min early, compensation owed 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-4: no record of when passengers were informed means no notice exception applies 1ms
+ ✓ tests/engine/compensation.test.ts > cancellation notice windows (Art 5(1)(c)) > REG-5-1-C: scenario A (told the same evening, re-routed next morning) owes the full 600 EUR 1ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-402-07: arriving 179 minutes late gives no compensation 1ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-402-07: arriving 180 minutes late gives compensation 1ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-452-13: the door-open time counts, so on blocks 2 h 57 min late but door open 3 h 4 min late is owed 1ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-11-11: a connection is measured at the final destination even when the first departure delay was short 0ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-402-07-P63: a long-haul delay of 3 h 20 min is reduced by 50% to 300 EUR 0ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-402-07-P63: a long-haul delay of exactly 4 h is not reduced, 600 EUR 1ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-402-07-P63: if the paragraph is not verified, the reduced amount needs a human check 0ms
+ ✓ tests/engine/compensation.test.ts > delay compensation (Sturgeon, Nelson, Folkerts, Germanwings) > CJEU-C-452-13: an unknown arrival time at the final destination needs a human check 1ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > REG-7-2: B1 re-routing arriving 120 min late pays 125 EUR 1ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > REG-7-2: B1 re-routing arriving 121 min late pays 250 EUR 1ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > REG-7-2: B2 re-routing arriving 180 min late pays 200 EUR 1ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > REG-7-2: B2 re-routing arriving 181 min late pays 400 EUR 0ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > REG-7-2: B3 re-routing arriving 240 min late pays 300 EUR 0ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > REG-7-2: B3 re-routing arriving 241 min late pays 600 EUR 1ms
+ ✓ tests/engine/compensation.test.ts > Article 7(2) reduction for re-routed cancellations > POL-ART7-2: when Demo Air policy turns the reduction off, the full amount is paid 1ms
+ ✓ tests/engine/compensation.test.ts > extraordinary circumstances (Art 5(3)) are a human decision > REG-5-3: while the decision is pending, compensation shows as awaiting decision with its amount 1ms
+ ✓ tests/engine/compensation.test.ts > extraordinary circumstances (Art 5(3)) are a human decision > REG-5-3: a signed denial sets compensation to 0 and cites the decision 1ms
+ ✓ tests/engine/compensation.test.ts > extraordinary circumstances (Art 5(3)) are a human decision > CJEU-C-12-11: a signed denial leaves meals, hotel and transport unchanged 1ms
+ ✓ tests/demo/manifest.test.ts > local time to UTC > converts Frankfurt and Dubai winter times 38ms
+ ✓ tests/demo/manifest.test.ts > local time to UTC > handles summer time 1ms
+ ✓ tests/demo/manifest.test.ts > scenario definitions (docs/DEMO.md 2) > resolves scenario A times in each airport's zone 4ms
+ ✓ tests/demo/manifest.test.ts > scenario definitions (docs/DEMO.md 2) > keeps the ops note and maintenance log verbatim 3ms
+ ✓ tests/demo/manifest.test.ts > scenario definitions (docs/DEMO.md 2) > marks both dates as placeholders until Phase 2 5ms
+ ✓ tests/demo/manifest.test.ts > synthetic manifests (docs/DEMO.md 2.5) > builds the 12 quick-run cases in table order 2ms
+ ✓ tests/demo/manifest.test.ts > synthetic manifests (docs/DEMO.md 2.5) > builds the full run with the group sizes and overlays of scenario A 3ms
+ ✓ tests/demo/manifest.test.ts > synthetic manifests (docs/DEMO.md 2.5) > is deterministic for a given seed 4ms
+ ✓ tests/demo/manifest.test.ts > synthetic manifests (docs/DEMO.md 2.5) > maps receivers to pool accounts, reserved-domain addresses or none 1ms
+ ✓ tests/demo/manifest.test.ts > expected scenario outcomes from docs/DEMO.md > REG-5-1-C: scenario A owes 600 EUR with no reduction, plus meals, one hotel night and transport 5ms
+ ✓ tests/demo/manifest.test.ts > expected scenario outcomes from docs/DEMO.md > CJEU-C-559-16: scenario A connecting to Addis Ababa is measured Frankfurt to Addis Ababa 3ms
+ ✓ tests/demo/manifest.test.ts > expected scenario outcomes from docs/DEMO.md > REG-7-1: scenario B is intra-Community B2, 400 EUR if owed, with care and a hotel night 3ms
+ ✓ tests/paypal/webhook-store.test.ts > webhook store idempotency (SPEC 9.4) > stores an event once and reports repeats as duplicates 3ms
+ ✓ tests/paypal/webhook-store.test.ts > webhook store idempotency (SPEC 9.4) > applies a refund event to the matching refund and marks the event processed 2ms
+ ✓ tests/paypal/webhook-store.test.ts > webhook store idempotency (SPEC 9.4) > takes the resource id from payout item, payout batch and refund events 0ms
+ ✓ tests/paypal/webhook-store.test.ts > webhook store idempotency (SPEC 9.4) > records a processing error instead of throwing 1ms
+ ✓ tests/paypal/config.test.ts > sandbox guard (SPEC 9.1) > accepts the sandbox host, with or without a trailing slash 2ms
+ ✓ tests/paypal/config.test.ts > sandbox guard (SPEC 9.1) > refuses the live host 0ms
+ ✓ tests/paypal/config.test.ts > sandbox guard (SPEC 9.1) > refuses a lookalike host 0ms
+ ✓ tests/paypal/config.test.ts > sandbox guard (SPEC 9.1) > requires credentials 1ms
+ ✓ tests/paypal/config.test.ts > money formatting > formats integer cents as two-decimal strings 0ms
+ ✓ tests/paypal/config.test.ts > money formatting > rejects fractional or negative cents 0ms
+ ✓ tests/paypal/config.test.ts > money formatting > parses PayPal amounts back to cents 0ms
+ ✓ tests/paypal/config.test.ts > log redaction > masks emails 0ms
+ ✓ tests/rules/pack.test.ts > rule pack (SPEC 6) > contains every SPEC 6.2 candidate 3ms
+ ✓ tests/rules/pack.test.ts > rule pack (SPEC 6) > contains no entries beyond the SPEC candidates except the Commission guidance used by the engine 1ms
+ ✓ tests/rules/pack.test.ts > rule pack (SPEC 6) > links law and case law to an official CELEX text 2ms
+ ✓ tests/rules/pack.test.ts > rule pack (SPEC 6) > lets the AI cite only verified law and case law, and policy only when asked 1ms
+ ✓ tests/rules/pack.test.ts > rule pack (SPEC 6) > matches the policy entries to data/policy/demo-air.json (POL-MEALS, POL-HOTEL, POL-TRANSPORT) 5ms
+
+ Test Files  10 passed (10)
+      Tests  108 passed (108)
+   Start at  02:06:51
+   Duration  1.07s (import 58%, tests 29%, transform 10%, worker 3%)
+
