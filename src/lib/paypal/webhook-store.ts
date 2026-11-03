@@ -6,6 +6,17 @@ import type { WebhookEventBody } from "./webhooks";
 
 export type StoreResult = "stored" | "duplicate";
 
+/**
+ * The PayPal ID the event is about. Payout item events carry payout_item_id, batch events
+ * carry batch_header.payout_batch_id, and capture or refund events carry id.
+ */
+export function eventResourceId(event: WebhookEventBody): string | null {
+  const resource = event.resource as
+    | { id?: string; payout_item_id?: string; batch_header?: { payout_batch_id?: string } }
+    | undefined;
+  return resource?.payout_item_id ?? resource?.batch_header?.payout_batch_id ?? resource?.id ?? null;
+}
+
 function isUniqueViolation(err: unknown): boolean {
   return typeof err === "object" && err !== null && (err as { code?: string }).code === "P2002";
 }
@@ -17,7 +28,7 @@ export async function storeEvent(db: PrismaClient, event: WebhookEventBody): Pro
         id: event.id,
         eventType: event.event_type,
         resourceType: event.resource_type ?? null,
-        resourceId: event.resource?.id ?? null,
+        resourceId: eventResourceId(event),
         verified: true,
         payload: event as object,
       },
