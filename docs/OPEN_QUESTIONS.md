@@ -24,3 +24,4 @@ Claude Code: these are decisions only the user can make. Use the default until t
 (Record answers here: date, question number, answer.)
 
 - 2026-11-03, Q1 (and scope): No Arabic and no Amharic. The product is English only; no RTL, no language switcher, no `ENABLE_AMHARIC`. Receipts may still be in any language as input data, but no Arabic or Amharic features are built.
+- 2026-11-03, Q6: The sandbox business account (airline) was created with a balance of 100,000 EUR. Size `PAYOUT_DAILY_CAP_EUR` from this and the spike reading.

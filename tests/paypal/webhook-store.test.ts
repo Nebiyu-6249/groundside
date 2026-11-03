@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { PrismaClient } from "@/generated/prisma/client";
-import { processEvent, storeEvent } from "@/lib/paypal/webhook-store";
+import { eventResourceId, processEvent, storeEvent } from "@/lib/paypal/webhook-store";
 
 // In-memory stand-in for the two tables the store touches.
 function fakeDb() {
@@ -46,6 +46,28 @@ describe("webhook store idempotency (SPEC 9.4)", () => {
     await processEvent(db, event);
     expect(refunds[0].status).toBe("COMPLETED");
     expect(events.get("WH-2")?.processedAt).toBeInstanceOf(Date);
+  });
+
+  it("takes the resource id from payout item, payout batch and refund events", () => {
+    // Shapes as delivered by the sandbox in the Phase 0 spike (docs/PHASE0_RESULTS.md).
+    expect(
+      eventResourceId({
+        id: "a",
+        event_type: "PAYMENT.PAYOUTS-ITEM.UNCLAIMED",
+        resource: { payout_item_id: "ZRXFCNWWNJ2VC" },
+      }),
+    ).toBe("ZRXFCNWWNJ2VC");
+    expect(
+      eventResourceId({
+        id: "b",
+        event_type: "PAYMENT.PAYOUTSBATCH.SUCCESS",
+        resource: { batch_header: { payout_batch_id: "JZYQH4CKG63TA" } },
+      }),
+    ).toBe("JZYQH4CKG63TA");
+    expect(
+      eventResourceId({ id: "c", event_type: "PAYMENT.CAPTURE.REFUNDED", resource: { id: "R1" } }),
+    ).toBe("R1");
+    expect(eventResourceId({ id: "d", event_type: "X" })).toBeNull();
   });
 
   it("records a processing error instead of throwing", async () => {
