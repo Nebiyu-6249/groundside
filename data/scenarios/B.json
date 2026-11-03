@@ -1,0 +1,23 @@
+{
+  "key": "B",
+  "title": "Real fog",
+  "dateLocal": "2026-01-22",
+  "dateIsPlaceholder": true,
+  "dateNote": "Placeholder winter date. The real fog date is chosen from the METAR archive in Phase 2 (docs/DEMO.md 2.1).",
+  "type": "CANCELLATION",
+  "aircraft": { "registration": "DEMO-02", "type": "Single-aisle, 180 seats" },
+  "flight": { "number": "DEMO 207", "origin": "LIMC", "destination": "LPPT", "depLocal": "07:10", "arrLocal": "09:05", "arrDayOffset": 0 },
+  "previousFlight": { "number": "DEMO 206", "origin": "LPPT", "destination": "LIMC", "depLocal": "18:40", "arrLocal": "22:25", "dayOffset": -1 },
+  "previousFlightNote": "docs/DEMO.md gives only 'DEMO 206 from Lisbon the previous evening'; the times are set here.",
+  "informed": { "local": "06:20", "dayOffset": 0 },
+  "rerouting": { "number": "DEMO 207", "depLocal": "07:10", "depDayOffset": 1, "arrLocal": "09:05", "arrDayOffset": 1 },
+  "onward": [],
+  "fareCents": 14900,
+  "opsNote": "DEMO 207 MXP-LIS CNL. Dense fog since 0430LT, LVP in force, RVR below company minima,\ndeparture flow restricted by ATC. Pax reprotected DEMO 207 tomorrow 0710LT. Hotels and meals arranged.",
+  "maintenanceLog": "DEMO-02 serviceable. Night stop MXP. No open defects.",
+  "fullRun": {
+    "groups": { "public": 140, "connecting": 0, "award": 6, "staff": 4 },
+    "overlays": { "reducedMobility": 3, "unaccompaniedMinor": 1, "unregistered": 10, "noEmail": 2, "refundCardPaid": 6 },
+    "note": "docs/DEMO.md 2.5 gives only the total (150) for scenario B; the split is set here in proportion to scenario A."
+  }
+}

@@ -108,9 +108,9 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - **GATE 0:** user reviews PHASE0_RESULTS.md. If Payouts can't run in sandbox, stop and report; the user will escalate on the PayPal Discord.
 
 ### Phase 1: Data, EU261 engine, rule pack (Tue Nov 3 to Wed Nov 4). STATUS: in progress
-- [ ] Airports subset from OurAirports (public domain) with EU/EEA/CH flag
-- [ ] Prisma schema per `docs/SPEC.md` section 10; migration; seed script; `npm run reset-demo`
-- [ ] Scenario definitions and synthetic manifest generator (`docs/DEMO.md` section 2)
+- [x] Airports subset from OurAirports (public domain) with EU/EEA/CH flag
+- [x] Prisma schema per `docs/SPEC.md` section 10; migration; seed script; `npm run reset-demo`
+- [x] Scenario definitions and synthetic manifest generator (`docs/DEMO.md` section 2)
 - [x] Rule pack: every candidate in `docs/SPEC.md` section 6 checked against EUR-Lex/CURIA; VERIFIED or UNVERIFIED with reason
 - [x] Engine per `docs/SPEC.md` section 5 with at least 40 unit tests, each naming the rule it exercises
 - **GATE 1:** test output, rule pack status table, one worked passenger example with its full trace.
