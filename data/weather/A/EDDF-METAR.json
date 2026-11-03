@@ -1,0 +1,29 @@
+{
+  "source": "Iowa Environmental Mesonet (IEM), Iowa State University, ASOS/METAR archive",
+  "sourceUrl": "https://mesonet.agron.iastate.edu/cgi-bin/request/asos.py?station=EDDF&data=metar&tz=UTC&format=onlycomma&sts=2026-01-24T16%3A55Z&ets=2026-01-24T22%3A50Z",
+  "termsUrl": "https://mesonet.agron.iastate.edu/disclaimer.php",
+  "query": {
+    "station": "EDDF",
+    "data": "metar",
+    "tz": "UTC",
+    "format": "onlycomma",
+    "sts": "2026-01-24T16:55Z",
+    "ets": "2026-01-24T22:50Z"
+  },
+  "retrievedAt": "2026-11-03T22:19:29.933Z",
+  "sha256": "215626901482ae1bcf9e91030b4eae6e6a119614e78274cf3784df2287f20400",
+  "format": "One report per line: archive timestamp (UTC, ISO) followed by the raw METAR.",
+  "windows": [
+    {
+      "role": "DEPARTURE",
+      "from": "2026-01-24T17:50:00.000Z",
+      "to": "2026-01-24T22:50:00.000Z"
+    },
+    {
+      "role": "PREV_ARRIVAL",
+      "from": "2026-01-24T16:55:00.000Z",
+      "to": "2026-01-24T20:55:00.000Z"
+    }
+  ],
+  "reports": 11
+}

@@ -23,10 +23,10 @@ describe("local time to UTC", () => {
 describe("scenario definitions (docs/DEMO.md 2)", () => {
   it("resolves scenario A times in each airport's zone", () => {
     const t = resolveTimes(loadScenario("A"), airports);
-    expect(t.schedDep.toISOString()).toBe("2026-01-15T20:50:00.000Z");
-    expect(t.informedAt.toISOString()).toBe("2026-01-15T19:30:00.000Z");
-    expect(t.reroutingDep.toISOString()).toBe("2026-01-16T09:15:00.000Z");
-    expect(t.reroutingArr.toISOString()).toBe("2026-01-16T15:20:00.000Z");
+    expect(t.schedDep.toISOString()).toBe("2026-01-24T20:50:00.000Z");
+    expect(t.informedAt.toISOString()).toBe("2026-01-24T19:30:00.000Z");
+    expect(t.reroutingDep.toISOString()).toBe("2026-01-25T09:15:00.000Z");
+    expect(t.reroutingArr.toISOString()).toBe("2026-01-25T15:20:00.000Z");
   });
 
   it("keeps the ops note and maintenance log verbatim", () => {
@@ -36,9 +36,9 @@ describe("scenario definitions (docs/DEMO.md 2)", () => {
     expect(loadScenario("B").opsNote).toContain("RVR below company minima");
   });
 
-  it("marks both dates as placeholders until Phase 2", () => {
-    expect(loadScenario("A").dateIsPlaceholder).toBe(true);
-    expect(loadScenario("B").dateIsPlaceholder).toBe(true);
+  it("uses the real archived-weather dates chosen in Phase 2", () => {
+    expect(loadScenario("A")).toMatchObject({ dateLocal: "2026-01-24", dateIsPlaceholder: false });
+    expect(loadScenario("B")).toMatchObject({ dateLocal: "2026-01-22", dateIsPlaceholder: false });
   });
 });
 

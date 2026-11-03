@@ -1,13 +1,15 @@
 // Seeds and resets the owner's demo data: reference data, scenarios A and B, synthetic
 // passengers and their engine-computed entitlements. Judge runs (Phase 5) are not touched.
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { airlinePolicySchema, computePassenger, type Airport, type DisruptionInput, type PassengerInput } from "@/lib/engine";
 import { loadRulePack, statusMap } from "@/lib/rules/pack";
 import { fullManifest, payoutReceiver, quickManifest, seededRandom, type ManifestEntry } from "./manifest";
-import { loadScenario, resolveTimes, SCENARIO_KEYS, type Scenario } from "./scenarios";
+import { loadScenarioWeather } from "@/lib/weather/scenario";
+import { loadScenario, resolveTimes, SCENARIO_KEYS, type Scenario, type ScenarioKey } from "./scenarios";
 
 export type SeedSize = "QUICK" | "FULL";
 
@@ -53,6 +55,39 @@ function pnr(random: () => number): string {
   return Array.from({ length: 6 }, () => alphabet[Math.floor(random() * alphabet.length)]).join("");
 }
 
+const sha256 = (text: string) => createHash("sha256").update(text).digest("hex");
+
+/** Ops note, maintenance log and the archived weather fixtures, with their facts. */
+async function seedEvidence(db: PrismaClient, disruptionId: string, scenario: Scenario) {
+  const docs = [
+    { kind: "OPS_NOTE" as const, raw: scenario.opsNote },
+    { kind: "MAINTENANCE_LOG" as const, raw: scenario.maintenanceLog },
+  ];
+  for (const d of docs) await db.evidence.create({ data: { disruptionId, kind: d.kind, raw: d.raw, sha256: sha256(d.raw) } });
+  if (scenario.dateIsPlaceholder) return;
+
+  const weather = loadScenarioWeather(scenario.key as ScenarioKey);
+  const idMap = new Map<string, string>();
+  for (const e of weather.evidence) {
+    const roles = weather.windows.filter((w) => w.icao === e.icao).map((w) => w.role);
+    const row = await db.evidence.create({
+      data: {
+        disruptionId, kind: "METAR", airportIcao: e.icao, role: roles[0], raw: e.raw,
+        parsed: { roles, source: e.source }, sourceUrl: e.sourceUrl, retrievedAt: new Date(e.retrievedAt), sha256: e.sha256,
+      },
+    });
+    idMap.set(e.id, row.id);
+  }
+  await db.fact.createMany({
+    data: weather.facts.map((f) => ({
+      id: f.id, disruptionId, evidenceId: idMap.get(f.sourceEvidenceId)!, airportIcao: f.airport,
+      // Stored as { value } so scalars, null and objects share one JSON shape.
+      observedAt: new Date(f.observedAt), kind: f.kind, value: JSON.parse(JSON.stringify({ value: f.value })), text: f.text,
+    })),
+  });
+  await db.disruption.update({ where: { id: disruptionId }, data: { status: "EVIDENCE_READY" } });
+}
+
 interface SeedOptions {
   size: SeedSize;
   pool: readonly string[];
@@ -89,6 +124,7 @@ async function seedScenario(db: PrismaClient, scenario: Scenario, airlineId: str
       opsNote: scenario.opsNote, maintenanceLog: scenario.maintenanceLog, status: "DRAFT", isDemoData: true,
     },
   });
+  await seedEvidence(db, disruption.id, scenario);
 
   const manifest: ManifestEntry[] = opts.size === "FULL" ? fullManifest(scenario) : quickManifest(scenario);
   const random = seededRandom(scenario.key.charCodeAt(0) * 1000 + manifest.length);
