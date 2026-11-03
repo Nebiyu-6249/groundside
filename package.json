@@ -18,7 +18,9 @@
     "db:deploy": "prisma migrate deploy",
     "spike:payouts": "tsx --env-file=.env scripts/spike-payouts.ts",
     "rules:verify": "tsx scripts/verify-rules.ts",
-    "airports:build": "tsx scripts/build-airports.ts"
+    "airports:build": "tsx scripts/build-airports.ts",
+    "seed": "tsx --env-file=.env scripts/seed.ts",
+    "reset-demo": "tsx --env-file=.env scripts/seed.ts --reset"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",

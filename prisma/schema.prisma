@@ -1,6 +1,5 @@
-// Groundside data model.
-// Phase 0 holds only the tables the PayPal spike needs. They follow docs/SPEC.md
-// section 10 so Phase 1 can add the remaining models without breaking these.
+// Groundside data model (docs/SPEC.md section 10).
+// IDs are cuid() strings unless noted. Money is integer cents. Times are UTC.
 
 generator client {
   provider = "prisma-client"
@@ -11,30 +10,515 @@ datasource db {
   provider = "postgresql"
 }
 
+// ---------------------------------------------------------------- enums
+
+enum UserRole {
+  DUTY_MANAGER
+  VIEWER
+}
+
+enum JudgeRunSize {
+  QUICK
+  FULL
+}
+
+enum AirportScope {
+  EU261
+  OUT_OF_SCOPE
+  UK261_UNSUPPORTED
+}
+
+enum FlightStatus {
+  SCHEDULED
+  DELAYED
+  CANCELLED
+  OPERATED
+}
+
+enum DisruptionType {
+  CANCELLATION
+  DELAY
+}
+
+enum DisruptionStatus {
+  DRAFT
+  EVIDENCE_READY
+  ASSESSED
+  APPROVED
+  DENIAL_SIGNED
+  PAYING
+  CLOSED
+}
+
+enum EvidenceKind {
+  METAR
+  TAF
+  OPS_NOTE
+  MAINTENANCE_LOG
+  OTHER
+}
+
+enum EvidenceRole {
+  DEPARTURE
+  ARRIVAL
+  PREV_DEPARTURE
+  PREV_ARRIVAL
+}
+
+enum DecisionKind {
+  APPROVE_COMPENSATION
+  DENY_COMPENSATION
+}
+
 enum PaymentMethod {
   PAYPAL
   CARD
   OTHER
 }
 
+enum ReceiverKind {
+  POOL
+  UNREGISTERED
+  JUDGE_SANDBOX
+  NONE
+}
+
+enum FareType {
+  PUBLIC
+  FREQUENT_FLYER_AWARD
+  STAFF_REDUCED_NOT_PUBLIC
+  FREE_OF_CHARGE
+}
+
+enum PassengerChoice {
+  UNDECIDED
+  REROUTING
+  REFUND
+}
+
+enum PriorityReason {
+  REDUCED_MOBILITY
+  UNACCOMPANIED_MINOR
+}
+
+enum EntitlementKind {
+  COMPENSATION
+  MEAL_ALLOWANCE
+  HOTEL_REIMBURSEMENT_CAP
+  TRANSPORT_REIMBURSEMENT_CAP
+  REFUND
+}
+
+enum EntitlementStatus {
+  PENDING_DECISION
+  READY
+  OFFERED
+  ACCEPTED
+  PAYING
+  PAID
+  NOT_OWED
+  NEEDS_HUMAN_CHECK
+  CANCELLED
+}
+
+enum PaymentChoice {
+  NONE
+  PAYPAL
+  BANK_TRANSFER
+}
+
+enum PayoutKind {
+  COMPENSATION
+  MEAL
+  RECEIPT
+}
+
+enum ReceiptDecision {
+  AUTO_APPROVED
+  HUMAN_REVIEW
+  REJECTED
+  APPROVED_BY_HUMAN
+}
+
+enum OutboxKind {
+  NOTICE
+  REMINDER
+}
+
+enum QaRole {
+  PASSENGER
+  ASSISTANT
+}
+
+enum TicketStatus {
+  OPEN
+  CLOSED
+}
+
+enum ActorType {
+  USER
+  SYSTEM
+  AI
+  PAYPAL
+  PASSENGER
+}
+
+// ---------------------------------------------------------------- people and runs
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  name         String
+  passwordHash String
+  role         UserRole
+  decisions    Decision[]
+  reviews      Receipt[]
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model JudgeRun {
+  id          String       @id @default(cuid())
+  ipHash      String
+  scenarioKey String
+  size        JudgeRunSize
+  expiresAt   DateTime
+  disruptions Disruption[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([expiresAt])
+}
+
+// ---------------------------------------------------------------- reference data
+
+model Airport {
+  icao       String       @id
+  iata       String       @unique
+  name       String
+  city       String
+  country    String
+  lat        Float
+  lon        Float
+  tz         String
+  scope      AirportScope
+  departures Flight[]     @relation("FlightOrigin")
+  arrivals   Flight[]     @relation("FlightDestination")
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+}
+
+model Airline {
+  id                 String   @id @default(cuid())
+  name               String
+  code               String   @unique
+  isCommunityCarrier Boolean
+  policy             Json
+  flights            Flight[]
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Aircraft {
+  id           String   @id @default(cuid())
+  registration String   @unique
+  type         String
+  flights      Flight[]
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Flight {
+  id                 String       @id @default(cuid())
+  flightNumber       String
+  airlineId          String
+  airline            Airline      @relation(fields: [airlineId], references: [id])
+  aircraftId         String?
+  aircraft           Aircraft?    @relation(fields: [aircraftId], references: [id])
+  origin             String
+  originAirport      Airport      @relation("FlightOrigin", fields: [origin], references: [icao])
+  destination        String
+  destinationAirport Airport      @relation("FlightDestination", fields: [destination], references: [icao])
+  schedDep           DateTime
+  schedArr           DateTime
+  actualDep          DateTime?
+  actualArrDoorOpen  DateTime?
+  status             FlightStatus
+  previousFlightId   String?
+  previousFlight     Flight?      @relation("PreviousFlight", fields: [previousFlightId], references: [id])
+  nextFlights        Flight[]     @relation("PreviousFlight")
+  disruptions        Disruption[]
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  @@index([flightNumber, schedDep])
+}
+
+// ---------------------------------------------------------------- disruption and evidence
+
+model Disruption {
+  id             String           @id @default(cuid())
+  flightId       String
+  flight         Flight           @relation(fields: [flightId], references: [id])
+  judgeRunId     String?
+  judgeRun       JudgeRun?        @relation(fields: [judgeRunId], references: [id], onDelete: Cascade)
+  scenarioKey    String
+  type           DisruptionType
+  informedAt     DateTime?
+  opsNote        String
+  maintenanceLog String?
+  status         DisruptionStatus @default(DRAFT)
+  isDemoData     Boolean          @default(true)
+  evidence       Evidence[]
+  facts          Fact[]
+  assessments    Assessment[]
+  decisions      Decision[]
+  passengers     Passenger[]
+  notices        Notice[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([scenarioKey])
+  @@index([judgeRunId])
+}
+
+model Evidence {
+  id           String        @id @default(cuid())
+  disruptionId String
+  disruption   Disruption    @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+  kind         EvidenceKind
+  airportIcao  String?
+  role         EvidenceRole?
+  raw          String
+  parsed       Json?
+  sourceUrl    String?
+  retrievedAt  DateTime?
+  sha256       String
+  facts        Fact[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([disruptionId])
+}
+
+model Fact {
+  // Stable string id, for example "F-EDDF-03"; unique within a disruption.
+  id           String
+  disruptionId String
+  disruption   Disruption @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+  evidenceId   String
+  evidence     Evidence   @relation(fields: [evidenceId], references: [id], onDelete: Cascade)
+  airportIcao  String
+  observedAt   DateTime
+  kind         String
+  value        Json
+  text         String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@id([disruptionId, id])
+}
+
+model Assessment {
+  id                  String     @id @default(cuid())
+  disruptionId        String
+  disruption          Disruption @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+  component           String     @default("A1")
+  model               String
+  promptVersion       String
+  inputHash           String
+  output              Json
+  validation          Json
+  shownRecommendation String
+  modelRecommendation String?
+  retries             Int        @default(0)
+  usedFixture         Boolean    @default(false)
+  costUsd             Float      @default(0)
+  latencyMs           Int        @default(0)
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+
+  @@index([disruptionId])
+}
+
+model Decision {
+  id            String       @id @default(cuid())
+  disruptionId  String
+  disruption    Disruption   @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+  kind          DecisionKind
+  userId        String
+  user          User         @relation(fields: [userId], references: [id])
+  typedName     String
+  reason        String
+  citations     String[]
+  differsFromAi Boolean      @default(false)
+  differsReason String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  @@index([disruptionId])
+}
+
+// ---------------------------------------------------------------- bookings and passengers
+
 model Booking {
-  id              String        @id @default(cuid())
-  pnr             String        @unique
-  totalCents      Int
-  currency        String        @default("EUR")
-  paymentMethod   PaymentMethod
-  paypalOrderId   String?       @unique
-  paypalCaptureId String?       @unique
+  id               String        @id @default(cuid())
+  pnr              String        @unique
+  totalCents       Int
+  currency         String        @default("EUR")
+  paymentMethod    PaymentMethod
+  paypalOrderId    String?       @unique
+  paypalCaptureId  String?       @unique
   // PayPal-Request-Id values, stored before the call so retries reuse them.
-  orderRequestId   String?      @unique
-  captureRequestId String?      @unique
+  orderRequestId   String?       @unique
+  captureRequestId String?       @unique
   // CREATED, APPROVED, COMPLETED, or the PayPal status last seen.
-  orderStatus     String?
-  segments        Json?
-  isJudgeBooking  Boolean       @default(false)
-  refunds         Refund[]
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  orderStatus      String?
+  segments         Json?
+  isJudgeBooking   Boolean       @default(false)
+  refunds          Refund[]
+  passengers       Passenger[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model Passenger {
+  id                           String          @id @default(cuid())
+  bookingId                    String
+  booking                      Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  disruptionId                 String
+  disruption                   Disruption      @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+  // Synthetic, labelled "Demo data" on screen.
+  displayName                  String
+  displayEmail                 String?
+  payoutReceiver               String?
+  receiverKind                 ReceiverKind    @default(NONE)
+  fareType                     FareType
+  confirmedReservation         Boolean         @default(true)
+  checkedInOnTime              Boolean         @default(true)
+  // ICAO codes. firstDeparture is the booking's first departure airport (distance, scope).
+  firstDeparture               String
+  finalDestination             String
+  schedArrFinal                DateTime
+  arrFinalDoorOpen             DateTime?
+  rerouting                    Json?
+  choice                       PassengerChoice @default(UNDECIDED)
+  priorityReason               PriorityReason?
+  // Human flags read by the engine.
+  overnightStayNecessary       Boolean         @default(false)
+  journeyNoLongerServesPurpose Boolean         @default(false)
+  // Index in the scenario manifest, for stable ordering and test references.
+  manifestIndex                Int
+  entitlements                 Entitlement[]
+  offers                       Offer[]
+  receipts                     Receipt[]
+  outbox                       OutboxMessage[]
+  qaMessages                   QaMessage[]
+  tickets                      Ticket[]
+  createdAt                    DateTime        @default(now())
+  updatedAt                    DateTime        @updatedAt
+
+  @@unique([disruptionId, manifestIndex])
+  @@index([bookingId])
+}
+
+model Entitlement {
+  id                    String            @id @default(cuid())
+  passengerId           String
+  passenger             Passenger         @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  kind                  EntitlementKind
+  amountCents           Int
+  currency              String            @default("EUR")
+  status                EntitlementStatus
+  trace                 Json
+  engineVersion         String
+  needsHumanCheckReason String?
+  payoutItems           PayoutItem[]
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@unique([passengerId, kind])
+}
+
+model Offer {
+  id                 String        @id @default(cuid())
+  passengerId        String
+  passenger          Passenger     @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  tokenHash          String        @unique
+  expiresAt          DateTime
+  paymentChoice      PaymentChoice @default(NONE)
+  paypalEmail        String?
+  consentTextVersion String?
+  consentAt          DateTime?
+  ibanLast4          String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  @@index([passengerId])
+}
+
+// ---------------------------------------------------------------- payouts
+
+model PayoutBatch {
+  id            String       @id @default(cuid())
+  senderBatchId String       @unique
+  paypalBatchId String?      @unique
+  kind          PayoutKind
+  status        String
+  itemCount     Int
+  totalCents    Int
+  lastSyncedAt  DateTime?
+  lastError     String?
+  items         PayoutItem[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model PayoutItem {
+  id            String      @id @default(cuid())
+  batchId       String
+  batch         PayoutBatch @relation(fields: [batchId], references: [id])
+  entitlementId String
+  entitlement   Entitlement @relation(fields: [entitlementId], references: [id])
+  receiptId     String?
+  receipt       Receipt?    @relation(fields: [receiptId], references: [id])
+  senderItemId  String      @unique
+  paypalItemId  String?     @unique
+  receiver      String
+  amountCents   Int
+  status        String
+  transactionId String?
+  lastError     String?
+  finalAt       DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // One active item per entitlement is a partial unique index, added in raw SQL in the
+  // phase1_full_model migration because Prisma cannot express a WHERE clause on an index.
+  @@index([entitlementId])
+}
+
+model Receipt {
+  id               String           @id @default(cuid())
+  passengerId      String
+  passenger        Passenger        @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  // JPEG, at most 1600 px on the long side, metadata stripped.
+  image            Bytes
+  sha256           String
+  pHash            String?
+  extracted        Json?
+  checks           Json?
+  decision         ReceiptDecision?
+  approvedCents    Int?
+  reviewerId       String?
+  reviewer         User?            @relation(fields: [reviewerId], references: [id])
+  demoDateOverride DateTime?
+  payoutItems      PayoutItem[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([sha256])
+  @@index([passengerId])
 }
 
 model Refund {
@@ -68,4 +552,86 @@ model WebhookEvent {
 
   @@index([eventType])
   @@index([resourceId])
+}
+
+// ---------------------------------------------------------------- notices and passenger messages
+
+model Notice {
+  id            String          @id @default(cuid())
+  disruptionId  String
+  disruption    Disruption      @relation(fields: [disruptionId], references: [id], onDelete: Cascade)
+  outcome       String
+  promptVersion String
+  text          String
+  citations     String[]
+  outbox        OutboxMessage[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+// Simulated email: shown on screen, never sent.
+model OutboxMessage {
+  id           String     @id @default(cuid())
+  passengerId  String
+  passenger    Passenger  @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  noticeId     String?
+  notice       Notice?    @relation(fields: [noticeId], references: [id])
+  renderedText String
+  kind         OutboxKind
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model QaMessage {
+  id          String    @id @default(cuid())
+  passengerId String
+  passenger   Passenger @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  role        QaRole
+  text        String
+  validated   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Ticket {
+  id          String       @id @default(cuid())
+  passengerId String
+  passenger   Passenger    @relation(fields: [passengerId], references: [id], onDelete: Cascade)
+  reason      String
+  status      TicketStatus @default(OPEN)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+// ---------------------------------------------------------------- AI spend and audit
+
+model AiCall {
+  id           String   @id @default(cuid())
+  component    String
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  costUsd      Float
+  ok           Boolean
+  usedFixture  Boolean  @default(false)
+  latencyMs    Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([createdAt])
+}
+
+model AuditEvent {
+  id         String    @id @default(cuid())
+  actorType  ActorType
+  actorId    String?
+  action     String
+  entityType String
+  entityId   String
+  summary    String
+  data       Json?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([entityType, entityId])
 }
