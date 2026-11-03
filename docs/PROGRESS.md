@@ -42,3 +42,14 @@ Why: Luna is the cheapest current model with both structured outputs and image i
 ### Waiting on the user
 
 `.env` (Neon URLs, PayPal sandbox credentials, receiver pool) and the PayPal sandbox accounts and app. See `docs/HANDOFF.md`.
+
+## 2026-11-03 (later): demo checkout declined, diagnosis
+
+Raw notes for `docs/PHASE0_RESULTS.md`.
+
+- **Symptom:** on `/demo/book`, five Orders v2 creates succeeded (HTTP 201; debug IDs `f7912328d0ae1`, `f39479400ab2e`, `f5364686e56e0`, `f11687998087f`, `f4268357f5238`). Every buyer approval in the PayPal window ended with "This transaction was rejected due to international regulations", both for the custom-email buyer and for the generated pool buyer. No order reached APPROVED.
+- **Payee on those orders:** `airport1@gmail.com` (merchant `K25TMWQ66LX4Y`, custom email, the account linked to our REST app).
+- **Server-side card order to that payee:** HTTP 422 `PAYEE_NOT_ENABLED_FOR_CARD_PROCESSING` (debug `f326758879664`).
+- **Same flow, payee overridden to a PayPal-generated business account** (`sb-ep1hb52053708@business.example.com`, country AE): created HTTP 200 (debug `f310820bc5d7c`), approved by pool buyer `sb-rw6g453693446` (DE), captured HTTP 201 COMPLETED (debug `f210905058fa9`, capture `6B0711678R6075636`, 1.00 EUR).
+- **Refund of that capture from our app:** HTTP 403 `PERMISSION_DENIED` (debug `f535532367a9e`). Expected: our app is not that payee's app.
+- **Conclusion:** the decline follows the `airport1@gmail.com` merchant account. Fix: a new PayPal-generated Business account (DE) and a new REST app linked to it, then rerun the payouts spike and the demo booking against it.
