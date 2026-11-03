@@ -72,6 +72,13 @@ export function captureOrder(orderId: string, requestId: string): Promise<Paypal
   });
 }
 
+export function getOrder(orderId: string): Promise<PaypalResponse> {
+  return paypalRequest({
+    method: "GET",
+    path: `/v2/checkout/orders/${encodeURIComponent(orderId)}`,
+  });
+}
+
 /** Full refund when amountCents is omitted. */
 export function refundCapture(
   captureId: string,
