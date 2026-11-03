@@ -9,6 +9,7 @@ import {
   captureResultSchema,
   createOrder,
   firstCapture,
+  getOrder,
   getRefund,
   orderSchema,
   refundCapture,
@@ -72,6 +73,18 @@ export async function captureDemoOrder(orderId: string) {
   if (!booking) throw new DemoBookingError("Unknown order", 404);
   if (booking.paypalCaptureId) {
     return { bookingId: booking.id, captureId: booking.paypalCaptureId, status: booking.orderStatus };
+  }
+  // Read the order first. The checkout window can report a cancel after the buyer approved
+  // (seen in the Phase 0 sandbox run), so the page asks us to capture on cancel too; only an
+  // APPROVED order is captured, so no capture request id is spent on an unapproved one.
+  const current = await getOrder(orderId);
+  const order = orderSchema.safeParse(current.data);
+  if (!current.ok || !order.success) {
+    throw new DemoBookingError("PayPal could not read the order", 502, current.debugId);
+  }
+  if (order.data.status !== "APPROVED" && order.data.status !== "COMPLETED") {
+    await db.booking.update({ where: { id: booking.id }, data: { orderStatus: order.data.status } });
+    throw new DemoBookingError("The payment was not approved", 409, current.debugId);
   }
   if (!booking.captureRequestId) {
     booking = await db.booking.update({

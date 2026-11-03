@@ -12,7 +12,7 @@ interface PaypalNamespace {
     style?: Record<string, string>;
     createOrder: () => Promise<string>;
     onApprove: (data: { orderID: string }) => Promise<void>;
-    onCancel?: () => void;
+    onCancel?: (data: { orderID: string }) => Promise<void> | void;
     onError?: (err: unknown) => void;
   }): PaypalButtons;
 }
@@ -112,7 +112,18 @@ export function BookingWidget({ clientId }: { clientId: string | undefined }) {
               setError(err instanceof Error ? err.message : "Payment capture failed");
             }
           },
-          onCancel: () => setError("Payment cancelled. No money was taken."),
+          // The window can close with a cancel even though the buyer approved; the server
+          // captures only if PayPal says the order is approved.
+          onCancel: async ({ orderID }) => {
+            try {
+              const { bookingId } = await postJson<{ bookingId: string }>(
+                `/api/demo/orders/${encodeURIComponent(orderID)}/capture`,
+              );
+              await refreshBooking(bookingId);
+            } catch {
+              setError("Payment cancelled. No money was taken.");
+            }
+          },
           onError: () => setError("PayPal reported an error. Try again."),
         });
         buttonsRef.current.innerHTML = "";
