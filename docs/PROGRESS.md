@@ -63,3 +63,21 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 - Demo booking: buyer approved order `6KS2677987580682D`, but the JS SDK called `onCancel`. Fixed: `onCancel` asks the server to capture, and the server captures only APPROVED orders (new unit tests). Captured (`53N346307V6339736`), refunded in full via API (`4W803013JY3640920`), `PAYMENT.CAPTURE.REFUNDED` webhook verified and stored.
 - Wrote `docs/PHASE0_RESULTS.md`; ticked the Phase 0 tracker; README gained sandbox setup steps.
 - `npm run check`: 27 tests passing.
+
+## 2026-11-04: Phase 1 (data, EU261 engine, rule pack), at Gate 1
+
+- **Rule pack:** 46 JSON entries in `rules/`. These cover every SPEC 6.2 candidate (24 regulation, 15 CJEU, 6 Demo Air policy) plus one Commission guidance entry, `COM-GL-2024-4-3-1`.
+  - **Verification source:** EUR-Lex returns a bot challenge (HTTP 202, empty body) to scripted requests. The same Official Journal texts come from the Publications Office CELLAR service, so that is what `npm run rules:verify` reads. All 46 excerpts match word for word.
+  - **Sturgeon paragraph 63** is confirmed as the 50 percent reduction paragraph.
+  - **Refund ends care** is verified against the 2024 Commission guidelines (C/2024/5687, section 4.3.1), which replace the 2016 guidelines named in SPEC 5.6. They're stored with a new kind, `GUIDANCE`, which the AI may not cite.
+  - **Long excerpts:** some run past the "about 60 words" guideline (Art 5(1)(c), 6(1), 8(1)) because the engine applies every limb. The rule's `notes` field says so.
+- **Airports:** 37 airports from OurAirports. Their data page says it is "released to the Public Domain". Time zones are set by hand.
+- **Data model:** full Prisma schema per SPEC 10. The migration `phase1_full_model` only adds tables and columns; it includes a partial unique index for active payout items.
+  - Passenger gains a few fields the engine needs: `firstDeparture`, `confirmedReservation`, `overnightStayNecessary`, `journeyNoLongerServesPurpose`, `manifestIndex`.
+- **Engine:** 64 tests, each named after the rule it exercises. `npm run check`: 108 tests passing.
+- **Scenarios and manifests:**
+  - Scenarios A and B use placeholder dates.
+  - The manifest generator uses a fixed seed. The quick run has 12 cases in the order of the DEMO.md table; the full run has 180 and 150 passengers.
+  - Scenario B's group split and the times of its previous flight (DEMO 206) were not in DEMO.md and were set by Claude Code, noted in the JSON.
+- **Seeding:** `npm run seed`, `npm run reset-demo` (with `-- --full`) and `npm run explain` work.
+- **Name check (OPEN_QUESTIONS Q5):** a quick web search found no aviation software product or trademark named "Groundside". This is not a trademark clearance.
