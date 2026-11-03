@@ -185,3 +185,19 @@ describe("A1 prompt", () => {
     expect(msg).toContain("observations (METAR) only");
   });
 });
+
+describe("A1 recorded fixtures", () => {
+  it("loads the recorded scenario fixtures and they pass the same validators", async () => {
+    const { loadA1Fixture } = await import("@/lib/ai/a1/assess");
+    for (const key of ["A", "B"] as const) {
+      const fx = loadA1Fixture(`scenario-${key}`);
+      expect(fx, key).not.toBeNull();
+      const input = scenarioA1Input(key);
+      const v = validateA1(fx!.output, { ...ctx, opsNote: input.opsNote, maintenanceLog: input.maintenanceLog, factIds: new Set(input.facts.map((f) => f.id)) });
+      expect(v.errors, key).toEqual([]);
+    }
+    expect(mapRecommendation(loadA1Fixture("scenario-A")!.output)).toBe("PAY_COMPENSATION");
+    expect(mapRecommendation(loadA1Fixture("scenario-B")!.output)).toBe("NO_COMPENSATION_HUMAN_MUST_DECIDE");
+    expect(loadA1Fixture("no-such-key")).toBeNull();
+  });
+});

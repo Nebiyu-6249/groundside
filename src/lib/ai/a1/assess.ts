@@ -6,6 +6,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { z } from "zod";
+import { loadAirports } from "@/lib/demo/seed";
 import type { Rule } from "@/lib/rules/schema";
 import type { WeatherFact } from "@/lib/weather/facts";
 import type { AiConfig } from "../config";
@@ -15,7 +16,8 @@ import { dataBlock } from "../text";
 import { a1JsonSchema, a1OutputSchema, type A1Output, type Recommendation } from "./schema";
 import { mapRecommendation, validateA1 } from "./validate";
 
-export const A1_PROMPT_VERSION = "A1.v1";
+// v2 (2026-11-04): weather facts are cited by ID, never quoted; airports carry ICAO and IATA codes.
+export const A1_PROMPT_VERSION = "A1.v2";
 
 /** Rule IDs relevant to extraordinary circumstances; their entries go into the prompt. */
 export const A1_RULE_IDS = [
@@ -62,6 +64,16 @@ export const a1FixtureSchema = z.strictObject({
 });
 export type A1Fixture = z.infer<typeof a1FixtureSchema>;
 
+/** Recorded live result for a scenario (written by npm run eval), or null if none. */
+export function loadA1Fixture(key: string): A1Fixture | null {
+  try {
+    const file = path.join(process.cwd(), "fixtures", "ai", `A1-${key}.json`);
+    return a1FixtureSchema.parse(JSON.parse(readFileSync(file, "utf8")));
+  } catch {
+    return null;
+  }
+}
+
 export interface A1Result {
   model: string;
   promptVersion: string;
@@ -86,8 +98,22 @@ function loadPrompt(): string {
   return readFileSync(path.join(process.cwd(), "prompts", `${A1_PROMPT_VERSION}.md`), "utf8");
 }
 
+let airportNames: Map<string, string> | null = null;
+/** "LPPT (LIS, Lisbon)" for airports in data/airports.json, otherwise the code as given. */
+function airportLabel(icao: string): string {
+  airportNames ??= new Map(loadAirports().map((a) => [a.icao, `${a.icao} (${a.iata}, ${a.city})`]));
+  return airportNames.get(icao) ?? icao;
+}
+
 export function buildA1UserMessage(input: A1Input, rules: readonly Rule[]): string {
-  const d = input.disruption;
+  const raw = input.disruption;
+  const prev = raw.previousFlight;
+  const d = {
+    ...raw,
+    origin: airportLabel(raw.origin),
+    destination: airportLabel(raw.destination),
+    previousFlight: prev ? { ...prev, origin: airportLabel(prev.origin), destination: airportLabel(prev.destination) } : null,
+  };
   const ruleLines = rules
     .filter((r) => A1_RULE_IDS.includes(r.id) && r.status === "VERIFIED")
     .map((r) => `${r.id} | ${r.title} | ${r.excerpt}`)
