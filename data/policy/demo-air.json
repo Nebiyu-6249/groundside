@@ -1,0 +1,19 @@
+{
+  "label": "Demo Air policy (fictional carrier)",
+  "currency": "EUR",
+  "mealAllowanceFirstEur": 15,
+  "mealAllowanceEachFurtherHoursEur": 15,
+  "mealAllowanceFurtherEveryHours": 4,
+  "mealAllowanceMaxPer24hEur": 60,
+  "hotelCapPerNightEur": 160,
+  "groundTransportCapEachWayEur": 40,
+  "applyArt7_2Reduction": true,
+  "receiptWindowBeforeSchedDepMinutes": 120,
+  "receiptWindowAfterNewDepMinutes": 60,
+  "receiptExcludedCategories": ["alcohol", "tobacco", "duty-free goods"],
+  "fxRates": {
+    "label": "Demo rates",
+    "asOf": "2026-11-01",
+    "toEur": { "AED": 0.25, "USD": 0.92, "GBP": 1.17 }
+  }
+}

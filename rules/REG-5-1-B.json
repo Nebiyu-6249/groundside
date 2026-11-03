@@ -1,0 +1,14 @@
+{
+  "id": "REG-5-1-B",
+  "title": "Cancellation: care",
+  "source": "Regulation (EC) No 261/2004, Article 5(1)(b)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "(b) be offered assistance by the operating air carrier in accordance with Article 9(1)(a) and 9(2), as well as, in event of re-routing when the reasonably expected time of departure of the new flight is at least the day after the departure as it was planned for the cancelled flight, the assistance specified in Article 9(1)(b) and 9(1)(c); and",
+  "summary": "When a flight is cancelled, passengers get meals and communication, plus hotel and transport if the new flight leaves at least the day after the planned departure.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 65 words."
+}

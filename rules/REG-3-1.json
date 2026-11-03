@@ -1,0 +1,14 @@
+{
+  "id": "REG-3-1",
+  "title": "Scope: departures from the EU and arrivals on Community carriers",
+  "source": "Regulation (EC) No 261/2004, Article 3(1)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "1. This Regulation shall apply: (a) to passengers departing from an airport located in the territory of a Member State to which the Treaty applies; (b) to passengers departing from an airport located in a third country to an airport situated in the territory of a Member State to which the Treaty applies, unless they received benefits or compensation and were given assistance in that third country, if the operating air carrier of the flight concerned is a Community carrier.",
+  "summary": "The Regulation covers departures from an EU airport, and flights from a third country to an EU airport operated by a Community carrier, unless benefits, compensation and assistance were received in that third country.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": "Excerpt is about 75 words: both limbs of the scope test are applied by the engine."
+}

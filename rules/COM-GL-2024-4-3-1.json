@@ -1,0 +1,14 @@
+{
+  "id": "COM-GL-2024-4-3-1",
+  "title": "Commission Interpretative Guidelines (C/2024/5687), section 4.3.1: when the right to care ends",
+  "source": "Commission Notice, Interpretative Guidelines on Regulation (EC) No 261/2004 (C/2024/5687), 25 September 2024, section 4.3.1",
+  "url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52024XC05687",
+  "celex": "52024XC05687",
+  "excerpt": "the right to care subsists only as long as passengers have to wait for re-routing, under comparable transport conditions, to their final destination at the earliest opportunity (Article 8(1), point (b)), or a return flight (Article 8(1), point (a), second indent).",
+  "summary": "Care lasts only while passengers wait for re-routing at the earliest opportunity or a return flight, so it ends once a passenger takes a refund without a return flight or chooses re-routing at a later date.",
+  "kind": "GUIDANCE",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/52024XC05687",
+  "verifiedAt": "2026-11-04",
+  "notes": "Commission guidance, not binding law. These 2024 guidelines replace the 2016 guidelines (2016/C 214/04) named in docs/SPEC.md 5.6. Kind GUIDANCE is an addition to the SPEC 6.1 kinds; the AI may not cite it."
+}

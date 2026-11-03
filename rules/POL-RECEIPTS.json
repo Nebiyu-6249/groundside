@@ -1,0 +1,14 @@
+{
+  "id": "POL-RECEIPTS",
+  "title": "Demo Air policy: meal receipts",
+  "source": "Demo Air (fictional carrier) policy, data/policy/demo-air.json",
+  "url": "data/policy/demo-air.json",
+  "celex": null,
+  "excerpt": "Receipts dated from 120 minutes before the scheduled departure to 60 minutes after the new departure; alcohol, tobacco and duty-free goods excluded.",
+  "summary": "Rules Demo Air applies when reimbursing meal receipts.",
+  "kind": "POLICY",
+  "status": "VERIFIED",
+  "verifiedAgainst": "data/policy/demo-air.json",
+  "verifiedAt": "2026-11-04",
+  "notes": "Fictional airline policy, not law."
+}

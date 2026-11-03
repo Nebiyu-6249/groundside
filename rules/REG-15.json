@@ -1,0 +1,14 @@
+{
+  "id": "REG-15",
+  "title": "No waiver of passenger rights",
+  "source": "Regulation (EC) No 261/2004, Article 15(1)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "1. Obligations vis-à-vis passengers pursuant to this Regulation may not be limited or waived, notably by a derogation or restrictive clause in the contract of carriage.",
+  "summary": "The carrier's obligations cannot be limited or waived, including by contract terms.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}

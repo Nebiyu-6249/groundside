@@ -1,0 +1,14 @@
+{
+  "id": "POL-FX",
+  "title": "Demo Air policy: demo exchange rates",
+  "source": "Demo Air (fictional carrier) policy, data/policy/demo-air.json",
+  "url": "data/policy/demo-air.json",
+  "celex": null,
+  "excerpt": "Fixed demo table for AED, USD and GBP to EUR, labelled Demo rates.",
+  "summary": "Fixed exchange rates used for receipts in other currencies in this demo.",
+  "kind": "POLICY",
+  "status": "VERIFIED",
+  "verifiedAgainst": "data/policy/demo-air.json",
+  "verifiedAt": "2026-11-04",
+  "notes": "Fictional airline policy, not law."
+}

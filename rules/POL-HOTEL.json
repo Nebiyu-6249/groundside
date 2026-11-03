@@ -1,0 +1,14 @@
+{
+  "id": "POL-HOTEL",
+  "title": "Demo Air policy: hotel cap",
+  "source": "Demo Air (fictional carrier) policy, data/policy/demo-air.json",
+  "url": "data/policy/demo-air.json",
+  "celex": null,
+  "excerpt": "Hotel reimbursement up to 160 EUR per night.",
+  "summary": "Hotel cap set by Demo Air policy, for care under Article 9(1)(b).",
+  "kind": "POLICY",
+  "status": "VERIFIED",
+  "verifiedAgainst": "data/policy/demo-air.json",
+  "verifiedAt": "2026-11-04",
+  "notes": "Fictional airline policy, not law."
+}

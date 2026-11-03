@@ -1,0 +1,14 @@
+{
+  "id": "POL-ART7-2",
+  "title": "Demo Air policy: apply the Article 7(2) reduction",
+  "source": "Demo Air (fictional carrier) policy, data/policy/demo-air.json",
+  "url": "data/policy/demo-air.json",
+  "celex": null,
+  "excerpt": "Demo Air applies the 50 percent reduction allowed by Article 7(2) when its conditions are met.",
+  "summary": "Demo Air chooses to use the optional Article 7(2) reduction.",
+  "kind": "POLICY",
+  "status": "VERIFIED",
+  "verifiedAgainst": "data/policy/demo-air.json",
+  "verifiedAt": "2026-11-04",
+  "notes": "Fictional airline policy, not law."
+}

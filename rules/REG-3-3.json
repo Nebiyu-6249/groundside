@@ -1,0 +1,14 @@
+{
+  "id": "REG-3-3",
+  "title": "Scope: free and non-public reduced fares excluded",
+  "source": "Regulation (EC) No 261/2004, Article 3(3)",
+  "url": "https://eur-lex.europa.eu/eli/reg/2004/261/oj",
+  "celex": "32004R0261",
+  "excerpt": "3. This Regulation shall not apply to passengers travelling free of charge or at a reduced fare not available directly or indirectly to the public. However, it shall apply to passengers having tickets issued under a frequent flyer programme or other commercial programme by an air carrier or tour operator.",
+  "summary": "Free tickets and reduced fares not available to the public are excluded; frequent flyer and other commercial programme tickets are covered.",
+  "kind": "LAW",
+  "status": "VERIFIED",
+  "verifiedAgainst": "http://publications.europa.eu/resource/celex/32004R0261",
+  "verifiedAt": "2026-11-04",
+  "notes": ""
+}
