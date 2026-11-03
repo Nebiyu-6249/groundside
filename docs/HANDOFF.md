@@ -4,14 +4,20 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 1 is at Gate 1**, waiting for the user's review. Don't start Phase 2 until the user approves.
-- Phase 0 is done (Gate 0 approved 2026-11-04). Results in `docs/PHASE0_RESULTS.md`.
+- **Phase 2 in progress, blocked on `OPENAI_API_KEY`** (empty in `.env`). The user said not to wait for approvals in this phase.
+  - **Built and tested:**
+    - METAR parsing, weather windows, facts, TAF facts
+    - real fixtures for A (2026-01-24) and B (2026-01-22) in `data/weather/` (sources in `data/weather/SOURCES.md`)
+    - A1 in `src/lib/ai/a1/`
+    - the eval harness, `npm run eval`
+  - **Not done:** running the eval. So `docs/EVAL_REPORT.md` and the recorded fixtures in `fixtures/ai/` don't exist yet, and until they do the app shows "AI assessment unavailable".
+- Phases 0 and 1 are done (Gates 0 and 1 approved 2026-11-04). Results in `docs/PHASE0_RESULTS.md` and the Gate 1 docs.
 - **Rule pack:** 46 entries in `rules/` (JSON, one file each), all VERIFIED. `npm run rules:verify` re-fetches the official texts from the Publications Office CELLAR service and checks every excerpt word for word. EUR-Lex itself answers scripted requests with a bot challenge, so CELLAR is the verification source.
 - **Engine:** `src/lib/engine/`, pure functions, 64 tests. Entry point `computePassenger(disruption, passenger, { rules, policy })`; `reconcile()` for idempotent re-runs.
 - **Data:**
   - `data/airports.json` (37 airports, OurAirports, public domain, time zones added by hand)
   - `data/policy/demo-air.json`
-  - `data/scenarios/A.json`, `data/scenarios/B.json`: **dates are placeholders** until Phase 2
+  - `data/scenarios/A.json`, `data/scenarios/B.json`: real dates, chosen in Phase 2
 - **Database:** migration `phase1_full_model` applied on Neon. The quick-run demo is seeded (`npm run reset-demo`).
 - **PayPal app:** "Groundside EU" (`APP-55E35906EM8730949`), business account `sb-vz8j553542468@business.example.com` (DE), webhook `6UR10068K6257654U`.
 - **Port:** dev server on **3001** (`npm run dev -- --port 3001`).
@@ -20,12 +26,11 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Next steps
 
-1. The user reviews Gate 1:
-   - `docs/GATE1_TEST_OUTPUT.txt`
-   - `docs/RULE_PACK_STATUS.md`
-   - `docs/GATE1_WORKED_EXAMPLE.md`
-   - the open decisions in the Gate 1 report: policy amounts (Q8), the name check (Q5), the B2 exactly-180-minute delay edge, and the `GUIDANCE` rule kind
-2. After approval, Phase 2 (weather evidence, A1 assessment, evals). The first step is showing the user 2 or 3 candidate real dates per scenario (`docs/DEMO.md` 2.1); then update `dateLocal` and `dateIsPlaceholder` in `data/scenarios/*.json` and reseed.
+1. The user adds `OPENAI_API_KEY` to `.env` in Notepad (never in chat).
+2. Run `npm run eval` and check the pass criteria at the top of `docs/EVAL_REPORT.md`.
+3. If fewer than 11 of 12 cases match, look at the failing ones. Put any prompt change in a new file `prompts/A1.v2.md`, bump `A1_PROMPT_VERSION`, and rerun.
+4. The eval writes the scenario A and B results to `fixtures/ai/`. Commit them.
+5. Gate 2 report: the eval table and the cost so far (`AiCall` table).
 
 ## How to run
 
@@ -39,7 +44,9 @@ npm run reset-demo
 npm run dev -- --port 3001
 ```
 
-- Checks: `npm run check` (108 tests at Gate 1)
+- Checks: `npm run check` (143 tests)
+- A1 evals: `npm run eval` (live model; needs `OPENAI_API_KEY`)
+- Weather fixtures: `npm run weather:fetch -- --scenario=A` (skips existing files; `--force` replaces them)
 - Rule pack check: `npm run rules:verify` (add `-- --refresh` to re-download the texts)
 - One passenger's trace: `npm run explain -- --scenario=A --case=4`
 - Airports rebuild: `npm run airports:build -- <path to OurAirports airports.csv>`
