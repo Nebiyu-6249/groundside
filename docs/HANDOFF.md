@@ -4,7 +4,7 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 3 is built locally; the Render deploy is pending** (it needs the user's Render account). Gate 3, the Quick run working end to end on the hosted URL, is therefore not reached.
+- **Phase 3 is done and deployed; Gate 3 was reached 2026-11-04 and is awaiting the user's approval.** The Quick run works on https://groundside.onrender.com.
   - Phases 0 to 2 are done (Gates 0, 1 and 2 approved 2026-11-04). A1 is on prompt `A1.v3`: 12/12 evals.
   - **Ops console** (`src/app/(ops)/ops/`):
     - login at `/login`
@@ -36,8 +36,8 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
    - Deployed with `npm run deploy:render` through the Render CLI (installed with winget; the user ran `render login`). See `docs/DEPLOY.md`.
    - The database is `groundside_hosted` on the same Neon project.
    - The hosted login is in `scripts/out/hosted-credentials.txt` (git-ignored; Claude Code does not read it).
-   - Next: the Quick run on the hosted URL (Gate 3). It needs a sign-in, which the user does.
-2. **Devpost draft:** the user fills in the form; Claude Code provides the text from `docs/DEMO.md` section 5.
+   - The user ran the Quick run on the hosted URL (2026-11-04): it works.
+2. **Devpost draft:** the text is ready in `docs/DEVPOST_DRAFT.md`; the user fills in the form for the early eligibility check.
 3. **Phase 3 items still open from SPEC** (they could move to Phase 4 or 5): the landing page (`/` is still a placeholder), the judge-mode "Start the judge demo" flow (SPEC 14, Phase 5), and the questions and receipts tabs (Phase 4).
 
 ## How to run
