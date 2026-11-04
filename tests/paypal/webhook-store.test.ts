@@ -21,6 +21,8 @@ function fakeDb() {
       updateMany: vi.fn(async ({ where, data }: { where: { paypalRefundId: string }; data: { status: string } }) => {
         refunds.filter((r) => r.paypalRefundId === where.paypalRefundId).forEach((r) => (r.status = data.status));
       }),
+      // No booking passengers in this fake, so the entitlement sync (lib/ops/refunds) has nothing to move.
+      findMany: vi.fn(async () => []),
     },
   };
   return { db: db as unknown as PrismaClient, events, refunds };
