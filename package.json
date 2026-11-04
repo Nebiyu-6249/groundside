@@ -21,6 +21,8 @@
     "airports:build": "tsx scripts/build-airports.ts",
     "seed": "tsx --env-file=.env scripts/seed.ts",
     "reset-demo": "tsx --env-file=.env scripts/seed.ts --reset",
+    "seed:hosted": "tsx --env-file=.env --env-file=.env.hosted scripts/seed.ts --hosted",
+    "reset-demo:hosted": "tsx --env-file=.env --env-file=.env.hosted scripts/seed.ts --hosted --reset",
     "explain": "tsx --env-file=.env scripts/explain-passenger.ts",
     "weather:dates": "tsx scripts/find-weather-dates.ts",
     "weather:fetch": "tsx scripts/fetch-weather.ts",

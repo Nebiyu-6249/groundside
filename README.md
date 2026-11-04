@@ -107,11 +107,7 @@ Test the checkout in a regular browser (Chrome, Edge, Firefox); embedded browser
 - **Start:** `npm start`
 - **Health check:** `/api/health`
 
-Values marked `sync: false` are entered in the Render dashboard. After the first deploy:
-
-1. Set `APP_BASE_URL` to the service URL.
-2. Create a PayPal sandbox webhook at `<service URL>/api/webhooks/paypal` and set `PAYPAL_WEBHOOK_ID`.
-3. Seed once with `npm run seed`, from a machine whose `.env` points at the production database.
+Values marked `sync: false` are entered in the Render dashboard. After the first deploy, set `APP_BASE_URL`, point a PayPal sandbox webhook at `<service URL>/api/webhooks/paypal` and set `PAYPAL_WEBHOOK_ID`. Then seed the hosted database from your machine with `npm run seed:hosted`: it reads `.env.hosted` (git-ignored) on top of `.env`. Step by step: [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Demo data
 

@@ -32,12 +32,7 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Next steps
 
-1. **Deploy to Render** (the user does the account steps):
-   1. Rotate the Neon password and the PayPal secret, which appeared in chat earlier.
-   2. Ideally create a separate Neon branch for production, so local `reset-demo` runs don't wipe the hosted demo.
-   3. In Render, choose New, then Blueprint, then the `groundside` repo. Fill the `sync: false` values.
-   4. After the first deploy: set `APP_BASE_URL` to the service URL, create the PayPal webhook for `<URL>/api/webhooks/paypal`, set `PAYPAL_WEBHOOK_ID`, and run `npm run seed` locally against the production database URL.
-   5. Run the Quick run on the hosted URL (Gate 3).
+1. **Deploy to Render:** the user does the account steps in `docs/DEPLOY.md` (rotate secrets, Neon `hosted` branch, Render Blueprint, webhook, `npm run seed:hosted` with `.env.hosted`). Then run the Quick run on the hosted URL (Gate 3). User chose "Deploy first" (2026-11-04), before checking the ops screens locally.
 2. **Devpost draft:** the user fills in the form; Claude Code provides the text from `docs/DEMO.md` section 5.
 3. **Phase 3 items still open from SPEC** (they could move to Phase 4 or 5): the landing page (`/` is still a placeholder), the judge-mode "Start the judge demo" flow (SPEC 14, Phase 5), and the questions and receipts tabs (Phase 4).
 

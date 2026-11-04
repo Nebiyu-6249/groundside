@@ -171,3 +171,10 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - the rule-pack path is now scoped statically, so the build no longer traces the whole project
 - **Checks:** `npm run build` passes. `npm run check`: 151 tests.
 - **Not done:** the Render deploy (needs the user's Render account) and the Devpost draft (the user fills the form). `render.yaml` and the README deploy section are ready.
+
+### 2026-11-04: Deploy preparation
+
+- The user chose to deploy before checking the ops screens locally.
+- Checked `render.yaml` against `.env.example`: every variable is covered.
+- Added `npm run seed:hosted` and `npm run reset-demo:hosted`. They load `.env.hosted` (git-ignored) on top of `.env`, print only the target database host, and refuse to run without `DEMO_OPS_PASSWORD`, so a generated password never overwrites the local credentials file.
+- Wrote `docs/DEPLOY.md`: rotating the secrets, a Neon `hosted` branch, the Render Blueprint values, the webhook, seeding, and the Gate 3 check.
