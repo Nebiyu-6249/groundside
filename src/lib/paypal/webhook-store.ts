@@ -59,6 +59,11 @@ export async function processEvent(db: PrismaClient, event: WebhookEventBody): P
       | undefined;
     if (event.event_type.startsWith("PAYMENT.PAYOUTS-ITEM.") && r?.payout_item_id && r.transaction_status) {
       await applyItemUpdate(db, { paypalItemId: r.payout_item_id, senderItemId: r.payout_item?.sender_item_id, status: r.transaction_status, transactionId: r.transaction_id }, "WEBHOOK");
+      const item = await db.payoutItem.findUnique({ where: { paypalItemId: r.payout_item_id }, select: { entitlement: { select: { passenger: { select: { disruptionId: true } } } } } });
+      if (item) {
+        const { finalizeBankSwitches } = await import("@/lib/payouts/unclaimed");
+        await finalizeBankSwitches(db, item.entitlement.passenger.disruptionId);
+      }
     }
     if (event.event_type.startsWith("PAYMENT.PAYOUTSBATCH.") && r?.batch_header?.payout_batch_id && r.batch_header.batch_status) {
       await applyBatchUpdate(db, r.batch_header.payout_batch_id, r.batch_header.batch_status, "WEBHOOK");

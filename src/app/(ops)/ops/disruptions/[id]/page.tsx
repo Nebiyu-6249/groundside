@@ -10,7 +10,7 @@ import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
-import { approve, assess, deny, openAsPassenger, releaseCareNow, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
+import { approve, assess, cancelUnclaimedItem, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 
@@ -234,10 +234,10 @@ function Payouts({ d }: { d: DisruptionDetail }) {
             {b.lastError ? <span className="text-xs text-red">{b.lastError}</span> : null}
           </div>
           <table className="mt-2 w-full text-left text-xs">
-            <thead className="text-muted"><tr><th className="py-1 font-medium">Passenger</th><th className="font-medium">Kind</th><th className="font-medium">Sandbox receiver (demo pool)</th><th className="font-medium">Amount</th><th className="font-medium">Status</th></tr></thead>
+            <thead className="text-muted"><tr><th className="py-1 font-medium">Passenger</th><th className="font-medium">Kind</th><th className="font-medium">Sandbox receiver (demo pool)</th><th className="font-medium">Amount</th><th className="font-medium">Status</th><th className="font-medium"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>
               {b.items.map((i) => (
-                <tr key={i.id} className="border-t border-line"><td className="py-1">{i.name}</td><td>{i.kind === "COMPENSATION" ? "Compensation" : "Meals"}</td><td className="font-mono">{i.receiver}</td><td className="font-mono tabular">{euros(i.amountCents)}</td><td><PayoutStatus status={i.status} /></td></tr>
+                <tr key={i.id} className="border-t border-line"><td className="py-1">{i.name}</td><td>{i.kind === "COMPENSATION" ? "Compensation" : "Meals"}</td><td className="font-mono">{i.receiver}</td><td className="font-mono tabular">{euros(i.amountCents)}</td><td><PayoutStatus status={i.status} />{i.lastError ? <span className="block text-red">{i.lastError}</span> : null}</td><td>{i.status === "UNCLAIMED" ? <div className="flex flex-wrap gap-2 py-1"><ActionButton action={remindUnclaimed.bind(null, d.id, i.id)} label="Send reminder" pendingLabel="Sending" /><ActionButton action={cancelUnclaimedItem.bind(null, d.id, i.id)} label="Cancel item" pendingLabel="Cancelling" /></div> : null}</td></tr>
               ))}
             </tbody>
           </table>

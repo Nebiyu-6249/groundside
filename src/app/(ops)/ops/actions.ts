@@ -12,6 +12,7 @@ import { payDisruption } from "@/lib/payouts/orchestrator";
 import { audit } from "@/lib/ops/audit";
 import { loadReadiness } from "@/lib/ops/readiness";
 import { refreshRefunds, requestPassengerRefund } from "@/lib/ops/refunds";
+import { cancelUnclaimed, sendReminder, UnclaimedError } from "@/lib/payouts/unclaimed";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { hit } from "@/lib/rate-limit";
 
@@ -93,6 +94,31 @@ export async function syncWithPaypal(disruptionId: string): Promise<ActionState>
   const refunds = await refreshRefunds(db, disruptionId);
   revalidatePath(`/ops/disruptions/${disruptionId}`);
   return { error: null, ok: `Synced with PayPal: ${r.changed + refunds} change(s).` };
+}
+
+export async function remindUnclaimed(disruptionId: string, payoutItemId: string): Promise<ActionState> {
+  const user = await requireUser("DUTY_MANAGER");
+  try {
+    await sendReminder(getDb(), id.parse(payoutItemId), user.id);
+  } catch (err) {
+    if (err instanceof UnclaimedError) return { error: err.message };
+    throw err;
+  }
+  revalidatePath(`/ops/disruptions/${disruptionId}`);
+  return { error: null, ok: "Reminder is in the outbox." };
+}
+
+export async function cancelUnclaimedItem(disruptionId: string, payoutItemId: string): Promise<ActionState> {
+  const user = await requireUser("DUTY_MANAGER");
+  let r;
+  try {
+    r = await cancelUnclaimed(getDb(), id.parse(payoutItemId), { type: "USER", id: user.id });
+  } catch (err) {
+    if (err instanceof UnclaimedError) return { error: err.message };
+    throw err;
+  }
+  revalidatePath(`/ops/disruptions/${disruptionId}`);
+  return r.cancelled ? { error: null, ok: r.message } : { error: r.message };
 }
 
 export async function retryRefund(disruptionId: string, passengerId: string): Promise<ActionState> {

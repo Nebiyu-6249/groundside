@@ -40,5 +40,8 @@ export async function reconcileDisruption(db: PrismaClient, disruptionId: string
       if (page >= (parsed.data.total_page ?? 1)) break;
     }
   }
+  // Bank-transfer switches wait for their unclaimed items to come back (SPEC F10).
+  const { finalizeBankSwitches } = await import("./unclaimed");
+  changed += await finalizeBankSwitches(db, disruptionId);
   return { skipped: false, changed };
 }

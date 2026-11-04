@@ -6,6 +6,7 @@ import { getDb } from "@/lib/db";
 import { ChoiceError, recordPaymentChoice, recordTravelChoice } from "@/lib/ops/passenger-choice";
 import { offerByToken } from "@/lib/pax/offer";
 import { payDisruption } from "@/lib/payouts/orchestrator";
+import { requestBankSwitch, UnclaimedError } from "@/lib/payouts/unclaimed";
 import { hit } from "@/lib/rate-limit";
 import { ipHash } from "@/lib/request";
 
@@ -45,6 +46,20 @@ export async function choosePayment(token: string, _prev: PaxState, form: FormDa
   }
   revalidatePath(`/p/${token}`);
   return { error: null, ok: "Thank you. Your choice is saved." };
+}
+
+export async function switchToBank(token: string, _prev: PaxState, form: FormData): Promise<PaxState> {
+  let message: string;
+  try {
+    const { db, view } = await resolve(token);
+    const r = await requestBankSwitch(db, view.passengerId, String(form.get("ibanLast4") ?? ""));
+    message = r.cancelled ? "Your PayPal payment was cancelled. The airline will pay by bank transfer." : "Saved. The PayPal payment must come back to the airline first; the bank transfer follows then.";
+  } catch (err) {
+    if (err instanceof ChoiceError || err instanceof UnclaimedError) return { error: err.message };
+    throw err;
+  }
+  revalidatePath(`/p/${token}`);
+  return { error: null, ok: message };
 }
 
 export async function chooseTravel(token: string, _prev: PaxState, form: FormData): Promise<PaxState> {

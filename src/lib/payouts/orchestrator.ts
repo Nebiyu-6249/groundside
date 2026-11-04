@@ -123,7 +123,8 @@ export async function payDisruption(db: PrismaClient, disruptionId: string, sett
         kind: kind.entitlement,
         status: "ACCEPTED",
         amountCents: { gt: 0 },
-        passenger: { disruptionId, payoutReceiver: { not: null }, offers: { some: { paymentChoice: "PAYPAL" } } },
+        // A passenger waiting to switch an unclaimed payout to bank transfer gets nothing new via PayPal.
+        passenger: { disruptionId, payoutReceiver: { not: null }, offers: { some: { paymentChoice: "PAYPAL", bankSwitchRequestedAt: null } } },
         payoutItems: { none: { status: { notIn: [...NO_MONEY] } } },
       },
       include: { passenger: { select: { payoutReceiver: true, priorityReason: true, manifestIndex: true } } },
