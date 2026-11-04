@@ -1,0 +1,19 @@
+{
+  "synthetic": true,
+  "note": "Hotel night, under the cap",
+  "expected": {
+    "merchantName": "Airport Rest Hotel",
+    "merchantLocation": "Frankfurt Airport, Hugo-Eckener-Ring",
+    "date": "2026-01-25",
+    "time": "07:15",
+    "currency": "EUR",
+    "total": 129,
+    "lineItems": [
+      {
+        "description": "Room, 1 night, 24-25 Jan",
+        "amount": 129,
+        "category": "HOTEL"
+      }
+    ]
+  }
+}

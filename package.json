@@ -24,9 +24,11 @@
     "deploy:render": "tsx --env-file=.env scripts/deploy-render.ts",
     "reset-demo:hosted": "tsx --env-file=.env scripts/deploy-render.ts --db-only --reset",
     "explain": "tsx --env-file=.env scripts/explain-passenger.ts",
+    "receipts:synthetic": "tsx scripts/make-synthetic-receipts.ts",
     "weather:dates": "tsx scripts/find-weather-dates.ts",
     "weather:fetch": "tsx scripts/fetch-weather.ts",
     "eval": "tsx --env-file=.env scripts/eval.ts",
+    "eval:a2": "tsx --env-file=.env scripts/eval-a2.ts",
     "e2e": "tsx --env-file=.env scripts/e2e-flow.ts"
   },
   "dependencies": {
@@ -43,6 +45,7 @@
     "pg": "8.23.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "sharp": "0.35.5",
     "zod": "4.6.7"
   },
   "devDependencies": {

@@ -1,0 +1,38 @@
+{
+  "recordedAt": "2026-11-04T20:06:34.757Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v1",
+  "source": "receipts-synthetic/outside-window.png",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "Main Street Deli",
+    "merchantLocation": "Frankfurt am Main, Kaiserstrasse 12",
+    "isAtAirport": false,
+    "date": "2026-01-20",
+    "time": "12:05",
+    "currency": "EUR",
+    "total": 10.3,
+    "lineItems": [
+      {
+        "description": "Soup of the day",
+        "amount": 6.9,
+        "category": "FOOD"
+      },
+      {
+        "description": "Orange juice",
+        "amount": 3.4,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt is labeled “SYNTHETIC TEST RECEIPT” and says “Not a real receipt.”"
+  }
+}

@@ -13,6 +13,7 @@ import { audit } from "@/lib/ops/audit";
 import { loadReadiness } from "@/lib/ops/readiness";
 import { refreshRefunds, requestPassengerRefund } from "@/lib/ops/refunds";
 import { cancelUnclaimed, sendReminder, UnclaimedError } from "@/lib/payouts/unclaimed";
+import { ReceiptError, reviewReceipt } from "@/lib/receipts/service";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { hit } from "@/lib/rate-limit";
 
@@ -119,6 +120,22 @@ export async function cancelUnclaimedItem(disruptionId: string, payoutItemId: st
   }
   revalidatePath(`/ops/disruptions/${disruptionId}`);
   return r.cancelled ? { error: null, ok: r.message } : { error: r.message };
+}
+
+export async function decideReceipt(disruptionId: string, receiptId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
+  const user = await requireUser("DUTY_MANAGER");
+  const db = getDb();
+  const approveIt = form.get("decision") === "approve";
+  let r;
+  try {
+    r = await reviewReceipt(db, user, id.parse(receiptId), approveIt, String(form.get("reason") ?? ""));
+  } catch (err) {
+    if (err instanceof ReceiptError) return { error: err.message };
+    throw err;
+  }
+  if (approveIt) after(async () => void (await payDisruption(db, disruptionId)));
+  revalidatePath(`/ops/disruptions/${disruptionId}`);
+  return { error: null, ok: approveIt ? `Approved ${(r.approvedCents / 100).toFixed(2)} EUR; payment follows if the passenger chose PayPal.` : "Rejected." };
 }
 
 export async function retryRefund(disruptionId: string, passengerId: string): Promise<ActionState> {

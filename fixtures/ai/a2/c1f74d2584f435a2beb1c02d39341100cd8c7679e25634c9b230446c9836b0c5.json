@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-04T20:06:14.806Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v1",
+  "source": "receipts-synthetic/airport-cafe.png",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "Gate Cafe",
+    "merchantLocation": "Frankfurt Airport, Terminal 1, Gate B44",
+    "isAtAirport": true,
+    "date": "2026-01-24",
+    "time": "20:41",
+    "currency": "EUR",
+    "total": 15,
+    "lineItems": [
+      {
+        "description": "Chicken sandwich",
+        "amount": 8.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Cappuccino",
+        "amount": 3.9,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Still water 0.5 l",
+        "amount": 2.6,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "Clearly legible. The receipt is labeled “SYNTHETIC TEST RECEIPT” and says “Not a real receipt.”"
+  }
+}

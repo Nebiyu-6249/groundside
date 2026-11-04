@@ -8,11 +8,13 @@ import { audit } from "@/lib/ops/audit";
 import { PaypalNetworkError } from "@/lib/paypal/http";
 import { createBatchResponseSchema, createPayoutBatch } from "@/lib/paypal/payouts";
 import { applyBatchUpdate, NO_MONEY } from "./transitions";
+import { receiptEntitlementKind } from "@/lib/receipts/service";
 
 const KINDS = [
   { entitlement: "COMPENSATION" as const, batch: "COMPENSATION" as const, note: "EU261 compensation" },
   { entitlement: "MEAL_ALLOWANCE" as const, batch: "MEAL" as const, note: "Meal allowance" },
 ];
+const RECEIPT_NOTE = "Receipt reimbursement";
 
 export interface PayoutSettings {
   batchSize: number;
@@ -49,7 +51,7 @@ async function sendBatch(db: PrismaClient, batchId: string): Promise<void> {
     senderBatchId: batch.senderBatchId,
     emailSubject: "Your payment from Demo Air (fictional carrier)",
     emailMessage: "Sandbox payment from Groundside, a demo. No real money.",
-    items: batch.items.map((i) => ({ senderItemId: i.senderItemId, receiver: i.receiver, amountCents: i.amountCents, note: `${KINDS.find((k) => k.batch === batch.kind)?.note ?? "Payment"} (Demo Air, demo data)` })),
+    items: batch.items.map((i) => ({ senderItemId: i.senderItemId, receiver: i.receiver, amountCents: i.amountCents, note: `${batch.kind === "RECEIPT" ? RECEIPT_NOTE : KINDS.find((k) => k.batch === batch.kind)?.note ?? "Payment"} (Demo Air, demo data)` })),
   };
   for (let attempt = 0; attempt < 2; attempt++) {
     let status = 0;
@@ -92,7 +94,8 @@ async function sendBatch(db: PrismaClient, batchId: string): Promise<void> {
     await db.$transaction([
       db.payoutBatch.update({ where: { id: batch.id }, data: { status: "FAILED_TO_CREATE", lastError: message } }),
       db.payoutItem.updateMany({ where: { batchId: batch.id }, data: { status: "FAILED", lastError: message, finalAt: new Date() } }),
-      db.entitlement.updateMany({ where: { id: { in: batch.items.map((i) => i.entitlementId) } }, data: { status: "ACCEPTED" } }),
+      // Receipt items leave their entitlement alone: it may already be paid by its own payout.
+      db.entitlement.updateMany({ where: { id: { in: batch.items.filter((i) => !i.receiptId).map((i) => i.entitlementId) } }, data: { status: "ACCEPTED" } }),
     ]);
     await audit(db, { actorType: "PAYPAL", action: "PAYOUT_BATCH_FAILED", entityType: "PayoutBatch", entityId: batch.id, summary: message, data });
     return;
@@ -161,6 +164,49 @@ export async function payDisruption(db: PrismaClient, disruptionId: string, sett
       items += rows.length;
     }
   }
+  // Approved receipts, one payout item each, with the passenger's existing PayPal consent (SPEC F11).
+  const receipts = await db.receipt.findMany({
+    where: {
+      decision: { in: ["AUTO_APPROVED", "APPROVED_BY_HUMAN"] },
+      approvedCents: { gt: 0 },
+      payoutItems: { none: { status: { notIn: [...NO_MONEY] } } },
+      passenger: { disruptionId, payoutReceiver: { not: null }, offers: { some: { paymentChoice: "PAYPAL", bankSwitchRequestedAt: null } } },
+    },
+    include: { passenger: { select: { payoutReceiver: true, entitlements: { select: { id: true, kind: true } } } } },
+    orderBy: { createdAt: "asc" },
+  });
+  const payable = [];
+  for (const r of receipts) {
+    if (r.approvedCents! <= remainingCap) {
+      payable.push(r);
+      remainingCap -= r.approvedCents!;
+    } else skippedForCap++;
+  }
+  for (let i = 0; i < payable.length; i += settings.batchSize) {
+    const chunk = payable.slice(i, i + settings.batchSize);
+    const seq = (await db.payoutBatch.count({ where: { senderBatchId: { startsWith: `gs-${shortId}-` } } })) + 1;
+    const senderBatchId = `gs-${shortId}-receipt-${seq}`;
+    const rows = chunk.map((r) => {
+      const kind = receiptEntitlementKind((r.checks as { outcome?: { byBucket?: Record<"MEAL" | "HOTEL" | "TRANSPORT", number> } } | null)?.outcome?.byBucket ?? { MEAL: r.approvedCents!, HOTEL: 0, TRANSPORT: 0 });
+      return { id: newItemId(), r, entitlementId: r.passenger.entitlements.find((e) => e.kind === kind)!.id };
+    });
+    let batchId: string;
+    try {
+      batchId = await db.$transaction(async (tx) => {
+        const b = await tx.payoutBatch.create({ data: { senderBatchId, kind: "RECEIPT", status: "CREATING", itemCount: rows.length, totalCents: rows.reduce((s, x) => s + x.r.approvedCents!, 0) } });
+        await tx.payoutItem.createMany({ data: rows.map((x) => ({ id: x.id, senderItemId: x.id, batchId: b.id, entitlementId: x.entitlementId, receiptId: x.r.id, receiver: x.r.passenger.payoutReceiver!, amountCents: x.r.approvedCents!, status: "CREATING" })) });
+        return b.id;
+      });
+    } catch (err) {
+      if ((err as { code?: string }).code === "P2002") continue;
+      throw err;
+    }
+    await audit(db, { actorType: "SYSTEM", action: "PAYOUT_BATCH_CREATED", entityType: "PayoutBatch", entityId: batchId, summary: `${RECEIPT_NOTE}: batch ${senderBatchId} with ${rows.length} item(s)` });
+    await sendBatch(db, batchId);
+    batches++;
+    items += rows.length;
+  }
+
   if (skippedForCap > 0) {
     await audit(db, { actorType: "SYSTEM", action: "PAYOUT_CAP_REACHED", entityType: "Disruption", entityId: disruptionId, summary: `Daily payout cap reached; ${skippedForCap} payout(s) wait for tomorrow` });
   }
