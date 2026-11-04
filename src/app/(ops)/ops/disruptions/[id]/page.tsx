@@ -71,7 +71,8 @@ function Header({ d, readiness }: { d: DisruptionDetail; readiness: ReadinessChe
 
 function Overview({ d }: { d: DisruptionDetail }) {
   const approvedAt = d.audit.find((a) => a.action === "DECISION_APPROVE" || a.action === "DECISION_DENY")?.at;
-  const firstPaid = d.audit.find((a) => a.action === "PAYOUT_ITEM_STATUS" && a.summary.includes("to SUCCESS"))?.at;
+  // Payments after the decision only: meal allowances released earlier do not count.
+  const firstPaid = approvedAt ? d.audit.find((a) => a.action === "PAYOUT_ITEM_STATUS" && a.summary.includes("to SUCCESS") && a.at >= approvedAt)?.at : undefined;
   const minutes = approvedAt && firstPaid ? Math.round((Date.parse(firstPaid) - Date.parse(approvedAt)) / 6000) / 10 : null;
   const paid = d.passengers.flatMap((p) => p.entitlements).filter((e) => e.status === "PAID");
   return (
@@ -143,6 +144,17 @@ function Evidence({ d }: { d: DisruptionDetail }) {
       </section>
     </div>
   );
+}
+
+/** What an approval pays, for the confirmation (SPEC F6). */
+function approvalTotals(d: DisruptionDetail) {
+  const ents = d.passengers.flatMap((p) => p.entitlements);
+  const sum = (kinds: string[]) => ents.filter((e) => kinds.includes(e.kind) && e.amountCents > 0 && e.status !== "NOT_OWED").reduce((s, e) => s + e.amountCents, 0);
+  return {
+    passengers: d.passengers.filter((p) => p.entitlements.some((e) => e.kind === "COMPENSATION" && e.amountCents > 0 && e.status !== "NOT_OWED")).length,
+    compensation: euros(sum(["COMPENSATION"])),
+    care: euros(sum(["MEAL_ALLOWANCE", "HOTEL_REIMBURSEMENT_CAP", "TRANSPORT_REIMBURSEMENT_CAP"])),
+  };
 }
 
 async function Assessment({ d, readiness }: { d: DisruptionDetail; readiness: ReadinessCheck[] }) {
@@ -217,7 +229,7 @@ async function Assessment({ d, readiness }: { d: DisruptionDetail; readiness: Re
           <p className="mt-2 text-sm text-muted">Only a duty manager can decide.</p>
         ) : (
           <div className="mt-2 grid gap-4 lg:grid-cols-2">
-            <ApproveForm action={approve.bind(null, d.id)} aiDiffers={!!a && a.shown !== "PAY_COMPENSATION"} openChecks={readiness.filter((c) => !c.ok).map((c) => c.label)} />
+            <ApproveForm action={approve.bind(null, d.id)} aiDiffers={!!a && a.shown !== "PAY_COMPENSATION"} openChecks={readiness.filter((c) => !c.ok).map((c) => c.label)} totals={approvalTotals(d)} />
             <DenyForm action={deny.bind(null, d.id)} userName={user.name} citable={d.citable} />
           </div>
         )}

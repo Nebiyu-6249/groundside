@@ -200,3 +200,47 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 - The user signed in on https://groundside.onrender.com and ran the Quick run through the hosted UI (assess, approve, simulate responses, payouts). The user reported "Done, it works".
 - Wrote the Devpost draft text in `docs/DEVPOST_DRAFT.md`, with measured values only. The user submits the form.
 - Gate 3 approved by the user, 2026-11-04. Phase 4 started.
+
+### 2026-11-05: Phase 4 built (Gate 4 pending)
+
+- **Release care now (SPEC F6):** a duty manager can offer meal allowances before the compensation decision.
+  - Compensation stays PENDING_DECISION until then.
+  - After the decision, what became payable joins each passenger's existing payment choice, and every offered passenger gets an update notice. A denial notice says how to contest.
+  - `npm run e2e -- --release-care-first` covers it: meals paid 60 s after release; compensation followed the approval with the same totals as before.
+- **Readiness panel (SPEC F6):** covers evidence airports, assessment, rule pack, missing contacts, payout funds (2 percent sandbox fee, compared with today's cap; the balance API returns 403 in sandbox) and the last webhook.
+  - Approval requires typing APPROVE, shows the totals, and needs a logged acknowledgement when a check is open.
+- **Refunds (SPEC F12):**
+  - A paid demo booking joins cancelled DEMO 412 as a passenger, with the buyer's sandbox account as receiver.
+  - Choosing a refund calls Payments v2 on the original capture. The REFUND entitlement follows the PayPal refund (webhook and polling).
+  - Ops shows a refunds table with the 7-day deadline (REG-8-1).
+  - Demo resets keep PayPal-paid bookings and their refunds.
+  - Tested by joining the Phase 0 booking: its completed refund is reused, so no new money moved.
+- **Unclaimed payouts (SPEC F10, 9.7):**
+  - reminders, at most one per passenger a day
+  - cancelling an item: the sandbox still answers HTTP 500, as in Phase 0; the debug IDs are recorded and the UI says so
+  - switching to bank transfer, which completes only once every unclaimed item is cancelled or returned; until then nothing new is sent to PayPal for that passenger
+  - the 30-day return, simulated locally
+- **Receipts (SPEC F11, 8.2):**
+  - Image processing with `sharp`: upright, at most 1600 px, metadata stripped, SHA-256 plus a 64-bit dHash.
+  - A2 vision reading with strict JSON, Zod validation, one retry, spend log, and recorded readings as fallback.
+  - The 8 code checks run in SPEC order. A near duplicate needs a similar photo and the same total or time: a photo hash alone flagged different receipts printed from one template.
+  - Ops review queue in the Receipts tab.
+  - Receipt payouts are separate PayPal items: the partial unique index is now per receipt for receipt items (migration `phase4_receipt_payouts`).
+  - Sandbox run: a hotel receipt was auto-approved (129 EUR) and paid; the same file again was rejected as a duplicate.
+  - Synthetic receipts: `npm run receipts:synthetic`. `npm run eval:a2`: 5/5, 0.0018 USD.
+- **Passenger questions (SPEC F13, 8.4):**
+  - A4 answers from a case file built by code, plus verified rule summaries (guidance excluded).
+  - Validators check every amount against the case file and every citation, and always offer a person for legal advice, disputes and human requests. 10 questions per passenger a day.
+  - "Talk to a person" opens one ticket; the ops Questions tab lists tickets.
+  - `npm run eval:a4`: 8/8, including injection, legal-advice and invented-sum cases, 0.0032 USD.
+- **Weather timeline (SPEC 7.5):**
+  - AG Charts Community 14.3.0: visibility, lowest RVR and ceiling per airport.
+  - Lettered flight-time markers with a key; 550 m and 200 ft lines labelled reference only.
+  - Time axis in UTC: the library otherwise used the viewer's time zone.
+  - Shown on the Evidence tab and on the new public `/about-data` page.
+- **Passenger page:** a "Why" section with the cited rules for every outcome; pre-decision wording ("You may be owed").
+- **Checks:** 193 tests; `npm run build` passes; every feature pushed and auto-deployed to Render.
+- **Not done in Phase 4:**
+  - A3 notice writer (notices are code templates)
+  - the landing page and judge mode (Phase 5)
+  - the owner's real receipt photos (`fixtures/receipts/`)

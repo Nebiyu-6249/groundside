@@ -2,7 +2,7 @@
 
 When a flight from an EU airport is cancelled or badly delayed, Groundside checks the airline's stated cause against real archived weather reports, works out what every passenger is owed under EU Regulation 261/2004, and pays them through PayPal once a duty manager approves.
 
-Built for the PayPal AI Hackathon. **Status: in development (Phase 3: ops console, payouts and hosted demo).**
+Built for the PayPal AI Hackathon. **Status: in development (Phase 4: passenger experience, receipts, refunds and questions).**
 
 - Live demo: https://groundside.onrender.com (free plan: the first request after a quiet spell can take up to a minute while it wakes)
 - Demo credentials: published here once the hosted demo is up (sandbox only)
@@ -12,14 +12,21 @@ Built for the PayPal AI Hackathon. **Status: in development (Phase 3: ops consol
 1. Gathers the evidence: the airline's ops note, the maintenance log, and real METAR/TAF weather for the departure airport, the arrival airport and the aircraft's previous flight.
 2. An AI model checks whether the stated cause is supported by that evidence. It may cite only verified rules and only weather facts that code extracted. It recommends; it never denies.
 3. A deterministic engine computes each passenger's entitlements (compensation, meals, hotel, refund), with every amount traced to a cited rule.
-4. A duty manager approves once, or signs a denial with reasons. Meals and hotel are paid either way.
+4. Meal allowances can be released before any decision. A duty manager then approves once, or signs a denial with reasons. Meals and hotel are paid either way.
 5. Each passenger chooses PayPal (with explicit consent) or bank transfer, and is paid through the PayPal Payouts API.
+6. On their personal page, passengers can:
+   - send receipts (read by a vision model, checked by code)
+   - choose a refund, which goes back to the original PayPal payment
+   - ask questions, answered only from their own case file, or ask for a person
+7. Unclaimed payouts get reminders and a switch to bank transfer that never pays twice.
 
 ## How PayPal is used
 
-- Payouts API: micro-batches with idempotent `sender_batch_id`, unclaimed handling and cancellation
-- Orders v2 and the PayPal JS SDK: demo ticket bookings
-- Payments v2: refunds to the original capture
+- **Payouts API:**
+  - micro-batches with an idempotent `sender_batch_id`, for compensation, meal allowances and receipt reimbursements
+  - unclaimed handling, including cancellation (the sandbox refuses it with HTTP 500; see `docs/PHASE0_RESULTS.md`)
+- **Orders v2 and the PayPal JS SDK:** demo ticket bookings. A paid booking can join the cancelled demo flight as a passenger.
+- **Payments v2:** Art 8 refunds to the original capture, tracked by webhook and polling
 - Webhooks with signature verification, plus polling reconciliation
 
 All PayPal calls use the **sandbox** only. No real money moves.
@@ -37,8 +44,28 @@ The AI recommends; code calculates; only a human can deny compensation. Model ID
   - the summary is short
 
   Code, not the model, maps the result to the shown recommendation. A failed check gets one retry; a second failure shows "uncertain, a human decides". When live AI is unavailable or the daily budget (`AI_DAILY_BUDGET_USD`) is reached, a recorded result is shown with a visible label. Every call is logged with its token count and estimated cost.
-- **Evals:** `npm run eval` runs 12 cases (`data/evals/a1-cases.json`) against the live model and writes `docs/EVAL_REPORT.md`.
+- **A2 receipt reading** (`src/lib/ai/a2/`, prompt `prompts/A2.v1.md`): reads a receipt photo into fields with per-field confidence. The photo is resized and stripped of metadata with `sharp` before the AI sees it. Code checks decide, in order:
+  1. duplicates across all passengers: same file, or a similar photo with the same amount or time
+  2. a repeat claim with the same merchant, total and time
+  3. the disruption time window
+  4. whether the line items add up to the total
+  5. excluded categories and the currency
+  6. the remaining allowance
+  7. low confidence on any field the decision needs
+
+  Anything doubtful goes to a person in the ops Receipts tab.
+- **A4 passenger questions** (`src/lib/ai/a4/`, prompt `prompts/A4.v1.md`): answers only from the passenger's case file, built by code. Code checks that every amount in the answer appears in the case file and that every citation is a verified rule. It always offers a person for legal advice, disputes and requests for a human. "Talk to a person" opens a ticket in the ops Questions tab.
+- **Evals:**
+  - `npm run eval`: A1, 12 cases, report in `docs/EVAL_REPORT.md`
+  - `npm run eval:a2`: receipts, report in `docs/EVAL_A2.md`
+  - `npm run eval:a4`: questions, report in `docs/EVAL_A4.md`
+
+  All use the live model.
 - Weather: Iowa Environmental Mesonet archive (public domain). Archived forecasts (TAF) were not available for the scenario dates, so the demo uses observations only; see `data/weather/SOURCES.md`.
+
+## About the data
+
+`/about-data` lists what is synthetic and what is real, and shows the real weather timelines (AG Charts) for both scenarios.
 
 ## Data labels
 

@@ -17,12 +17,13 @@ export function ActionButton({ action, label, pendingLabel, tone = "neutral" }: 
   );
 }
 
-export function ApproveForm({ action, aiDiffers, openChecks }: { action: (prev: ActionState, form: FormData) => Promise<ActionState>; aiDiffers: boolean; openChecks: string[] }) {
+export function ApproveForm({ action, aiDiffers, openChecks, totals }: { action: (prev: ActionState, form: FormData) => Promise<ActionState>; aiDiffers: boolean; openChecks: string[]; totals: { passengers: number; compensation: string; care: string } }) {
   const [state, run, pending] = useActionState(action, { error: null });
   return (
     <form action={run} className="space-y-3 rounded border border-line p-4">
       <h3 className="font-medium">Approve compensation</h3>
       <p className="text-sm text-muted">Pays compensation, meals and care as computed. Passengers receive their offer in the outbox.</p>
+      <p className="text-sm">Compensation for {totals.passengers} passengers, <span className="font-mono tabular">{totals.compensation}</span>; care (meals, and hotel and transport up to their caps) <span className="font-mono tabular">{totals.care}</span>.</p>
       {aiDiffers ? (
         <div>
           <label htmlFor="differsReason" className="block text-sm">The AI did not recommend paying. Why are you approving?</label>
@@ -35,6 +36,10 @@ export function ApproveForm({ action, aiDiffers, openChecks }: { action: (prev: 
           <span>I have reviewed the open readiness checks ({openChecks.join(", ")}) and approve anyway. This is logged.</span>
         </label>
       ) : null}
+      <div>
+        <label htmlFor="confirmApprove" className="block text-sm">Type APPROVE to confirm</label>
+        <input id="confirmApprove" name="confirm" required autoComplete="off" pattern="APPROVE" className="mt-1 w-40 rounded border border-line bg-background px-2 py-1 font-mono text-sm" />
+      </div>
       {state.error ? <p role="alert" className="text-sm text-red">{state.error}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{state.ok}</p> : null}
       <button type="submit" disabled={pending} className="rounded bg-amber px-3 py-1.5 text-sm font-medium text-ink disabled:opacity-60">{pending ? "Approving" : "Approve compensation"}</button>

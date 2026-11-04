@@ -4,7 +4,16 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 3 is done and deployed; Gate 3 approved 2026-11-04. Phase 4 is in progress.** The Quick run works on https://groundside.onrender.com.
+- **Phase 4 is built (2026-11-05); Gate 4 waits on the user's recorded walkthrough** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
+  - **Phase 4 features:**
+    - release care before the decision
+    - readiness panel with typed APPROVE
+    - refunds on PayPal demo bookings
+    - unclaimed handling
+    - receipts (A2 plus code checks plus review queue)
+    - passenger questions (A4 plus tickets)
+    - AG Charts weather timeline, and `/about-data`
+  - See `docs/PROGRESS.md` (2026-11-05).
   - Phases 0 to 2 are done (Gates 0, 1 and 2 approved 2026-11-04). A1 is on prompt `A1.v3`: 12/12 evals.
   - **Ops console** (`src/app/(ops)/ops/`):
     - login at `/login`
