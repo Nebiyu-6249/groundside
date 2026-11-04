@@ -194,3 +194,9 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - PayPal delivered 19 webhooks to the Render URL. All 19 were verified with the ID found by URL, and none were rejected.
   - The hosted demo was then reset with `npm run reset-demo:hosted`.
 - Gate 3 still needs the Quick run through the hosted UI. It needs a sign-in, which the user does.
+
+### 2026-11-04: Gate 3 reached
+
+- The user signed in on https://groundside.onrender.com and ran the Quick run through the hosted UI (assess, approve, simulate responses, payouts). The user reported "Done, it works".
+- Wrote the Devpost draft text in `docs/DEVPOST_DRAFT.md`, with measured values only. The user submits the form.
+- Waiting for Gate 3 approval.
