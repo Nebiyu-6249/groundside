@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { CheckCircle2, CircleAlert } from "lucide-react";
 import { Chip, EntitlementStatus, PayoutStatus, RecommendationChip } from "@/components/status";
 import { requireUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
+import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
 import { approve, assess, deny, openAsPassenger, releaseCareNow, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh } from "./client";
@@ -24,7 +26,7 @@ const TABS = [
 ] as const;
 type Tab = (typeof TABS)[number][0];
 
-function Header({ d }: { d: DisruptionDetail }) {
+function Header({ d, readiness }: { d: DisruptionDetail; readiness: ReadinessCheck[] }) {
   const missingEmail = d.passengers.filter((p) => !p.email).length;
   const unregistered = d.passengers.filter((p) => p.receiverKind === "UNREGISTERED").length;
   const needsCheck = d.passengers.filter((p) => p.entitlements.some((e) => e.status === "NEEDS_HUMAN_CHECK")).length;
@@ -42,7 +44,18 @@ function Header({ d }: { d: DisruptionDetail }) {
       <p className="mt-1 text-sm text-muted">
         Scheduled {localTime(d.flight.schedDep, d.flight.origin.tz)} from {d.flight.origin.city}, arriving {localTime(d.flight.schedArr, d.flight.destination.tz)} in {d.flight.destination.city}. Aircraft {d.flight.aircraft ?? "unknown"}{d.flight.previous ? `, previous flight ${d.flight.previous.number} ${d.flight.previous.origin} to ${d.flight.previous.destination}` : ""}.
       </p>
-      <section aria-label="Readiness" className="mt-3 flex flex-wrap gap-2 text-xs">
+      <section aria-labelledby="readiness-title" className="mt-4 rounded border border-line p-3">
+        <h2 id="readiness-title" className="text-sm font-medium">Readiness {readiness.every((c) => c.ok) ? <span className="text-green">(all clear)</span> : <span className="text-amber">({readiness.filter((c) => !c.ok).length} to review)</span>}</h2>
+        <ul className="mt-2 grid gap-x-6 gap-y-1 text-sm md:grid-cols-2">
+          {readiness.map((c) => (
+            <li key={c.id} className="flex items-start gap-2">
+              {c.ok ? <CheckCircle2 aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-green" /> : <CircleAlert aria-hidden className="mt-0.5 h-4 w-4 shrink-0 text-amber" />}
+              <span><span className="font-medium">{c.label}</span><span className="sr-only">{c.ok ? ": ok" : ": needs review"}</span>: <span className="text-muted">{c.detail}</span></span>
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section aria-label="Passenger counts" className="mt-3 flex flex-wrap gap-2 text-xs">
         <Chip>{d.passengers.length} passengers</Chip>
         <Chip tone={missingEmail ? "attention" : "neutral"}>{missingEmail} without email</Chip>
         <Chip tone={unregistered ? "attention" : "neutral"}>{unregistered} with no PayPal account yet</Chip>
@@ -121,7 +134,7 @@ function Evidence({ d }: { d: DisruptionDetail }) {
   );
 }
 
-async function Assessment({ d }: { d: DisruptionDetail }) {
+async function Assessment({ d, readiness }: { d: DisruptionDetail; readiness: ReadinessCheck[] }) {
   const user = await requireUser();
   const a = d.assessment;
   const o = a?.output;
@@ -193,7 +206,7 @@ async function Assessment({ d }: { d: DisruptionDetail }) {
           <p className="mt-2 text-sm text-muted">Only a duty manager can decide.</p>
         ) : (
           <div className="mt-2 grid gap-4 lg:grid-cols-2">
-            <ApproveForm action={approve.bind(null, d.id)} aiDiffers={!!a && a.shown !== "PAY_COMPENSATION"} />
+            <ApproveForm action={approve.bind(null, d.id)} aiDiffers={!!a && a.shown !== "PAY_COMPENSATION"} openChecks={readiness.filter((c) => !c.ok).map((c) => c.label)} />
             <DenyForm action={deny.bind(null, d.id)} userName={user.name} citable={d.citable} />
           </div>
         )}
@@ -257,13 +270,15 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
   const { id } = await params;
   const sp = await searchParams;
   const tab = (TABS.some(([t]) => t === sp.tab) ? sp.tab : "overview") as Tab;
-  const d = await disruptionDetail(getDb(), id);
+  const db = getDb();
+  const d = await disruptionDetail(db, id);
   if (!d) notFound();
+  const readiness = await loadReadiness(db, id);
   const inFlight = d.batches.some((b) => !["SUCCESS", "DENIED", "CANCELED", "FAILED_TO_CREATE"].includes(b.status) || b.items.some((i) => ["CREATING", "PENDING", "ONHOLD", "UNCLAIMED"].includes(i.status)));
   const pending = d.passengers.filter((p) => p.paymentChoice === "NONE").length;
   return (
     <>
-      <Header d={d} />
+      <Header d={d} readiness={readiness} />
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-line">
         <nav aria-label="Disruption sections" className="flex gap-1">
           {TABS.map(([t, label]) => (
@@ -278,7 +293,7 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
       <div className="mt-6">
         {tab === "overview" ? <Overview d={d} /> : null}
         {tab === "evidence" ? <Evidence d={d} /> : null}
-        {tab === "assessment" ? <Assessment d={d} /> : null}
+        {tab === "assessment" ? <Assessment d={d} readiness={readiness} /> : null}
         {tab === "passengers" ? <PassengersGrid rows={d.passengers} rules={d.rules} openAsPassenger={openAsPassenger} /> : null}
         {tab === "payouts" ? <Payouts d={d} /> : null}
         {tab === "audit" ? <Audit d={d} /> : null}
