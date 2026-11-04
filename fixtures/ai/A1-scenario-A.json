@@ -1,18 +1,18 @@
 {
   "key": "scenario-A",
-  "recordedAt": "2026-11-03T22:47:55.915Z",
+  "recordedAt": "2026-11-04T05:52:03.920Z",
   "model": "gpt-6-luna",
-  "promptVersion": "A1.v2",
-  "inputHash": "64dbe14b73fcdeb24d945d72d5d1a50e198e67c749caad2a3c7af52bb1051ab2",
+  "promptVersion": "A1.v3",
+  "inputHash": "ab777aeeeb90c604368f3768c1fcd706205fbd0924342cf9223e7fa1b4b3b9e5",
   "output": {
     "statedCause": {
       "category": "WEATHER",
-      "location": "DEPARTURE",
+      "location": "UNKNOWN",
       "quote": "Reason: adverse weather."
     },
     "findings": [
       {
-        "statement": "Weather observations across EDDF's departure window do not support adverse weather as the cancellation cause.",
+        "statement": "The EDDF departure-window observations show no reported ceiling, visibility of at least 10 km, and no listed significant weather. This contradicts the stated adverse-weather cause at the departure airport.",
         "effect": "CONTRADICTS_STATED_CAUSE",
         "factIds": [
           "WX-EDDF-DEPARTURE-COUNT",
@@ -23,36 +23,46 @@
         "evidenceQuotes": []
       },
       {
-        "statement": "The maintenance log documents a hydraulic pressure caution and an EDP 2 failure found on the ground, with an estimated aircraft-on-ground period. This supports a technical cause for the cancellation rather than the stated weather cause.",
+        "statement": "The maintenance log records a hydraulic-system caution reported on arrival from Madrid and a failed EDP 2 ground check, with an estimated aircraft-on-ground period. This supports a technical cause rather than adverse weather.",
         "effect": "CONTRADICTS_STATED_CAUSE",
         "factIds": [],
         "evidenceQuotes": [
           "On arrival ex MAD, crew report HYD SYS 2 LO PRESS caution.",
           "Engineering: EDP 2 failed on ground check, part ex MAD hub on DEMO 413, est. AOG 14h."
         ]
+      },
+      {
+        "statement": "The maintenance log reports no external damage, bird strike, or foreign object damage; it does not identify an external event causing the technical failure.",
+        "effect": "NEUTRAL",
+        "factIds": [],
+        "evidenceQuotes": [
+          "No external damage found. No bird strike, no FOD."
+        ]
       }
     ],
     "likelyCause": {
       "category": "TECHNICAL",
-      "location": "DEPARTURE",
+      "location": "PREVIOUS_FLIGHT",
       "confidence": "HIGH"
     },
     "claimSupport": "NOT_SUPPORTED",
     "extraordinaryAssessment": "LIKELY_NOT_EXTRAORDINARY",
-    "knockOnFromPreviousFlight": false,
-    "reasonableMeasuresNote": "The carrier would need to document the technical failure's cause and show that it could not be avoided despite reasonable measures. It should also provide evidence about reserve time, aircraft and crew alternatives, and efforts to obtain the required part or repair.",
+    "knockOnFromPreviousFlight": true,
+    "reasonableMeasuresNote": "The carrier would need to show the technical failure stemmed from an event outside its normal activity and control, and document reasonable steps to limit the cancellation's impact, including reserve time and whether alternative aircraft or crew were available.",
     "modelRecommendation": "PAY_COMPENSATION",
     "citations": [
       "REG-5-3",
       "REG-REC-14",
       "CJEU-C-549-07",
-      "CJEU-C-294-10"
+      "CJEU-C-257-14",
+      "CJEU-C-294-10",
+      "CJEU-C-74-19"
     ],
     "questionsForDutyManager": [
-      "Can maintenance records establish the cause of the EDP 2 failure and whether it stemmed from an event outside the carrier's normal activity and control?",
-      "What reserve time, spare aircraft or crew, and repair or parts alternatives were considered?",
-      "Does the carrier have evidence supporting adverse weather at EDDF that is not reflected in the supplied observations?"
+      "Can maintenance and engineering records establish the cause and history of the EDP 2 failure, including whether it arose from an event outside the carrier's normal activity and control?",
+      "What reserve time, alternative aircraft, or crew were considered, and why were they insufficient to avoid the cancellation?",
+      "Do operational records or other weather evidence show conditions at EDDF or elsewhere that affected this flight despite the available observations? Confirm the applicable runway, aircraft, and crew minima with an appropriate human specialist."
     ],
-    "summary": "The weather claim is not supported by EDDF observations during the departure window. The maintenance log instead identifies an EDP 2 failure and an estimated aircraft-on-ground period, making a technical cause highly likely. The evidence does not establish an extraordinary event or show that all reasonable measures were taken. A human duty manager should verify the failure's cause and the alternatives considered."
+    "summary": "Available EDDF observations do not support the stated adverse-weather reason. The maintenance log instead links a hydraulic-system caution and failed EDP 2 check on arrival from Madrid to the aircraft's extended grounding and this cancellation. The evidence supports a technical knock-on cause, but does not establish an extraordinary external event or the reasonable measures taken. A human should review maintenance and mitigation records before deciding."
   }
 }

@@ -126,3 +126,11 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 - **Recorded fixtures:** `fixtures/ai/A1-scenario-A.json` (PAY) and `A1-scenario-B.json` (NO_COMP, human decides) are recorded from live runs and load through `loadA1Fixture()`.
 - **AI spend so far:** 40 calls, 0 failed, 224,066 input and 55,319 output tokens, about 0.05 USD (estimated from token counts at the 2026-11-03 prices).
 - `npm run check`: 144 tests passing.
+
+## 2026-11-04: Gate 2 approved
+
+- **Decision:** the user chose to keep the SPEC 8.1 policy table. The expected label for `arrival-weather-well-above` is now UNCERTAIN_HUMAN_MUST_DECIDE, with a note in the case file.
+- **A1.v2 was unstable on that case:** over 6 runs it showed UNCERTAIN 4 times and PAY 2 times, because the model sometimes gave MEDIUM confidence to a NOT_STATED likely cause.
+- **Prompt A1.v3** clarifies that an unidentified likely cause has LOW confidence. The policy table is unchanged.
+- **Results on A1.v3:** 12/12 on two full runs, and UNCERTAIN on 5 of 5 runs of the borderline case. Recorded fixtures for scenarios A and B re-recorded on v3.
+- AI spend to date is about 0.10 USD.
