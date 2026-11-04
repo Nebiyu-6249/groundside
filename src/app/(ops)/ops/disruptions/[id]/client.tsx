@@ -17,7 +17,7 @@ export function ActionButton({ action, label, pendingLabel, tone = "neutral" }: 
   );
 }
 
-export function ApproveForm({ action, aiDiffers }: { action: (prev: ActionState, form: FormData) => Promise<ActionState>; aiDiffers: boolean }) {
+export function ApproveForm({ action, aiDiffers, openChecks }: { action: (prev: ActionState, form: FormData) => Promise<ActionState>; aiDiffers: boolean; openChecks: string[] }) {
   const [state, run, pending] = useActionState(action, { error: null });
   return (
     <form action={run} className="space-y-3 rounded border border-line p-4">
@@ -28,6 +28,12 @@ export function ApproveForm({ action, aiDiffers }: { action: (prev: ActionState,
           <label htmlFor="differsReason" className="block text-sm">The AI did not recommend paying. Why are you approving?</label>
           <textarea id="differsReason" name="differsReason" required minLength={10} rows={2} className="mt-1 w-full rounded border border-line bg-background px-2 py-1 text-sm" />
         </div>
+      ) : null}
+      {openChecks.length ? (
+        <label className="flex items-start gap-2 text-sm">
+          <input type="checkbox" name="acknowledge" required className="mt-1" />
+          <span>I have reviewed the open readiness checks ({openChecks.join(", ")}) and approve anyway. This is logged.</span>
+        </label>
       ) : null}
       {state.error ? <p role="alert" className="text-sm text-red">{state.error}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{state.ok}</p> : null}

@@ -9,6 +9,8 @@ import { getDb } from "@/lib/db";
 import { runAssessment } from "@/lib/ops/assessment";
 import { approveCompensation, DecisionError, passengerLink, releaseCare, signDenial } from "@/lib/ops/decisions";
 import { payDisruption } from "@/lib/payouts/orchestrator";
+import { audit } from "@/lib/ops/audit";
+import { loadReadiness } from "@/lib/ops/readiness";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { hit } from "@/lib/rate-limit";
 
@@ -36,8 +38,15 @@ export async function assess(disruptionId: string): Promise<ActionState> {
 
 export async function approve(disruptionId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
   const user = await requireUser("DUTY_MANAGER");
+  const db = getDb();
+  // SPEC F6: the Readiness panel is all green, or the duty manager acknowledges what is open.
+  const open = (await loadReadiness(db, id.parse(disruptionId))).filter((c) => !c.ok);
+  if (open.length && form.get("acknowledge") !== "on") return { error: `Acknowledge the open readiness checks first: ${open.map((c) => c.label).join(", ")}.` };
   try {
-    await approveCompensation(getDb(), user, id.parse(disruptionId), String(form.get("differsReason") ?? ""));
+    const r = await approveCompensation(db, user, disruptionId, String(form.get("differsReason") ?? ""));
+    if (r.created && open.length) {
+      await audit(db, { actorType: "USER", actorId: user.id, action: "READINESS_ACKNOWLEDGED", entityType: "Disruption", entityId: disruptionId, summary: `${user.name} approved with open readiness checks: ${open.map((c) => `${c.label} (${c.detail})`).join("; ")}` });
+    }
   } catch (err) {
     if (err instanceof DecisionError) return { error: err.message };
     throw err;
