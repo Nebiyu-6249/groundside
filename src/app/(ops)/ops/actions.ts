@@ -138,6 +138,15 @@ export async function decideReceipt(disruptionId: string, receiptId: string, _pr
   return { error: null, ok: approveIt ? `Approved ${(r.approvedCents / 100).toFixed(2)} EUR; payment follows if the passenger chose PayPal.` : "Rejected." };
 }
 
+export async function closeTicket(disruptionId: string, ticketId: string): Promise<ActionState> {
+  const user = await requireUser("DUTY_MANAGER");
+  const db = getDb();
+  const t = await db.ticket.updateMany({ where: { id: id.parse(ticketId), status: "OPEN", passenger: { disruptionId: id.parse(disruptionId) } }, data: { status: "CLOSED" } });
+  if (t.count) await audit(db, { actorType: "USER", actorId: user.id, action: "TICKET_CLOSED", entityType: "Disruption", entityId: disruptionId, summary: `${user.name} closed a passenger ticket` });
+  revalidatePath(`/ops/disruptions/${disruptionId}`);
+  return { error: null, ok: "Ticket closed." };
+}
+
 export async function retryRefund(disruptionId: string, passengerId: string): Promise<ActionState> {
   await requireUser("DUTY_MANAGER");
   const db = getDb();
