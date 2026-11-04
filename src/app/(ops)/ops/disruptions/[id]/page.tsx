@@ -13,6 +13,7 @@ import { payoutSettings } from "@/lib/payouts/orchestrator";
 import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
 import { PassengersGrid } from "./passengers-grid";
+import { WeatherChart } from "@/components/weather-chart";
 
 export const metadata: Metadata = { title: "Disruption - Groundside" };
 
@@ -113,6 +114,14 @@ function Evidence({ d }: { d: DisruptionDetail }) {
             </li>
           ))}
         </ul>
+      </section>
+      <section>
+        <h2 className="font-medium">Weather timeline</h2>
+        <div className="mt-2 grid gap-4 xl:grid-cols-2">
+          {d.timelines.map((t) => (
+            <WeatherChart key={t.icao} timeline={t} title={`${t.icao}: ${t.roles.map((r) => ({ DEPARTURE: "departure", ARRIVAL: "arrival", PREV_DEPARTURE: "previous flight departure", PREV_ARRIVAL: "previous flight arrival" })[r] ?? r).join(", ")}`} />
+          ))}
+        </div>
       </section>
       <section>
         <h2 className="font-medium">Facts (computed by code; the AI may cite only these IDs)</h2>

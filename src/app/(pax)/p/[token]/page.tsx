@@ -89,6 +89,16 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
             <ul className="mt-2 space-y-1 text-sm">{v.decision!.citations.map((c) => <li key={c.id}><span className="font-mono">{c.id}</span>: {c.summary}</li>)}</ul>
             <p className="mt-2 text-sm">You can contest this with the airline or with the national enforcement body in the country of departure.</p>
           </details>
+        ) : comp ? (
+          <details className="mt-2 rounded border border-line p-3">
+            <summary className="cursor-pointer">Why</summary>
+            <ul className="mt-2 space-y-1 text-sm">
+              {[...new Map(comp.trace.filter((s) => s.kind !== "POLICY").map((s) => [s.ruleId, s])).values()].map((s) => (
+                <li key={s.ruleId}><span className="font-mono">{s.ruleId}</span>: {s.title}</li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-muted">{v.decision ? "The duty manager approved compensation for this flight." : "The airline is checking what caused the disruption. Compensation is not owed if it was caused by extraordinary circumstances that could not have been avoided (REG-5-3)."}</p>
+          </details>
         ) : null}
       </section>
 
