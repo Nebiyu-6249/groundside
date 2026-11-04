@@ -4,7 +4,7 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 3 is done and deployed; Gate 3 was reached 2026-11-04 and is awaiting the user's approval.** The Quick run works on https://groundside.onrender.com.
+- **Phase 3 is done and deployed; Gate 3 approved 2026-11-04. Phase 4 is in progress.** The Quick run works on https://groundside.onrender.com.
   - Phases 0 to 2 are done (Gates 0, 1 and 2 approved 2026-11-04). A1 is on prompt `A1.v3`: 12/12 evals.
   - **Ops console** (`src/app/(ops)/ops/`):
     - login at `/login`
