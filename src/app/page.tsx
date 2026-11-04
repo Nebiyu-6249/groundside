@@ -14,6 +14,11 @@ export default function Home() {
       </p>
       <ul className="mt-8 space-y-2">
         <li>
+          <Link className="underline" href="/about-data">
+            About the data: what is real (weather, law) and what is synthetic
+          </Link>
+        </li>
+        <li>
           <Link className="underline" href="/demo/book">
             Demo booking (PayPal sandbox)
           </Link>

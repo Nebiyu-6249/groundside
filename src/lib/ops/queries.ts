@@ -3,6 +3,7 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import type { A1Output } from "@/lib/ai/a1/schema";
 import { loadRulePack } from "@/lib/rules/pack";
+import { airportTimeline } from "@/lib/weather/timeline";
 
 export async function boardRows(db: PrismaClient) {
   const ds = await db.disruption.findMany({
@@ -146,6 +147,10 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
       };
     }),
     batches: batches.map((b) => ({ id: b.id, senderBatchId: b.senderBatchId, paypalBatchId: b.paypalBatchId, kind: b.kind, status: b.status, itemCount: b.itemCount, totalCents: b.totalCents, lastError: b.lastError, lastSyncedAt: b.lastSyncedAt?.toISOString() ?? null, createdAt: b.createdAt.toISOString(), items: b.items.map((i) => ({ id: i.id, name: i.entitlement.passenger.displayName, kind: i.receiptId ? "RECEIPT" : i.entitlement.kind, receiver: i.receiver, amountCents: i.amountCents, status: i.status, paypalItemId: i.paypalItemId, lastError: i.lastError })) })),
+    timelines: d.evidence
+      .filter((e) => e.kind === "METAR")
+      .map((e) => airportTimeline(e, { number: d.flight.flightNumber, schedDep: d.flight.schedDep, schedArr: d.flight.schedArr, actualDep: d.flight.actualDep, previous: d.flight.previousFlight ? { number: d.flight.previousFlight.flightNumber, schedDep: d.flight.previousFlight.schedDep, schedArr: d.flight.previousFlight.schedArr } : null }))
+      .filter((t): t is NonNullable<typeof t> => t !== null),
     tickets: tickets.map((t) => ({ id: t.id, reason: t.reason, status: t.status, at: t.createdAt.toISOString(), passengerId: t.passenger.id, passenger: t.passenger.displayName, email: t.passenger.displayEmail, recent: t.passenger.qaMessages.reverse() })),
     receipts: receipts.map((r) => {
       const c = r.checks as { outcome?: { reason?: string; checks?: { id: string; label: string; ok: boolean; detail: string }[] }; aiNotice?: string | null; model?: string; promptVersion?: string } | null;
