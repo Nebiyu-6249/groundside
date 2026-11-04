@@ -88,6 +88,26 @@ export async function signDenial(db: PrismaClient, user: SessionUser, disruption
   return { decision, created: true };
 }
 
+/**
+ * "Release care now" (SPEC F6): meal allowances are owed whatever the cause (Art 5(3), C-12/11
+ * McDonagh), so a duty manager can offer them before deciding on compensation. Passengers get
+ * their link and payment choice now; compensation stays pending until the decision.
+ */
+export async function releaseCare(db: PrismaClient, user: SessionUser, disruptionId: string) {
+  if (user.role !== "DUTY_MANAGER") throw new DecisionError("Only a duty manager can release care.");
+  const d = await db.disruption.findUniqueOrThrow({ where: { id: disruptionId }, select: { careReleasedAt: true, decisions: { select: { id: true } } } });
+  if (d.careReleasedAt) return { released: false, offers: 0 };
+  if (d.decisions.length) throw new DecisionError("Care was already offered with the decision.");
+  const meals = await db.entitlement.count({ where: { kind: "MEAL_ALLOWANCE", amountCents: { gt: 0 }, passenger: { disruptionId } } });
+  if (meals === 0) throw new DecisionError("No passenger on this flight is owed a meal allowance.");
+  const claimed = await db.disruption.updateMany({ where: { id: disruptionId, careReleasedAt: null }, data: { careReleasedAt: new Date() } });
+  if (claimed.count === 0) return { released: false, offers: 0 };
+  await audit(db, { actorType: "USER", actorId: user.id, action: "CARE_RELEASED", entityType: "Disruption", entityId: disruptionId, summary: `${user.name} released meal allowances before the compensation decision` });
+  const offers = await createOffers(db, disruptionId);
+  await audit(db, { actorType: "SYSTEM", action: "OFFERS_CREATED", entityType: "Disruption", entityId: disruptionId, summary: `${offers.created} passenger offers (meal allowances; compensation pending the decision) sent to the simulated outbox` });
+  return { released: true, offers: offers.created };
+}
+
 async function afterDecision(db: PrismaClient, user: SessionUser, disruptionId: string, status: "APPROVED" | "DENIAL_SIGNED", summary: string, decisionId: string) {
   await db.disruption.update({ where: { id: disruptionId }, data: { status } });
   await audit(db, { actorType: "USER", actorId: user.id, action: status === "APPROVED" ? "DECISION_APPROVE" : "DECISION_DENY", entityType: "Disruption", entityId: disruptionId, summary, data: { decisionId } });
@@ -101,6 +121,27 @@ async function afterDecision(db: PrismaClient, user: SessionUser, disruptionId: 
  * SHA-256 is stored on the offer. The link itself lives only in the simulated email (outbox).
  */
 export async function createOffers(db: PrismaClient, disruptionId: string) {
+  // Passengers who already have an offer (care released before the decision): what the decision
+  // made payable joins their existing choice, and they get an update without a new link.
+  const offered = await db.passenger.findMany({
+    where: { disruptionId, offers: { some: {} } },
+    include: { offers: { orderBy: { createdAt: "desc" }, take: 1 }, entitlements: { where: { status: "READY", kind: { not: "REFUND" } } }, disruption: { include: { flight: true, decisions: true } } },
+  });
+  for (const p of offered) {
+    if (p.entitlements.length === 0) continue;
+    const choice = p.offers[0].paymentChoice;
+    await db.entitlement.updateMany({ where: { id: { in: p.entitlements.map((e) => e.id) } }, data: { status: choice === "NONE" ? "OFFERED" : "ACCEPTED" } });
+    const decision = p.disruption.decisions[0];
+    const header = p.displayEmail ? `To: ${p.displayEmail} (simulated email, not sent)` : "Not delivered: no email address on file.";
+    await db.outboxMessage.create({
+      data: {
+        passengerId: p.id,
+        kind: "NOTICE",
+        renderedText: `${header}\n\nDear ${p.displayName},\n\nUpdate on flight ${p.disruption.flight.flightNumber}: ${decision?.kind === "DENY_COMPENSATION" ? "the airline has decided that no compensation is owed. Your meal allowance and other care are not affected" : "compensation has been approved"}. Open your personal page with the link in our first email for the details${choice === "NONE" ? " and to choose how to be paid" : ""}.\n\nDemo Air (fictional carrier). Demo data.`,
+      },
+    });
+  }
+
   const passengers = await db.passenger.findMany({
     where: { disruptionId, offers: { none: {} } },
     include: { entitlements: true, disruption: { include: { flight: true } } },
@@ -131,7 +172,11 @@ export async function createOffers(db: PrismaClient, disruptionId: string) {
 
 /** The passenger link from the latest simulated email, for "Open as passenger". */
 export async function passengerLink(db: PrismaClient, passengerId: string): Promise<string | null> {
-  const msg = await db.outboxMessage.findFirst({ where: { passengerId, kind: "NOTICE" }, orderBy: { createdAt: "desc" } });
-  const m = msg?.renderedText.match(/https?:\/\/\S+\/p\/[A-Za-z0-9_-]+/);
-  return m ? m[0] : null;
+  // Update notices carry no link, so look through all notices, newest first.
+  const msgs = await db.outboxMessage.findMany({ where: { passengerId, kind: "NOTICE" }, orderBy: { createdAt: "desc" }, select: { renderedText: true } });
+  for (const msg of msgs) {
+    const m = msg.renderedText.match(/https?:\/\/\S+\/p\/[A-Za-z0-9_-]+/);
+    if (m) return m[0];
+  }
+  return null;
 }

@@ -31,6 +31,7 @@ export async function offerByToken(db: PrismaClient, token: string) {
     offer: { paymentChoice: offer.paymentChoice, paypalEmail: offer.paypalEmail, consentAt: offer.consentAt?.toISOString() ?? null, ibanLast4: offer.ibanLast4 },
     flight: { number: f.flightNumber, origin: f.originAirport.city, originIata: f.originAirport.iata, destination: f.destinationAirport.city, destinationIata: f.destinationAirport.iata, schedDep: f.schedDep.toISOString(), tz: f.originAirport.tz },
     type: p.disruption.type,
+    careReleased: p.disruption.careReleasedAt !== null,
     decision: decision ? { kind: decision.kind, reason: decision.reason, citations: decision.citations.map((id) => ({ id, title: rules.get(id)?.title ?? id, summary: rules.get(id)?.summary ?? "" })) } : null,
     entitlements: p.entitlements.map((e) => ({
       kind: e.kind,

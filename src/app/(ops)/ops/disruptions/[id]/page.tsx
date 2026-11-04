@@ -8,7 +8,7 @@ import { getDb } from "@/lib/db";
 import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
-import { approve, assess, deny, openAsPassenger, simulateResponses, syncWithPaypal } from "../../actions";
+import { approve, assess, deny, openAsPassenger, releaseCareNow, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 
@@ -166,6 +166,20 @@ async function Assessment({ d }: { d: DisruptionDetail }) {
         <p className="text-muted">Not assessed yet. The AI reads the ops note, the maintenance log and the weather facts, and says whether the stated cause is supported.</p>
       ) : null}
 
+      {!d.decision ? (
+        <section aria-label="Care" className="rounded border border-line p-4">
+          <h2 className="font-medium">Meal allowances</h2>
+          {d.careReleasedAt ? (
+            <p className="mt-1 text-sm">Released {utcTime(d.careReleasedAt)}. Passengers can choose how to be paid; compensation waits for the decision below.</p>
+          ) : (
+            <>
+              <p className="mt-1 text-sm">Care is owed whatever caused the disruption, so meal allowances can be paid now, before the compensation decision.</p>
+              {user.role === "DUTY_MANAGER" ? <div className="mt-3"><ActionButton action={releaseCareNow.bind(null, d.id)} label="Release meal allowances now" pendingLabel="Releasing" /></div> : null}
+            </>
+          )}
+        </section>
+      ) : null}
+
       <section aria-label="Decision">
         <h2 className="font-medium">Decision</h2>
         {d.decision ? (
@@ -196,7 +210,7 @@ function Payouts({ d }: { d: DisruptionDetail }) {
         <ActionButton action={syncWithPaypal.bind(null, d.id)} label="Sync with PayPal" pendingLabel="Syncing" />
         <span className="text-xs text-muted">Micro-batches of {settings.batchSize}, priority passengers first. Daily payout cap {euros(settings.dailyCapCents)} (sandbox).</span>
       </div>
-      {d.batches.length === 0 ? <p className="text-muted">No payouts yet. They start when passengers choose PayPal after a decision.</p> : null}
+      {d.batches.length === 0 ? <p className="text-muted">No payouts yet. They start when passengers choose PayPal, after care is released or a decision is made.</p> : null}
       {d.batches.map((b) => (
         <section key={b.id} className="rounded border border-line p-3">
           <div className="flex flex-wrap items-center gap-3 text-sm">
@@ -258,7 +272,7 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
         </nav>
         <div className="flex items-center gap-3 pb-1">
           <LiveRefresh disruptionId={d.id} active={inFlight} />
-          {d.decision && pending > 0 ? <ActionButton action={simulateResponses.bind(null, d.id)} label={`Simulate passenger responses (${pending})`} pendingLabel="Simulating" /> : null}
+          {(d.decision || d.careReleasedAt) && pending > 0 ? <ActionButton action={simulateResponses.bind(null, d.id)} label={`Simulate passenger responses (${pending})`} pendingLabel="Simulating" /> : null}
         </div>
       </div>
       <div className="mt-6">

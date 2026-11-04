@@ -7,7 +7,7 @@ import { z } from "zod";
 import { clearSession, requireUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { runAssessment } from "@/lib/ops/assessment";
-import { approveCompensation, DecisionError, passengerLink, signDenial } from "@/lib/ops/decisions";
+import { approveCompensation, DecisionError, passengerLink, releaseCare, signDenial } from "@/lib/ops/decisions";
 import { payDisruption } from "@/lib/payouts/orchestrator";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { hit } from "@/lib/rate-limit";
@@ -60,6 +60,19 @@ export async function deny(disruptionId: string, _prev: ActionState, form: FormD
   }
   revalidatePath(`/ops/disruptions/${disruptionId}`);
   return { error: null, ok: "Denial signed. Care is still provided." };
+}
+
+export async function releaseCareNow(disruptionId: string): Promise<ActionState> {
+  const user = await requireUser("DUTY_MANAGER");
+  let r;
+  try {
+    r = await releaseCare(getDb(), user, id.parse(disruptionId));
+  } catch (err) {
+    if (err instanceof DecisionError) return { error: err.message };
+    throw err;
+  }
+  revalidatePath(`/ops/disruptions/${disruptionId}`);
+  return { error: null, ok: r.released ? `Meal allowances released. ${r.offers} passenger offers are in the outbox.` : "Meal allowances were already released." };
 }
 
 export async function syncWithPaypal(disruptionId: string): Promise<ActionState> {

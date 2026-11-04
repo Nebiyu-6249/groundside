@@ -84,6 +84,7 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
     id: d.id,
     scenarioKey: d.scenarioKey,
     status: d.status,
+    careReleasedAt: d.careReleasedAt?.toISOString() ?? null,
     type: d.type,
     informedAt: d.informedAt?.toISOString() ?? null,
     opsNote: d.opsNote,

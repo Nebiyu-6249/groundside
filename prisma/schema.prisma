@@ -267,6 +267,8 @@ model Disruption {
   informedAt     DateTime?
   opsNote        String
   maintenanceLog String?
+  // Set when a duty manager releases meal allowances before the compensation decision (SPEC F6).
+  careReleasedAt DateTime?
   status         DisruptionStatus @default(DRAFT)
   isDemoData     Boolean          @default(true)
   evidence       Evidence[]
