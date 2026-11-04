@@ -5,6 +5,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import { computePassenger, reconcile, type Airport, type BookingSegment, type DisruptionInput, type EntitlementResult, type PassengerInput, type PassengerResult } from "@/lib/engine";
 import { loadPolicy } from "@/lib/demo/seed";
 import { loadRulePack, statusMap } from "@/lib/rules/pack";
+import { NO_MONEY } from "@/lib/payouts/transitions";
 import { audit } from "./audit";
 
 type Db = PrismaClient;
@@ -94,19 +95,39 @@ const row = (passengerId: string, e: EntitlementResult) => ({
 });
 
 /**
+ * Offer progress (OFFERED, ACCEPTED) is not something the engine computes: when the engine still
+ * says the entitlement is owed (READY or OFFERED), the stored progress stands. Refunds are the
+ * exception: their status follows the passenger's choice, which the engine reads.
+ */
+function effectiveStoredStatus(kind: string, stored: string, computed: string): string {
+  if (kind === "REFUND") return stored;
+  const progress = stored === "OFFERED" || stored === "ACCEPTED";
+  return progress && (computed === "READY" || computed === "OFFERED") ? computed : stored;
+}
+
+/**
  * Re-runs the engine and merges the result (SPEC 5.8): unpaid entitlements are updated, paid or
  * in-flight ones are never touched, and differences on those are audited as conflicts.
- * Offer progress (OFFERED, ACCEPTED) is kept when only the amount is refreshed.
+ * Pass `passengerIds` to recompute only some passengers (for example after one passenger's choice).
  */
-export async function recomputeEntitlements(db: Db, disruptionId: string): Promise<{ created: number; updated: number; conflicts: number }> {
-  const computed = await computeDisruption(db, disruptionId);
+export async function recomputeEntitlements(db: Db, disruptionId: string, passengerIds?: string[]): Promise<{ created: number; updated: number; conflicts: number }> {
+  const computed = (await computeDisruption(db, disruptionId)).filter((c) => !passengerIds || passengerIds.includes(c.passengerId));
   let created = 0;
   let updated = 0;
   let conflicts = 0;
   for (const { passengerId, result } of computed) {
     const stored = await db.entitlement.findMany({ where: { passengerId }, include: { payoutItems: { select: { status: true } } } });
     const actions = reconcile(
-      stored.map((s) => ({ id: s.id, kind: s.kind, status: s.status, amountCents: s.amountCents, payoutInFlight: s.payoutItems.some((i) => !FINAL_NO_MONEY.has(i.status) && i.status !== "SUCCESS") })),
+      stored.map((s) => {
+        const next = result.entitlements.find((e) => e.kind === s.kind);
+        return {
+          id: s.id,
+          kind: s.kind,
+          status: next ? effectiveStoredStatus(s.kind, s.status, next.status) : s.status,
+          amountCents: s.amountCents,
+          payoutInFlight: s.payoutItems.some((i) => !NO_MONEY.has(i.status) && i.status !== "SUCCESS"),
+        };
+      }),
       result.entitlements,
     );
     for (const a of actions) {
@@ -115,9 +136,10 @@ export async function recomputeEntitlements(db: Db, disruptionId: string): Promi
         created++;
       } else if (a.action === "UPDATE") {
         const current = stored.find((s) => s.id === a.id)!;
-        // An offer in progress keeps its status unless the engine now says not owed or needs a check.
-        const keep = (current.status === "OFFERED" || current.status === "ACCEPTED") && (a.next.status === "READY" || a.next.status === "OFFERED");
-        await db.entitlement.update({ where: { id: a.id }, data: { ...row(passengerId, a.next), status: keep ? current.status : a.next.status } });
+        // Keep offer progress while the engine still says owed; otherwise take the engine's status.
+        const keepProgress = a.kind !== "REFUND" && (current.status === "OFFERED" || current.status === "ACCEPTED") && (a.next.status === "READY" || a.next.status === "OFFERED");
+        const status = keepProgress ? current.status : a.next.status;
+        await db.entitlement.update({ where: { id: a.id }, data: { ...row(passengerId, a.next), status } });
         updated++;
       } else if (a.action === "CONFLICT") {
         conflicts++;
@@ -127,6 +149,3 @@ export async function recomputeEntitlements(db: Db, disruptionId: string): Promi
   }
   return { created, updated, conflicts };
 }
-
-/** Payout item statuses where no money reached the passenger, so a new item may be created. */
-export const FINAL_NO_MONEY = new Set(["FAILED", "RETURNED", "BLOCKED", "REFUNDED", "REVERSED", "CANCELED"]);

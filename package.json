@@ -24,7 +24,8 @@
     "explain": "tsx --env-file=.env scripts/explain-passenger.ts",
     "weather:dates": "tsx scripts/find-weather-dates.ts",
     "weather:fetch": "tsx scripts/fetch-weather.ts",
-    "eval": "tsx --env-file=.env scripts/eval.ts"
+    "eval": "tsx --env-file=.env scripts/eval.ts",
+    "e2e": "tsx --env-file=.env scripts/e2e-flow.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",

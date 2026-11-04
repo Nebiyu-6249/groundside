@@ -115,7 +115,8 @@ export async function createOffers(db: PrismaClient, disruptionId: string) {
     if (owed.length === 0) continue;
     const token = randomBytes(32).toString("base64url");
     await db.offer.create({ data: { passengerId: p.id, tokenHash: sha256(token), expiresAt: new Date(Date.now() + OFFER_DAYS * 86_400_000) } });
-    await db.entitlement.updateMany({ where: { passengerId: p.id, status: "READY" }, data: { status: "OFFERED" } });
+    // Refund status follows the passenger choice (engine), so only payable entitlements move to OFFERED.
+    await db.entitlement.updateMany({ where: { passengerId: p.id, status: "READY", kind: { not: "REFUND" } }, data: { status: "OFFERED" } });
     const link = `${appBaseUrl()}/p/${token}`;
     const f = p.disruption.flight;
     const header = p.displayEmail ? `To: ${p.displayEmail} (simulated email, not sent)` : "Not delivered: no email address on file. Ops can open the page from the passenger list.";
