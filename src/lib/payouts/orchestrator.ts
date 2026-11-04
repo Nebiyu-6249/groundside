@@ -107,8 +107,10 @@ export async function resendStuckBatches(db: PrismaClient, disruptionId: string)
 }
 
 export async function payDisruption(db: PrismaClient, disruptionId: string, settings: PayoutSettings = payoutSettings()) {
-  const decision = await db.decision.findUnique({ where: { disruptionId } });
-  if (!decision) return { batches: 0, items: 0, skippedForCap: 0 };
+  // Nothing is payable before a decision, except meal allowances once care is released (SPEC F6).
+  // Compensation stays PENDING_DECISION until then, so it is never selected below.
+  const d = await db.disruption.findUniqueOrThrow({ where: { id: disruptionId }, select: { careReleasedAt: true, decisions: { select: { id: true } } } });
+  if (d.decisions.length === 0 && !d.careReleasedAt) return { batches: 0, items: 0, skippedForCap: 0 };
   let remainingCap = settings.dailyCapCents - (await paidTodayCents(db));
   let batches = 0;
   let items = 0;

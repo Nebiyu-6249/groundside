@@ -14,13 +14,14 @@ export const metadata: Metadata = { title: "Your flight - Demo Air", robots: { i
 const eurWords = (cents: number) => `${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)} euros`;
 
 function Tracker({ v }: { v: PassengerView }) {
-  const items = v.entitlements.filter((e) => e.kind === "COMPENSATION" || e.kind === "MEAL_ALLOWANCE");
+  // Only what is payable now: compensation waiting for the airline's decision is not tracked yet.
+  const items = v.entitlements.filter((e) => (e.kind === "COMPENSATION" || e.kind === "MEAL_ALLOWANCE") && e.status !== "PENDING_DECISION" && e.amountCents > 0);
   const statuses = items.map((e) => e.payoutStatus);
   const sent = statuses.some((s) => s !== null);
   const done = statuses.length > 0 && statuses.every((s) => s === "SUCCESS" || s === null) && statuses.some((s) => s === "SUCCESS");
   const unclaimed = statuses.includes("UNCLAIMED");
   const steps = [
-    { label: "Approved", done: v.decision !== null },
+    { label: v.decision ? "Approved" : "Meal allowance released", done: v.decision !== null || v.careReleased },
     { label: "Sent to PayPal", done: sent },
     { label: unclaimed ? "Waiting: create a PayPal account with this email to collect it" : "In your PayPal account", done },
   ];
@@ -87,7 +88,11 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
       <section className="mt-6 rounded border border-line bg-surface p-4">
         <h2 className="font-medium">What you get</h2>
         {comp && comp.amountCents > 0 && !denied ? (
-          <p className="mt-2 text-lg">You will receive <strong className="font-mono">{eurWords(comp.amountCents)}</strong> compensation{comp.status === "PENDING_DECISION" ? " once the airline confirms the cause" : ""}.</p>
+          comp.status === "PENDING_DECISION" ? (
+            <p className="mt-2">You may also be owed <strong className="font-mono">{eurWords(comp.amountCents)}</strong> compensation. The airline is checking what caused the disruption, and this page will show the decision.</p>
+          ) : (
+            <p className="mt-2 text-lg">You will receive <strong className="font-mono">{eurWords(comp.amountCents)}</strong> compensation.</p>
+          )
         ) : denied ? (
           <p className="mt-2">No compensation is being paid (see above). Care is still provided.</p>
         ) : (
