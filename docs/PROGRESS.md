@@ -199,4 +199,4 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 
 - The user signed in on https://groundside.onrender.com and ran the Quick run through the hosted UI (assess, approve, simulate responses, payouts). The user reported "Done, it works".
 - Wrote the Devpost draft text in `docs/DEVPOST_DRAFT.md`, with measured values only. The user submits the form.
-- Waiting for Gate 3 approval.
+- Gate 3 approved by the user, 2026-11-04. Phase 4 started.

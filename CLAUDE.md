@@ -122,7 +122,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] `npm run eval` with at least 12 cases; pass criteria in `docs/SPEC.md` section 15
 - **GATE 2:** eval report (case, expected, actual, pass/fail), cost so far.
 
-### Phase 3: Ops console, payouts, basic passenger page, deploy (Thu Nov 5). STATUS: Gate 3 reached 2026-11-04 (Quick run works on the hosted URL); awaiting approval
+### Phase 3: Ops console, payouts, basic passenger page, deploy (Thu Nov 5). STATUS: done (Gate 3 approved 2026-11-04)
 - [x] Ops login, disruption list, disruption detail (Evidence, Assessment, Passengers grid, Payouts, Audit)
 - [x] Approval and signed denial flows; audit events
 - [x] Offers and passenger token links; basic passenger page with PayPal or bank-transfer choice and consent
@@ -131,7 +131,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [ ] Devpost draft submitted for the early eligibility check (user does the form; text ready in `docs/DEVPOST_DRAFT.md`)
 - **GATE 3:** the "Quick run" scenario works end-to-end on the hosted URL.
 
-### Phase 4: Passenger experience, receipts, refunds, Q&A (Fri Nov 6 to Sun Nov 8). STATUS: not started
+### Phase 4: Passenger experience, receipts, refunds, Q&A (Fri Nov 6 to Sun Nov 8). STATUS: in progress
 - [ ] Full passenger page (English), status tracker, plain-language explanation with citations
 - [ ] Meal allowance payouts; receipt upload, A2 vision extraction, code checks, reimbursement
 - [ ] Refund path (Art 8) on demo bookings paid with PayPal
