@@ -1,6 +1,7 @@
 // Webhook signature verification through PayPal's verify endpoint (docs/SPEC.md 9.4).
 
 import { z } from "zod";
+import { appBaseUrl } from "@/lib/app-url";
 import { paypalRequest } from "./http";
 
 export const TRANSMISSION_HEADERS = [
@@ -24,12 +25,28 @@ export type VerifyResult =
   | { verified: true }
   | { verified: false; reason: string; debugId?: string | null };
 
+let resolvedId: string | null = null;
+
+/**
+ * PAYPAL_WEBHOOK_ID when set. Otherwise the ID of the sandbox webhook whose URL is this app's
+ * /api/webhooks/paypal, looked up once per process. The hosted service is created before its
+ * webhook exists, so it finds the ID this way instead of needing a second configuration step.
+ */
+export async function resolveWebhookId(env: Record<string, string | undefined> = process.env): Promise<string | undefined> {
+  if (env.PAYPAL_WEBHOOK_ID) return env.PAYPAL_WEBHOOK_ID;
+  if (resolvedId) return resolvedId;
+  const url = `${appBaseUrl(env)}/api/webhooks/paypal`;
+  const res = await paypalRequest<{ webhooks?: { id: string; url: string }[] }>({ method: "GET", path: "/v1/notifications/webhooks" });
+  resolvedId = (res.ok && res.data.webhooks?.find((w) => w.url === url)?.id) || null;
+  return resolvedId ?? undefined;
+}
+
 export async function verifyWebhookSignature(
   headers: Headers,
   event: unknown,
   webhookId: string | undefined,
 ): Promise<VerifyResult> {
-  if (!webhookId) return { verified: false, reason: "PAYPAL_WEBHOOK_ID is not set" };
+  if (!webhookId) return { verified: false, reason: "no webhook ID: PAYPAL_WEBHOOK_ID is not set and no sandbox webhook points at this app" };
 
   const values: Record<string, string> = {};
   for (const name of TRANSMISSION_HEADERS) {

@@ -3,11 +3,13 @@
 // Deploys the hosted demo without anyone typing secrets into a dashboard:
 //   1. creates a separate database (groundside_hosted) next to the local one on Neon, so local
 //      reset-demo runs never touch the hosted demo, applies the migrations and seeds it
-//   2. creates or updates the Render web service from render.yaml (needs RENDER_API_KEY in .env)
-//   3. creates the PayPal sandbox webhook for the service URL and sets PAYPAL_WEBHOOK_ID
-//   4. triggers a deploy, waits until it is live and checks /api/health
+//   2. creates the Render web service from render.yaml with the Render CLI (`render login` once),
+//      or redeploys it if it exists
+//   3. creates the PayPal sandbox webhook for the service URL (the app finds it by URL)
+//   4. waits until the deploy is live and checks /api/health
 // Values are read from .env and sent only to Neon, Render and PayPal. Nothing secret is printed.
-// Re-run it after rotating a secret in .env: it updates the service's variables and redeploys.
+// After rotating a secret in .env, re-run it with RENDER_API_KEY in .env (the CLI cannot change
+// variables on an existing service), or change the variable in the Render dashboard.
 
 import { spawnSync } from "node:child_process";
 import { randomBytes } from "node:crypto";
@@ -18,7 +20,6 @@ import { paypalRequest } from "../src/lib/paypal/http";
 import { DEFAULT_DEMO_EMAIL } from "../src/lib/auth/users";
 
 const HOSTED_DB = "groundside_hosted";
-const RENDER_API = "https://api.render.com/v1";
 const CREDENTIALS_FILE = path.join(process.cwd(), "scripts", "out", "hosted-credentials.txt");
 const REPO = "https://github.com/Nebiyu-6249/groundside";
 
@@ -102,39 +103,77 @@ async function ensureHostedDatabase(): Promise<{ pooled: string; direct: string 
   return { pooled: withDatabase(required("DATABASE_URL"), HOSTED_DB), direct: withDatabase(direct, HOSTED_DB) };
 }
 
-async function render<T>(method: string, route: string, body?: unknown): Promise<T> {
-  const res = await fetch(`${RENDER_API}${route}`, {
-    method,
-    headers: { Authorization: `Bearer ${required("RENDER_API_KEY")}`, Accept: "application/json", "Content-Type": "application/json" },
-    body: body === undefined ? undefined : JSON.stringify(body),
+/** The Render CLI (winget Render.CLI), logged in with `render login` or RENDER_API_KEY. */
+function renderExe(): string {
+  const winget = path.join(process.env.LOCALAPPDATA ?? "", "Microsoft", "WinGet", "Links", "render.exe");
+  return process.env.RENDER_CLI || (existsSync(winget) ? winget : "render");
+}
+
+/** Runs the CLI without a shell, so values in the arguments are never re-parsed or echoed. */
+function cli(args: string[], opts: { json?: boolean } = {}): unknown {
+  const r = spawnSync(renderExe(), [...args, "-o", opts.json ? "json" : "text"], {
+    encoding: "utf8",
+    env: { ...process.env, RENDER_CLI_DISABLE_ANALYTICS: "1" },
+    maxBuffer: 32 * 1024 * 1024,
   });
-  const text = await res.text();
-  if (!res.ok) throw new Error(`Render ${method} ${route.split("?")[0]} returned ${res.status}: ${text.slice(0, 300)}`);
-  return (text ? JSON.parse(text) : null) as T;
+  if (r.error) throw new Error(`Render CLI not found (${r.error.message}). Install it with: winget install Render.CLI`);
+  if (r.status !== 0) throw new Error(`render ${args.slice(0, 2).join(" ")} failed: ${(r.stderr || r.stdout || "").trim().slice(0, 400)}`);
+  return opts.json ? JSON.parse(r.stdout) : r.stdout;
 }
 
 interface RenderService { id: string; name: string; dashboardUrl?: string; serviceDetails?: { url?: string } }
 
-async function ensureService(bp: Blueprint, env: Record<string, string>): Promise<{ service: RenderService; created: boolean }> {
-  const found = await render<{ service: RenderService }[]>("GET", `/services?name=${encodeURIComponent(bp.name)}&type=web_service&limit=20`);
-  const existing = found.find((s) => s.service.name === bp.name)?.service;
-  if (existing) return { service: existing, created: false };
-  const owners = await render<{ owner: { id: string; name: string } }[]>("GET", "/owners?limit=20");
-  const ownerId = process.env.RENDER_OWNER_ID || owners[0]?.owner.id;
-  if (!ownerId) throw new Error("No Render workspace found for this API key");
-  const envVars = [
-    ...Object.entries(env).map(([key, value]) => ({ key, value })),
-    ...bp.env.filter((e) => e.generate).map((e) => ({ key: e.key, generateValue: true })),
+const unwrap = (x: unknown): RenderService => ((x as { service?: RenderService }).service ?? x) as RenderService;
+
+function findService(name: string): RenderService | undefined {
+  const list = cli(["services"], { json: true }) as unknown[];
+  return list.map(unwrap).find((s) => s.name === name);
+}
+
+function createService(bp: Blueprint, env: Record<string, string>): RenderService {
+  const args = [
+    "services", "create", "--confirm",
+    "--name", bp.name, "--type", "web_service", "--repo", REPO, "--branch", "main",
+    "--runtime", "node", "--plan", bp.plan, "--region", bp.region,
+    "--build-command", bp.buildCommand, "--start-command", bp.startCommand, "--health-check-path", bp.healthCheckPath,
   ];
-  const body = {
-    type: "web_service", name: bp.name, ownerId, repo: REPO, branch: "main", autoDeployTrigger: "commit", envVars,
-    serviceDetails: {
-      runtime: "node", plan: bp.plan, region: bp.region, healthCheckPath: bp.healthCheckPath,
-      envSpecificDetails: { buildCommand: bp.buildCommand, startCommand: bp.startCommand },
-    },
-  };
-  const res = await render<{ service: RenderService }>("POST", "/services", body);
-  return { service: res.service, created: true };
+  for (const [key, value] of Object.entries(env)) args.push("--env-var", `${key}=${value}`);
+  return unwrap(cli(args, { json: true }));
+}
+
+/** Render's CLI cannot change variables on an existing service; its REST API can, with RENDER_API_KEY. */
+async function updateEnvVars(serviceId: string, env: Record<string, string>) {
+  const key = process.env.RENDER_API_KEY;
+  if (!key) {
+    console.log("Existing service: variables left as they are (the CLI cannot update them; add RENDER_API_KEY to .env to sync them)");
+    return;
+  }
+  for (const [name, value] of Object.entries(env)) {
+    const res = await fetch(`https://api.render.com/v1/services/${serviceId}/env-vars/${name}`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${key}`, Accept: "application/json", "Content-Type": "application/json" },
+      body: JSON.stringify({ value }),
+    });
+    if (!res.ok) throw new Error(`Render env var ${name} update returned ${res.status}`);
+  }
+  console.log(`Updated ${Object.keys(env).length} variables: ${Object.keys(env).join(", ")}`);
+}
+
+interface Deploy { id: string; status: string }
+
+/** Waits for the newest deploy (a new service starts its first one by itself). */
+async function waitForLatestDeploy(serviceId: string): Promise<string> {
+  const FINAL = new Set(["live", "build_failed", "update_failed", "canceled", "deactivated", "pre_deploy_failed"]);
+  let last = "";
+  for (let i = 0; i < 120; i++) {
+    const list = (cli(["deploys", "list", serviceId], { json: true }) as unknown[]).map((x) => ((x as { deploy?: Deploy }).deploy ?? x) as Deploy);
+    const d = list[0];
+    if (d && d.status !== last) console.log(`Deploy ${d.id}: ${d.status}`);
+    last = d?.status ?? last;
+    if (d && FINAL.has(d.status)) return d.status;
+    await new Promise((r) => setTimeout(r, 15_000));
+  }
+  return last;
 }
 
 interface Webhook { id: string; url: string }
@@ -147,19 +186,6 @@ async function ensureWebhook(url: string): Promise<string> {
   const created = await paypalRequest<Webhook>({ method: "POST", path: "/v1/notifications/webhooks", body: { url, event_types: [{ name: "*" }] } });
   if (!created.ok) throw new Error(`PayPal create webhook returned ${created.status} (debug id ${created.debugId})`);
   return created.data.id;
-}
-
-async function waitForDeploy(serviceId: string, deployId: string) {
-  const FINAL = new Set(["live", "build_failed", "update_failed", "canceled", "deactivated", "pre_deploy_failed"]);
-  let last = "";
-  for (let i = 0; i < 120; i++) {
-    const d = await render<{ status: string }>("GET", `/services/${serviceId}/deploys/${deployId}`);
-    if (d.status !== last) console.log(`Deploy ${deployId}: ${d.status}`);
-    last = d.status;
-    if (FINAL.has(d.status)) return d.status;
-    await new Promise((r) => setTimeout(r, 15_000));
-  }
-  return last;
 }
 
 async function main() {
@@ -177,42 +203,42 @@ async function main() {
   if (dbOnly) return;
 
   // Values for the service: fixed ones from render.yaml, the rest from .env with hosted overrides.
+  // APP_BASE_URL and PAYPAL_WEBHOOK_ID are left out: the app uses Render's RENDER_EXTERNAL_URL and
+  // finds its webhook by that URL (src/lib/app-url.ts, src/lib/paypal/webhooks.ts).
+  const SKIP = new Set(["APP_BASE_URL", "PAYPAL_WEBHOOK_ID"]);
+  const overrides: Record<string, string> = { ...hostedEnv, DEMO_OPS_EMAIL: process.env.DEMO_OPS_EMAIL || DEFAULT_DEMO_EMAIL };
   const env: Record<string, string> = {};
-  // The local APP_BASE_URL and PAYPAL_WEBHOOK_ID belong to the dev server and its tunnel; both are
-  // replaced below once the service URL is known.
-  const overrides: Record<string, string> = {
-    ...hostedEnv,
-    DEMO_OPS_EMAIL: process.env.DEMO_OPS_EMAIL || DEFAULT_DEMO_EMAIL,
-    APP_BASE_URL: `https://${bp.name}.onrender.com`,
-    PAYPAL_WEBHOOK_ID: "pending",
-  };
   for (const e of bp.env) {
-    if (e.generate) continue;
+    if (e.generate || SKIP.has(e.key)) continue;
     const value = e.sync === false ? overrides[e.key] ?? process.env[e.key] : e.value;
-    if (value) env[e.key] = value;
+    // Spaces, not commas, between pool emails: the CLI may split --env-var values on commas.
+    if (value) env[e.key] = e.key === "PAYPAL_POOL_RECEIVERS" ? value.split(/[\s,;]+/).filter(Boolean).join(" ") : value;
   }
   for (const key of ["PAYPAL_CLIENT_ID", "PAYPAL_CLIENT_SECRET", "NEXT_PUBLIC_PAYPAL_CLIENT_ID", "PAYPAL_POOL_RECEIVERS", "OPENAI_API_KEY", "OPENAI_MODEL_ASSESS"]) {
     if (!env[key]) throw new Error(`${key} is not set in .env`);
   }
 
-  const { service, created } = await ensureService(bp, env);
-  console.log(`${created ? "Created" : "Found"} Render service ${service.name} (${service.id})`);
-  const url = (service.serviceDetails?.url ?? env.APP_BASE_URL).replace(/\/$/, "");
+  let service = findService(bp.name);
+  const created = !service;
+  if (service) {
+    console.log(`Found Render service ${service.name} (${service.id})`);
+    await updateEnvVars(service.id, env);
+  } else {
+    // The CLI has no generateValue, so the session secret is generated here and sent only to Render.
+    for (const e of bp.env.filter((x) => x.generate)) env[e.key] = randomBytes(32).toString("hex");
+    service = createService(bp, env);
+    console.log(`Created Render service ${service.name} (${service.id}) with ${Object.keys(env).length} variables`);
+  }
+  service = findService(bp.name) ?? service;
+  const url = (service.serviceDetails?.url ?? `https://${bp.name}.onrender.com`).replace(/\/$/, "");
   console.log(`Service URL: ${url}`);
 
-  env.APP_BASE_URL = url;
-  env.PAYPAL_WEBHOOK_ID = await ensureWebhook(`${url}/api/webhooks/paypal`);
-  console.log(`PayPal webhook ${env.PAYPAL_WEBHOOK_ID} points at ${url}/api/webhooks/paypal`);
+  const webhookId = await ensureWebhook(`${url}/api/webhooks/paypal`);
+  console.log(`PayPal webhook ${webhookId} points at ${url}/api/webhooks/paypal`);
 
-  // One variable at a time, so the generated SESSION_SECRET is left as it is.
-  for (const [key, value] of Object.entries(env)) {
-    await render("PUT", `/services/${service.id}/env-vars/${key}`, { value });
-  }
-  console.log(`Set ${Object.keys(env).length} environment variables: ${Object.keys(env).join(", ")}`);
-
-  const deploy = await render<{ id: string }>("POST", `/services/${service.id}/deploys`, { clearCache: "do_not_clear" });
-  const status = await waitForDeploy(service.id, deploy.id);
-  if (status !== "live") throw new Error(`Deploy ended as ${status}. Build logs: ${service.dashboardUrl ?? "Render dashboard"}`);
+  if (!created) cli(["deploys", "create", service.id, "--confirm"]);
+  const status = await waitForLatestDeploy(service.id);
+  if (status !== "live") throw new Error(`Deploy ended as ${status}. Logs: render logs -r ${service.id}, or ${service.dashboardUrl ?? "the Render dashboard"}`);
 
   const health = await fetch(`${url}/api/health`);
   console.log(`GET ${url}/api/health: ${health.status} ${(await health.text()).slice(0, 200)}`);

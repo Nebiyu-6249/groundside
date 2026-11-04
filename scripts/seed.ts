@@ -18,7 +18,7 @@ function databaseHost(url: string | undefined): string {
 async function main() {
   const reset = process.argv.includes("--reset");
   const size = process.argv.includes("--full") ? "FULL" : "QUICK";
-  const pool = (process.env.PAYPAL_POOL_RECEIVERS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const pool = (process.env.PAYPAL_POOL_RECEIVERS ?? "").split(/[\s,;]+/).filter(Boolean);
   const unregisteredPattern = process.env.PAYPAL_UNREGISTERED_PATTERN ?? "pax-{n}@example.com";
   if (process.argv.includes("--hosted")) {
     // A generated password would overwrite the local credentials file and be unknown to judges.

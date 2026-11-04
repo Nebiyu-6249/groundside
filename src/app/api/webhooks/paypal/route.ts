@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import { processEvent, storeEvent } from "@/lib/paypal/webhook-store";
-import { verifyWebhookSignature, webhookEventSchema } from "@/lib/paypal/webhooks";
+import { resolveWebhookId, verifyWebhookSignature, webhookEventSchema } from "@/lib/paypal/webhooks";
 
 // PayPal webhook receiver (docs/SPEC.md 9.4): verify, store once by event id, answer fast.
 export async function POST(request: Request) {
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     verification = await verifyWebhookSignature(
       request.headers,
       parsed,
-      process.env.PAYPAL_WEBHOOK_ID,
+      await resolveWebhookId(),
     );
   } catch {
     // PayPal unreachable: answer 503 so PayPal retries delivery later.
