@@ -10,6 +10,7 @@ import { refreshRefunds } from "@/lib/ops/refunds";
 import { chooseTravel, choosePayment, switchToBank } from "./actions";
 import { BankSwitchForm, PaxRefresh, PaymentForm, TravelForm } from "./forms";
 import { ReceiptUpload } from "./receipt-upload";
+import { Questions } from "./questions";
 import { listDemoReceipts } from "@/lib/receipts/fixtures";
 
 export const metadata: Metadata = { title: "Your flight - Demo Air", robots: { index: false } };
@@ -195,6 +196,10 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
           ) : null}
         </section>
       ) : null}
+      <section className="mt-6 space-y-3" aria-labelledby="questions-title">
+        <h2 id="questions-title" className="font-medium">Questions</h2>
+        <Questions token={token} history={v.qa} ticketOpen={v.ticketOpen} />
+      </section>
     </main>
   );
 }

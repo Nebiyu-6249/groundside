@@ -14,6 +14,8 @@ export async function offerByToken(db: PrismaClient, token: string) {
           entitlements: { include: { payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, updatedAt: true, receiver: true, amountCents: true, createdAt: true } } } },
           disruption: { include: { flight: { include: { originAirport: true, destinationAirport: true } }, decisions: true } },
           receipts: { orderBy: { createdAt: "desc" }, select: { id: true, decision: true, approvedCents: true, extracted: true, checks: true, demoDateOverride: true, createdAt: true, payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true } } } },
+          qaMessages: { orderBy: { createdAt: "asc" }, take: 40, select: { role: true, text: true } },
+          tickets: { where: { status: "OPEN" }, take: 1, select: { id: true } },
           booking: { select: { paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true } } } },
         },
       },
@@ -38,6 +40,8 @@ export async function offerByToken(db: PrismaClient, token: string) {
     disruptionId: p.disruptionId,
     refundToPaypal: p.booking.paymentMethod === "PAYPAL" && p.booking.paypalCaptureId !== null,
     refundStatus: p.booking.refunds[0]?.status ?? null,
+    qa: p.qaMessages.map((m) => ({ role: m.role, text: m.text })),
+    ticketOpen: p.tickets.length > 0,
     receipts: p.receipts.map((r) => {
       const x = r.extracted as { merchantName?: string | null; total?: number | null; currency?: string | null; date?: string | null } | null;
       const c = r.checks as { outcome?: { reason?: string } } | null;

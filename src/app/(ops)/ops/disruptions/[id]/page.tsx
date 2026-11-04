@@ -10,7 +10,7 @@ import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
-import { approve, assess, cancelUnclaimedItem, decideReceipt, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
+import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 
@@ -23,6 +23,7 @@ const TABS = [
   ["passengers", "Passengers"],
   ["payouts", "Payouts"],
   ["receipts", "Receipts"],
+  ["questions", "Questions"],
   ["audit", "Audit"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
@@ -331,6 +332,33 @@ function Receipts({ d }: { d: DisruptionDetail }) {
   );
 }
 
+function Questions({ d }: { d: DisruptionDetail }) {
+  if (d.tickets.length === 0) return <p className="text-muted">No passenger has asked to talk to a person. Answers by the AI are logged in the audit trail.</p>;
+  return (
+    <div className="space-y-3">
+      {d.tickets.map((t) => (
+        <section key={t.id} className={`rounded border p-3 text-sm ${t.status === "OPEN" ? "border-amber" : "border-line"}`}>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-medium">{t.passenger}</span>
+            <span className="text-muted">{t.email ?? "no email on file"}</span>
+            <Chip tone={t.status === "OPEN" ? "attention" : "neutral"}>{t.status === "OPEN" ? "Open" : "Closed"}</Chip>
+            <span className="font-mono text-xs text-muted">{utcTime(t.at)}</span>
+            <form action={openAsPassenger.bind(null, t.passengerId)}><button type="submit" className="text-xs underline underline-offset-4">Open passenger page</button></form>
+          </div>
+          <p className="mt-2">{t.reason}</p>
+          {t.recent.length ? (
+            <details className="mt-2">
+              <summary className="cursor-pointer text-xs">Recent questions and answers</summary>
+              <ol className="mt-1 space-y-1 text-xs">{t.recent.map((m, i) => <li key={i} className="whitespace-pre-line"><span className="font-medium">{m.role === "PASSENGER" ? "Passenger" : `AI${m.validated ? "" : " (fallback)"}`}:</span> {m.text}</li>)}</ol>
+            </details>
+          ) : null}
+          {t.status === "OPEN" ? <div className="mt-2"><ActionButton action={closeTicket.bind(null, d.id, t.id)} label="Mark as handled" pendingLabel="Closing" /></div> : null}
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function Audit({ d }: { d: DisruptionDetail }) {
   return (
     <table className="w-full text-left text-sm">
@@ -372,6 +400,7 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
         {tab === "passengers" ? <PassengersGrid rows={d.passengers} rules={d.rules} openAsPassenger={openAsPassenger} /> : null}
         {tab === "payouts" ? <Payouts d={d} /> : null}
         {tab === "receipts" ? <Receipts d={d} /> : null}
+        {tab === "questions" ? <Questions d={d} /> : null}
         {tab === "audit" ? <Audit d={d} /> : null}
       </div>
       {tab === "passengers" ? <p className="mt-2 text-xs text-muted">Click a row for the full entitlement trace. Statuses: <EntitlementStatus status="PAID" /> paid only after PayPal reports success.</p> : null}

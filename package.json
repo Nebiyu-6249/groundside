@@ -29,6 +29,7 @@
     "weather:fetch": "tsx scripts/fetch-weather.ts",
     "eval": "tsx --env-file=.env scripts/eval.ts",
     "eval:a2": "tsx --env-file=.env scripts/eval-a2.ts",
+    "eval:a4": "tsx --env-file=.env scripts/eval-a4.ts",
     "e2e": "tsx --env-file=.env scripts/e2e-flow.ts"
   },
   "dependencies": {
