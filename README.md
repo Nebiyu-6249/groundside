@@ -87,6 +87,32 @@ In the PayPal developer dashboard (sandbox):
 
 Test the checkout in a regular browser (Chrome, Edge, Firefox); embedded browser panes can break the PayPal window.
 
+### Ops console
+
+1. `npm run reset-demo` seeds scenarios A and B and the demo duty manager.
+2. Sign in at `/login`. Without `DEMO_OPS_PASSWORD` in `.env`, the seed writes a generated local password to `scripts/out/demo-credentials.txt`.
+3. Open a disruption. A full run goes like this:
+   1. Read the evidence.
+   2. Run the AI assessment.
+   3. Approve, or sign a denial.
+   4. Simulate passenger responses. PayPal sandbox payouts start at once.
+   5. Open any passenger from the Passengers tab.
+
+`npm run e2e -- --scenario=A` runs the same path from the command line against the sandbox.
+
+### Deploy (Render)
+
+`render.yaml` is a Render Blueprint: one Node web service in Frankfurt on the free plan.
+- **Build:** `npm ci --include=dev && npx prisma migrate deploy && npm run build`
+- **Start:** `npm start`
+- **Health check:** `/api/health`
+
+Values marked `sync: false` are entered in the Render dashboard. After the first deploy:
+
+1. Set `APP_BASE_URL` to the service URL.
+2. Create a PayPal sandbox webhook at `<service URL>/api/webhooks/paypal` and set `PAYPAL_WEBHOOK_ID`.
+3. Seed once with `npm run seed`, from a machine whose `.env` points at the production database.
+
 ## Demo data
 
 ```bash

@@ -123,10 +123,10 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - **GATE 2:** eval report (case, expected, actual, pass/fail), cost so far.
 
 ### Phase 3: Ops console, payouts, basic passenger page, deploy (Thu Nov 5). STATUS: in progress
-- [ ] Ops login, disruption list, disruption detail (Evidence, Assessment, Passengers grid, Payouts, Audit)
-- [ ] Approval and signed denial flows; audit events
-- [ ] Offers and passenger token links; basic passenger page with PayPal or bank-transfer choice and consent
-- [ ] Payout orchestrator (micro-batches), webhook plus polling reconciliation, live grid updates
+- [x] Ops login, disruption list, disruption detail (Evidence, Assessment, Passengers grid, Payouts, Audit)
+- [x] Approval and signed denial flows; audit events
+- [x] Offers and passenger token links; basic passenger page with PayPal or bank-transfer choice and consent
+- [x] Payout orchestrator (micro-batches), webhook plus polling reconciliation, live grid updates
 - [ ] Deployed to Render with Neon; PayPal webhook pointed at Render; README has live URL and demo credentials
 - [ ] Devpost draft submitted for the early eligibility check (user does the form; you provide the text from `docs/DEMO.md`)
 - **GATE 3:** the "Quick run" scenario works end-to-end on the hosted URL.
