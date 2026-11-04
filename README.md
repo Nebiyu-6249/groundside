@@ -2,9 +2,9 @@
 
 When a flight from an EU airport is cancelled or badly delayed, Groundside checks the airline's stated cause against real archived weather reports, works out what every passenger is owed under EU Regulation 261/2004, and pays them through PayPal once a duty manager approves.
 
-Built for the PayPal AI Hackathon. **Status: in development (Phase 2: weather evidence and AI cause assessment).**
+Built for the PayPal AI Hackathon. **Status: in development (Phase 3: ops console, payouts and hosted demo).**
 
-- Live demo: not deployed yet
+- Live demo: https://groundside.onrender.com (free plan: the first request after a quiet spell can take up to a minute while it wakes)
 - Demo credentials: published here once the hosted demo is up (sandbox only)
 
 ## What it does
@@ -107,11 +107,11 @@ Test the checkout in a regular browser (Chrome, Edge, Firefox); embedded browser
 - **Start:** `npm start`
 - **Health check:** `/api/health`
 
-`npm run deploy:render` deploys from the values in `.env` plus a `RENDER_API_KEY`. It does four things:
-- creates a separate hosted database on Neon, migrates and seeds it
-- creates or updates the Render service
+`npm run deploy:render` deploys with the Render CLI (`winget install Render.CLI`, then `render login` once) and the values in `.env`. It does four things:
+- creates a separate hosted database on Neon, then migrates and seeds it
+- creates the Render service, or redeploys it
 - points a PayPal sandbox webhook at it
-- deploys and waits until the service is live
+- waits until the service is live
 
 Step by step: [`docs/DEPLOY.md`](docs/DEPLOY.md).
 

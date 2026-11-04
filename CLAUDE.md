@@ -127,7 +127,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] Approval and signed denial flows; audit events
 - [x] Offers and passenger token links; basic passenger page with PayPal or bank-transfer choice and consent
 - [x] Payout orchestrator (micro-batches), webhook plus polling reconciliation, live grid updates
-- [ ] Deployed to Render with Neon; PayPal webhook pointed at Render; README has live URL and demo credentials
+- [x] Deployed to Render with Neon; PayPal webhook pointed at Render; README has live URL (demo credentials: user to publish)
 - [ ] Devpost draft submitted for the early eligibility check (user does the form; you provide the text from `docs/DEMO.md`)
 - **GATE 3:** the "Quick run" scenario works end-to-end on the hosted URL.
 

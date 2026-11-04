@@ -183,4 +183,14 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - It deploys and checks `/api/health`.
 - `npm run reset-demo:hosted` restores the hosted demo data. `seed.ts --hosted` requires `DEMO_OPS_PASSWORD` and prints only the target database host.
 - Database step done: `groundside_hosted` migrated (4 migrations) and seeded with the Quick run. The local `neondb` was not changed.
-- Waiting on the user for `RENDER_API_KEY` in `.env`.
+- The user chose the Render CLI over an API key: it was installed with `winget install Render.CLI`, and the user authorized `render login` in the browser.
+  - The CLI can create a service with variables, but cannot change them afterwards. So the app now falls back to Render's `RENDER_EXTERNAL_URL` when `APP_BASE_URL` is unset, and finds its PayPal webhook by URL when `PAYPAL_WEBHOOK_ID` is unset.
+  - Pool emails are passed space-separated, because the CLI may split `--env-var` values on commas.
+  - 155 tests.
+- Service `groundside` created at https://groundside.onrender.com.
+  - The first deploy went live in about 2 minutes. `/api/health` returns 200 with the database up.
+  - Public pages checked in the browser: `/login`, the booking page with the PayPal SDK loaded, and an invalid passenger link. `/ops` redirects to `/login`.
+- Scenario A, end to end against the hosted database (from the local e2e script): 16 payouts, 14 SUCCESS and 2 UNCLAIMED (by design) within 46 s.
+  - PayPal delivered 19 webhooks to the Render URL. All 19 were verified with the ID found by URL, and none were rejected.
+  - The hosted demo was then reset with `npm run reset-demo:hosted`.
+- Gate 3 still needs the Quick run through the hosted UI. It needs a sign-in, which the user does.
