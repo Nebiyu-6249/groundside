@@ -17,7 +17,8 @@ import { a1JsonSchema, a1OutputSchema, type A1Output, type Recommendation } from
 import { mapRecommendation, validateA1 } from "./validate";
 
 // v2 (2026-11-04): weather facts are cited by ID, never quoted; airports carry ICAO and IATA codes.
-export const A1_PROMPT_VERSION = "A1.v2";
+// v3 (2026-11-04): an unidentified likely cause has LOW confidence.
+export const A1_PROMPT_VERSION = "A1.v3";
 
 /** Rule IDs relevant to extraordinary circumstances; their entries go into the prompt. */
 export const A1_RULE_IDS = [
