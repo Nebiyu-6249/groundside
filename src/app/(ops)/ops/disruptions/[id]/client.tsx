@@ -74,6 +74,23 @@ export function DenyForm({ action, userName, citable }: { action: (prev: ActionS
   );
 }
 
+export function ReceiptReviewForm({ action }: { action: (prev: ActionState, form: FormData) => Promise<ActionState> }) {
+  const [state, run, pending] = useActionState(action, { error: null });
+  return (
+    <form action={run} className="mt-2 space-y-2">
+      <label className="block text-xs">
+        Reason (shown to the passenger)
+        <input name="reason" required minLength={5} className="mt-1 w-full rounded border border-line bg-background px-2 py-1 text-sm" />
+      </label>
+      <div className="flex gap-2">
+        <button type="submit" name="decision" value="approve" disabled={pending} className="rounded bg-amber px-3 py-1 text-sm font-medium text-ink disabled:opacity-60">Approve</button>
+        <button type="submit" name="decision" value="reject" disabled={pending} className="rounded border border-red px-3 py-1 text-sm text-red disabled:opacity-60">Reject</button>
+      </div>
+      {state.error ? <p role="alert" className="text-xs text-red">{state.error}</p> : state.ok ? <p role="status" className="text-xs">{state.ok}</p> : null}
+    </form>
+  );
+}
+
 /** Polls the status endpoint while payouts are in flight and refreshes the page on change. */
 export function LiveRefresh({ disruptionId, active }: { disruptionId: string; active: boolean }) {
   const router = useRouter();

@@ -9,6 +9,8 @@ import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { refreshRefunds } from "@/lib/ops/refunds";
 import { chooseTravel, choosePayment, switchToBank } from "./actions";
 import { BankSwitchForm, PaxRefresh, PaymentForm, TravelForm } from "./forms";
+import { ReceiptUpload } from "./receipt-upload";
+import { listDemoReceipts } from "@/lib/receipts/fixtures";
 
 export const metadata: Metadata = { title: "Your flight - Demo Air", robots: { index: false } };
 
@@ -52,7 +54,8 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
     );
   }
   const refundInFlight = v.refundStatus !== null && !["COMPLETED", "FAILED", "CANCELLED"].includes(v.refundStatus);
-  const inFlight = refundInFlight || v.entitlements.some((e) => e.payoutStatus && ["CREATING", "PENDING", "ONHOLD", "UNCLAIMED"].includes(e.payoutStatus));
+  const receiptInFlight = v.receipts.some((r) => r.payoutStatus && ["CREATING", "PENDING", "ONHOLD"].includes(r.payoutStatus));
+  const inFlight = refundInFlight || receiptInFlight || v.entitlements.some((e) => e.payoutStatus && ["CREATING", "PENDING", "ONHOLD", "UNCLAIMED"].includes(e.payoutStatus));
   if (inFlight) {
     const disruptionId = v.disruptionId;
     try {
@@ -168,6 +171,30 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
           <p>You chose bank transfer to the account ending {v.offer.ibanLast4}. Bank transfers are recorded only; they are handled outside this demo.</p>
         )}
       </section>
+
+      {care.length ? (
+        <section className="mt-6 space-y-3" aria-labelledby="receipts-title">
+          <h2 id="receipts-title" className="font-medium">Receipts</h2>
+          <p className="text-sm">Spent more than your meal allowance, or paid for a hotel or taxi? Send a photo of the receipt. An AI reads it; code checks the time, the amounts and your remaining allowance, and anything unclear goes to a person. Alcohol, tobacco and duty-free goods are not covered (Demo Air policy).</p>
+          {v.offer.paymentChoice === "NONE" ? <p className="text-sm text-muted">Choose how to be paid first; approved receipts are paid the same way.</p> : <ReceiptUpload token={token} demos={listDemoReceipts().map((d) => ({ key: d.key, label: d.label }))} />}
+          {v.receipts.length ? (
+            <ul className="space-y-2">
+              {v.receipts.map((r) => (
+                <li key={r.id} className="flex gap-3 rounded border border-line p-2 text-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- private, token-scoped image */}
+                  <img src={`/api/pax/${token}/receipts/${r.id}`} alt={`Receipt${r.merchant ? ` from ${r.merchant}` : ""}`} className="h-20 w-16 shrink-0 rounded border border-line object-cover" />
+                  <div>
+                    <p className="font-medium">{r.merchant ?? "Receipt"}{r.total !== null ? <span className="font-mono"> {r.total.toFixed(2)} {r.currency ?? ""}</span> : null}</p>
+                    <p>{r.decision === "AUTO_APPROVED" || r.decision === "APPROVED_BY_HUMAN" ? <>Approved: <span className="font-mono">{euros(r.approvedCents ?? 0)}</span>{r.payoutStatus === "SUCCESS" ? ", paid to your PayPal account" : v.offer.paymentChoice === "PAYPAL" ? ", being paid" : ", recorded for bank transfer"}</> : r.decision === "REJECTED" ? "Not reimbursed" : "A person is checking this receipt"}</p>
+                    {r.reason ? <p className="text-xs text-muted">{r.reason}</p> : null}
+                    {r.dateReplaced ? <p className="text-xs text-muted">Demo receipt: date replaced with the scenario date (original {r.printedDate ?? "unknown"}).</p> : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </section>
+      ) : null}
     </main>
   );
 }

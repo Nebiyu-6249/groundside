@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-04T20:06:40.641Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v1",
+  "source": "receipts-synthetic/sum-mismatch.png",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "Sky Snacks",
+    "merchantLocation": "Frankfurt Airport, Terminal 1, Gate A12",
+    "isAtAirport": true,
+    "date": "2026-01-24",
+    "time": "21:30",
+    "currency": "EUR",
+    "total": 14,
+    "lineItems": [
+      {
+        "description": "Pretzel",
+        "amount": 3.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Tea",
+        "amount": 2.5,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Fruit cup",
+        "amount": 6,
+        "category": "FOOD"
+      }
+    ],
+    "language": "English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt is clearly legible and is printed with the statements “SYNTHETIC TEST RECEIPT” and “Not a real receipt.”"
+  }
+}

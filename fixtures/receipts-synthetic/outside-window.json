@@ -1,0 +1,24 @@
+{
+  "synthetic": true,
+  "note": "Four days before the flight",
+  "expected": {
+    "merchantName": "Main Street Deli",
+    "merchantLocation": "Frankfurt am Main, Kaiserstrasse 12",
+    "date": "2026-01-20",
+    "time": "12:05",
+    "currency": "EUR",
+    "total": 10.3,
+    "lineItems": [
+      {
+        "description": "Soup of the day",
+        "amount": 6.9,
+        "category": "FOOD"
+      },
+      {
+        "description": "Orange juice",
+        "amount": 3.4,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ]
+  }
+}

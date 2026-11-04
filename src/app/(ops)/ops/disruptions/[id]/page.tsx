@@ -10,8 +10,8 @@ import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
-import { approve, assess, cancelUnclaimedItem, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
-import { ActionButton, ApproveForm, DenyForm, LiveRefresh } from "./client";
+import { approve, assess, cancelUnclaimedItem, decideReceipt, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
+import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 
 export const metadata: Metadata = { title: "Disruption - Groundside" };
@@ -22,6 +22,7 @@ const TABS = [
   ["assessment", "Assessment"],
   ["passengers", "Passengers"],
   ["payouts", "Payouts"],
+  ["receipts", "Receipts"],
   ["audit", "Audit"],
 ] as const;
 type Tab = (typeof TABS)[number][0];
@@ -237,7 +238,7 @@ function Payouts({ d }: { d: DisruptionDetail }) {
             <thead className="text-muted"><tr><th className="py-1 font-medium">Passenger</th><th className="font-medium">Kind</th><th className="font-medium">Sandbox receiver (demo pool)</th><th className="font-medium">Amount</th><th className="font-medium">Status</th><th className="font-medium"><span className="sr-only">Actions</span></th></tr></thead>
             <tbody>
               {b.items.map((i) => (
-                <tr key={i.id} className="border-t border-line"><td className="py-1">{i.name}</td><td>{i.kind === "COMPENSATION" ? "Compensation" : "Meals"}</td><td className="font-mono">{i.receiver}</td><td className="font-mono tabular">{euros(i.amountCents)}</td><td><PayoutStatus status={i.status} />{i.lastError ? <span className="block text-red">{i.lastError}</span> : null}</td><td>{i.status === "UNCLAIMED" ? <div className="flex flex-wrap gap-2 py-1"><ActionButton action={remindUnclaimed.bind(null, d.id, i.id)} label="Send reminder" pendingLabel="Sending" /><ActionButton action={cancelUnclaimedItem.bind(null, d.id, i.id)} label="Cancel item" pendingLabel="Cancelling" /></div> : null}</td></tr>
+                <tr key={i.id} className="border-t border-line"><td className="py-1">{i.name}</td><td>{i.kind === "COMPENSATION" ? "Compensation" : i.kind === "RECEIPT" ? "Receipt" : "Meals"}</td><td className="font-mono">{i.receiver}</td><td className="font-mono tabular">{euros(i.amountCents)}</td><td><PayoutStatus status={i.status} />{i.lastError ? <span className="block text-red">{i.lastError}</span> : null}</td><td>{i.status === "UNCLAIMED" ? <div className="flex flex-wrap gap-2 py-1"><ActionButton action={remindUnclaimed.bind(null, d.id, i.id)} label="Send reminder" pendingLabel="Sending" /><ActionButton action={cancelUnclaimedItem.bind(null, d.id, i.id)} label="Cancel item" pendingLabel="Cancelling" /></div> : null}</td></tr>
               ))}
             </tbody>
           </table>
@@ -276,6 +277,56 @@ function Payouts({ d }: { d: DisruptionDetail }) {
           </table>
         )}
       </section>
+    </div>
+  );
+}
+
+function Receipts({ d }: { d: DisruptionDetail }) {
+  const queue = d.receipts.filter((r) => r.decision === "HUMAN_REVIEW");
+  const label = (x: string | null) => (x === "AUTO_APPROVED" ? "Approved by code" : x === "APPROVED_BY_HUMAN" ? "Approved by a person" : x === "REJECTED" ? "Rejected" : "Waiting for review");
+  if (d.receipts.length === 0) return <p className="text-muted">No receipts yet. Passengers send them from their page; meal, hotel and transport costs only.</p>;
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted">{queue.length} waiting for review. The AI only reads receipts; code checks decide, and a person decides whatever the checks send to review.</p>
+      {d.receipts.map((r) => (
+        <section key={r.id} className={`grid gap-4 rounded border p-3 md:grid-cols-[180px_1fr] ${r.decision === "HUMAN_REVIEW" ? "border-amber" : "border-line"}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- private image behind the ops session */}
+          <img src={`/api/ops/receipts/${r.id}`} alt={`Receipt from ${r.passenger}`} className="w-full rounded border border-line bg-white object-contain" />
+          <div className="space-y-2 text-sm">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-medium">{r.passenger}</span>
+              <Chip tone={r.decision === "HUMAN_REVIEW" ? "attention" : "neutral"}>{label(r.decision)}</Chip>
+              {r.approvedCents ? <span className="font-mono tabular">{euros(r.approvedCents)}</span> : null}
+              {r.payoutStatus ? <PayoutStatus status={r.payoutStatus} /> : null}
+              <span className="font-mono text-xs text-muted">{utcTime(r.at)}</span>
+            </div>
+            {r.reason ? <p>{r.reason}</p> : null}
+            {r.aiNotice ? <p className="text-xs text-amber">{r.aiNotice}</p> : null}
+            {r.dateReplaced ? <p className="text-xs text-muted">Demo receipt: date replaced with the scenario date (original {r.extracted?.date ?? "unknown"}).</p> : null}
+            {r.extracted ? (
+              <details>
+                <summary className="cursor-pointer text-xs">Fields read by the AI ({r.model}, prompt {r.promptVersion})</summary>
+                <dl className="mt-1 grid grid-cols-[auto_1fr] gap-x-3 text-xs">
+                  <dt className="text-muted">Merchant</dt>
+                  <dd>{r.extracted.merchantName ?? "-"}, {r.extracted.merchantLocation ?? "-"} ({r.extracted.confidence.merchantName})</dd>
+                  <dt className="text-muted">Date, time</dt>
+                  <dd>{r.extracted.date ?? "-"} {r.extracted.time ?? ""} ({r.extracted.confidence.date}, {r.extracted.confidence.time})</dd>
+                  <dt className="text-muted">Total</dt>
+                  <dd className="font-mono">{r.extracted.total?.toFixed(2) ?? "-"} {r.extracted.currency ?? ""} ({r.extracted.confidence.total})</dd>
+                  <dt className="text-muted">Lines</dt>
+                  <dd>{r.extracted.lineItems.map((l, i) => <span key={i} className="block">{l.description}: <span className="font-mono">{l.amount.toFixed(2)}</span> ({l.category.toLowerCase().replaceAll("_", " ")})</span>)}</dd>
+                  {r.extracted.legibilityNotes ? <><dt className="text-muted">Notes</dt><dd>{r.extracted.legibilityNotes}</dd></> : null}
+                </dl>
+              </details>
+            ) : null}
+            <ul className="space-y-0.5 text-xs">
+              {r.checks.map((c) => <li key={c.id} className={c.ok ? "" : "text-amber"}><span className="font-medium">{c.ok ? "Pass" : "Check"}</span>: {c.label}. {c.detail}</li>)}
+            </ul>
+            {r.reviewer ? <p className="text-xs text-muted">Decided by {r.reviewer}.</p> : null}
+            {r.decision === "HUMAN_REVIEW" ? <ReceiptReviewForm action={decideReceipt.bind(null, d.id, r.id)} /> : null}
+          </div>
+        </section>
+      ))}
     </div>
   );
 }
@@ -320,6 +371,7 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
         {tab === "assessment" ? <Assessment d={d} readiness={readiness} /> : null}
         {tab === "passengers" ? <PassengersGrid rows={d.passengers} rules={d.rules} openAsPassenger={openAsPassenger} /> : null}
         {tab === "payouts" ? <Payouts d={d} /> : null}
+        {tab === "receipts" ? <Receipts d={d} /> : null}
         {tab === "audit" ? <Audit d={d} /> : null}
       </div>
       {tab === "passengers" ? <p className="mt-2 text-xs text-muted">Click a row for the full entitlement trace. Statuses: <EntitlementStatus status="PAID" /> paid only after PayPal reports success.</p> : null}

@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-04T20:06:26.960Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v1",
+  "source": "receipts-synthetic/dinner-with-beer.png",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "Runway Bistro",
+    "merchantLocation": "Frankfurt Airport, Terminal 1, Level 2",
+    "isAtAirport": true,
+    "date": "2026-01-24",
+    "time": "22:12",
+    "currency": "EUR",
+    "total": 24.5,
+    "lineItems": [
+      {
+        "description": "Pasta arrabbiata",
+        "amount": 14.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Draught beer 0.4 l",
+        "amount": 6.2,
+        "category": "ALCOHOL"
+      },
+      {
+        "description": "Cola 0.33 l",
+        "amount": 3.8,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt is clearly legible. It is printed with the labels “SYNTHETIC TEST RECEIPT” and “Not a real receipt.”"
+  }
+}

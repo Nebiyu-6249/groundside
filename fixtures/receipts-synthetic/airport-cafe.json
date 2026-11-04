@@ -1,0 +1,29 @@
+{
+  "synthetic": true,
+  "note": "Within the window, sums correctly",
+  "expected": {
+    "merchantName": "Gate Cafe",
+    "merchantLocation": "Frankfurt Airport, Terminal 1, Gate B44",
+    "date": "2026-01-24",
+    "time": "20:41",
+    "currency": "EUR",
+    "total": 15,
+    "lineItems": [
+      {
+        "description": "Chicken sandwich",
+        "amount": 8.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Cappuccino",
+        "amount": 3.9,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Still water 0.5 l",
+        "amount": 2.6,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ]
+  }
+}

@@ -13,6 +13,7 @@ export async function offerByToken(db: PrismaClient, token: string) {
         include: {
           entitlements: { include: { payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, updatedAt: true, receiver: true, amountCents: true, createdAt: true } } } },
           disruption: { include: { flight: { include: { originAirport: true, destinationAirport: true } }, decisions: true } },
+          receipts: { orderBy: { createdAt: "desc" }, select: { id: true, decision: true, approvedCents: true, extracted: true, checks: true, demoDateOverride: true, createdAt: true, payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true } } } },
           booking: { select: { paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true } } } },
         },
       },
@@ -37,6 +38,11 @@ export async function offerByToken(db: PrismaClient, token: string) {
     disruptionId: p.disruptionId,
     refundToPaypal: p.booking.paymentMethod === "PAYPAL" && p.booking.paypalCaptureId !== null,
     refundStatus: p.booking.refunds[0]?.status ?? null,
+    receipts: p.receipts.map((r) => {
+      const x = r.extracted as { merchantName?: string | null; total?: number | null; currency?: string | null; date?: string | null } | null;
+      const c = r.checks as { outcome?: { reason?: string } } | null;
+      return { id: r.id, decision: r.decision, approvedCents: r.approvedCents, merchant: x?.merchantName ?? null, total: x?.total ?? null, currency: x?.currency ?? null, printedDate: x?.date ?? null, dateReplaced: r.demoDateOverride !== null, reason: c?.outcome?.reason ?? null, payoutStatus: r.payoutItems[0]?.status ?? null, at: r.createdAt.toISOString() };
+    }),
     decision: decision ? { kind: decision.kind, reason: decision.reason, citations: decision.citations.map((id) => ({ id, title: rules.get(id)?.title ?? id, summary: rules.get(id)?.summary ?? "" })) } : null,
     entitlements: p.entitlements.map((e) => ({
       kind: e.kind,

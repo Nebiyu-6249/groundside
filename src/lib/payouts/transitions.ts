@@ -68,7 +68,8 @@ export async function applyItemUpdate(db: PrismaClient, u: ItemUpdate, source: "
         finalAt: FINAL_ITEM.has(status) ? new Date() : null,
       },
     }),
-    db.entitlement.update({ where: { id: item.entitlementId }, data: { status: entitlementStatusFor(status) } }),
+    // Receipt payouts are tracked on the item itself; the entitlement they draw on keeps its own status.
+    ...(item.receiptId ? [] : [db.entitlement.update({ where: { id: item.entitlementId }, data: { status: entitlementStatusFor(status) } })]),
   ]);
   await audit(db, {
     actorType: "PAYPAL",

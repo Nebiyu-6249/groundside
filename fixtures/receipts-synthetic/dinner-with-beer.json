@@ -1,0 +1,29 @@
+{
+  "synthetic": true,
+  "note": "Alcohol must be excluded",
+  "expected": {
+    "merchantName": "Runway Bistro",
+    "merchantLocation": "Frankfurt Airport, Terminal 1, Level 2",
+    "date": "2026-01-24",
+    "time": "22:12",
+    "currency": "EUR",
+    "total": 24.5,
+    "lineItems": [
+      {
+        "description": "Pasta arrabbiata",
+        "amount": 14.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Draught beer 0.4 l",
+        "amount": 6.2,
+        "category": "ALCOHOL"
+      },
+      {
+        "description": "Cola 0.33 l",
+        "amount": 3.8,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "synthetic": true,
+  "note": "Lines sum to 12.00, total says 14.00",
+  "expected": {
+    "merchantName": "Sky Snacks",
+    "merchantLocation": "Frankfurt Airport, Terminal 1, Gate A12",
+    "date": "2026-01-24",
+    "time": "21:30",
+    "currency": "EUR",
+    "total": 14,
+    "lineItems": [
+      {
+        "description": "Pretzel",
+        "amount": 3.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Tea",
+        "amount": 2.5,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Fruit cup",
+        "amount": 6,
+        "category": "FOOD"
+      }
+    ]
+  }
+}

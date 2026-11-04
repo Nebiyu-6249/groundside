@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-11-04T20:06:20.460Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v1",
+  "source": "receipts-synthetic/airport-hotel.png",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "Airport Rest Hotel",
+    "merchantLocation": "Frankfurt Airport, Hugo-Eckener-Ring",
+    "isAtAirport": true,
+    "date": "2026-01-25",
+    "time": "07:15",
+    "currency": "EUR",
+    "total": 129,
+    "lineItems": [
+      {
+        "description": "Room, 1 night, 24-25 Jan",
+        "amount": 129,
+        "category": "HOTEL"
+      }
+    ],
+    "language": "English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt is clearly legible and is marked “SYNTHETIC TEST RECEIPT” and “Not a real receipt.”"
+  }
+}

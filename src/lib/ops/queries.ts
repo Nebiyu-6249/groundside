@@ -82,6 +82,11 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
     select: { id: true, displayName: true, booking: { select: { pnr: true, paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true, lastError: true } } } }, entitlements: { where: { kind: "REFUND" }, select: { amountCents: true, status: true } } },
   });
   const choiceEvents = await db.auditEvent.findMany({ where: { action: "TRAVEL_CHOICE", entityId: { in: refundPassengers.map((p) => p.id) } }, orderBy: { createdAt: "desc" }, select: { entityId: true, createdAt: true } });
+  const receipts = await db.receipt.findMany({
+    where: { passenger: { disruptionId: id } },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, decision: true, approvedCents: true, extracted: true, checks: true, demoDateOverride: true, createdAt: true, passenger: { select: { displayName: true } }, reviewer: { select: { name: true } }, payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true } } },
+  });
   const assessment = d.assessments[0] ?? null;
   const out = (assessment?.output ?? null) as { assessment: A1Output | null; notice: string | null } | null;
   const rules = loadRulePack();
@@ -135,7 +140,26 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
         entitlements: p.entitlements.map((e) => ({ id: e.id, kind: e.kind, amountCents: e.amountCents, status: e.status, needsHumanCheckReason: e.needsHumanCheckReason, trace: e.trace as { ruleId: string; inputs: Record<string, unknown>; outcome: string }[] })),
       };
     }),
-    batches: batches.map((b) => ({ id: b.id, senderBatchId: b.senderBatchId, paypalBatchId: b.paypalBatchId, kind: b.kind, status: b.status, itemCount: b.itemCount, totalCents: b.totalCents, lastError: b.lastError, lastSyncedAt: b.lastSyncedAt?.toISOString() ?? null, createdAt: b.createdAt.toISOString(), items: b.items.map((i) => ({ id: i.id, name: i.entitlement.passenger.displayName, kind: i.entitlement.kind, receiver: i.receiver, amountCents: i.amountCents, status: i.status, paypalItemId: i.paypalItemId, lastError: i.lastError })) })),
+    batches: batches.map((b) => ({ id: b.id, senderBatchId: b.senderBatchId, paypalBatchId: b.paypalBatchId, kind: b.kind, status: b.status, itemCount: b.itemCount, totalCents: b.totalCents, lastError: b.lastError, lastSyncedAt: b.lastSyncedAt?.toISOString() ?? null, createdAt: b.createdAt.toISOString(), items: b.items.map((i) => ({ id: i.id, name: i.entitlement.passenger.displayName, kind: i.receiptId ? "RECEIPT" : i.entitlement.kind, receiver: i.receiver, amountCents: i.amountCents, status: i.status, paypalItemId: i.paypalItemId, lastError: i.lastError })) })),
+    receipts: receipts.map((r) => {
+      const c = r.checks as { outcome?: { reason?: string; checks?: { id: string; label: string; ok: boolean; detail: string }[] }; aiNotice?: string | null; model?: string; promptVersion?: string } | null;
+      return {
+        id: r.id,
+        passenger: r.passenger.displayName,
+        decision: r.decision,
+        approvedCents: r.approvedCents,
+        extracted: r.extracted as { merchantName: string | null; merchantLocation: string | null; date: string | null; time: string | null; currency: string | null; total: number | null; lineItems: { description: string; amount: number; category: string }[]; confidence: Record<string, string>; legibilityNotes: string } | null,
+        checks: c?.outcome?.checks ?? [],
+        reason: c?.outcome?.reason ?? null,
+        aiNotice: c?.aiNotice ?? null,
+        model: c?.model ?? null,
+        promptVersion: c?.promptVersion ?? null,
+        dateReplaced: r.demoDateOverride !== null,
+        reviewer: r.reviewer?.name ?? null,
+        payoutStatus: r.payoutItems[0]?.status ?? null,
+        at: r.createdAt.toISOString(),
+      };
+    }),
     refunds: refundPassengers.map((p) => {
       const chosenAt = choiceEvents.find((e) => e.entityId === p.id)?.createdAt ?? null;
       const r = p.booking.refunds[0];

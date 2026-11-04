@@ -11,6 +11,8 @@ export interface StructuredRequest {
   schemaName: string;
   jsonSchema: Record<string, unknown>;
   timeoutMs?: number;
+  /** Images sent with the user message (vision input), as data URLs. */
+  images?: string[];
 }
 
 export type StructuredResult =
@@ -30,7 +32,9 @@ export function openAiCaller(apiKey: string): StructuredCaller {
           model: req.model,
           input: [
             { role: "system", content: req.system },
-            { role: "user", content: req.user },
+            req.images?.length
+              ? { role: "user", content: [{ type: "input_text", text: req.user }, ...req.images.map((url) => ({ type: "input_image" as const, image_url: url, detail: "high" as const }))] }
+              : { role: "user", content: req.user },
           ],
           text: { format: { type: "json_schema", name: req.schemaName, schema: req.jsonSchema, strict: true } },
         },
