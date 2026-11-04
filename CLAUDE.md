@@ -122,7 +122,7 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [x] `npm run eval` with at least 12 cases; pass criteria in `docs/SPEC.md` section 15
 - **GATE 2:** eval report (case, expected, actual, pass/fail), cost so far.
 
-### Phase 3: Ops console, payouts, basic passenger page, deploy (Thu Nov 5). STATUS: in progress
+### Phase 3: Ops console, payouts, basic passenger page, deploy (Thu Nov 5). STATUS: built locally; Render deploy pending (user)
 - [x] Ops login, disruption list, disruption detail (Evidence, Assessment, Passengers grid, Payouts, Audit)
 - [x] Approval and signed denial flows; audit events
 - [x] Offers and passenger token links; basic passenger page with PayPal or bank-transfer choice and consent
