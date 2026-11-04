@@ -15,11 +15,11 @@ export class RulePackError extends Error {
 }
 
 /** Reads and validates every rule file. Throws on a malformed file, a duplicate or a misnamed file. */
-export function loadRulePack(dir: string = RULES_DIR): Rule[] {
+export function loadRulePack(): Rule[] {
   const rules: Rule[] = [];
   const seen = new Set<string>();
-  for (const file of readdirSync(dir).filter((f) => f.endsWith(".json")).sort()) {
-    const parsed = ruleSchema.safeParse(JSON.parse(readFileSync(path.join(dir, file), "utf8")));
+  for (const file of readdirSync(path.join(process.cwd(), "rules")).filter((f) => f.endsWith(".json")).sort()) {
+    const parsed = ruleSchema.safeParse(JSON.parse(readFileSync(path.join(process.cwd(), "rules", file), "utf8")));
     if (!parsed.success) throw new RulePackError(`${file}: ${parsed.error.message}`);
     const rule = parsed.data;
     if (`${rule.id}.json` !== file) throw new RulePackError(`${file}: id ${rule.id} does not match the file name`);
