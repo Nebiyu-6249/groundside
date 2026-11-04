@@ -24,6 +24,12 @@ const CURATED: Record<string, string> = {
   HECA: "Africa/Cairo", GMMN: "Africa/Casablanca",
 };
 
+// OurAirports "municipality" is the town the airport sits in; passengers know the city it serves.
+const CITY: Record<string, string> = {
+  EDDF: "Frankfurt", LIMC: "Milan", EFHK: "Helsinki", GCLP: "Gran Canaria", LFPG: "Paris",
+  EBBR: "Brussels", LGAV: "Athens", LROP: "Bucharest", ENGM: "Oslo",
+};
+
 /** Minimal RFC 4180 parser: quoted fields, doubled quotes, commas and newlines inside quotes. */
 function parseCsv(text: string): string[][] {
   const rows: string[][] = [];
@@ -62,7 +68,7 @@ function main() {
       icao,
       iata: r[idx.iata],
       name: r[idx.name],
-      city: r[idx.city],
+      city: CITY[icao] ?? r[idx.city],
       country: r[idx.country],
       lat: Number(r[idx.lat]),
       lon: Number(r[idx.lon]),

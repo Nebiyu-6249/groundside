@@ -60,7 +60,8 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
     }
   }
   const comp = v.entitlements.find((e) => e.kind === "COMPENSATION");
-  const care = v.entitlements.filter((e) => ["MEAL_ALLOWANCE", "HOTEL_REIMBURSEMENT_CAP", "TRANSPORT_REIMBURSEMENT_CAP"].includes(e.kind) && e.amountCents > 0);
+  const CARE_ORDER = ["MEAL_ALLOWANCE", "HOTEL_REIMBURSEMENT_CAP", "TRANSPORT_REIMBURSEMENT_CAP"];
+  const care = v.entitlements.filter((e) => CARE_ORDER.includes(e.kind) && e.amountCents > 0).sort((a, b) => CARE_ORDER.indexOf(a.kind) - CARE_ORDER.indexOf(b.kind));
   const refund = v.entitlements.find((e) => e.kind === "REFUND");
   const denied = v.decision?.kind === "DENY_COMPENSATION";
   return (
