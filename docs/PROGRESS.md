@@ -134,3 +134,40 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 - **Prompt A1.v3** clarifies that an unidentified likely cause has LOW confidence. The policy table is unchanged.
 - **Results on A1.v3:** 12/12 on two full runs, and UNCERTAIN on 5 of 5 runs of the borderline case. Recorded fixtures for scenarios A and B re-recorded on v3.
 - AI spend to date is about 0.10 USD.
+
+## 2026-11-04: Phase 3 (ops console, payouts, passenger page): built locally, deploy pending
+
+- **Dependencies added** (all in the SPEC 5 stack): `ag-grid-community` and `ag-grid-react` 36.2.0, `lucide-react` 1.67.0, `bcryptjs` 3.0.3, `jose` 6.2.15.
+- **Auth:**
+  - signed HS256 httpOnly cookie
+  - users re-read from the database on every request
+  - login rate limit (10 per 15 min per IP hash, Postgres-backed `RateLimit` table)
+  - `src/proxy.ts` redirects signed-out `/ops` and `/api/disruptions` requests
+  - The seed creates the demo duty manager. Without `DEMO_OPS_PASSWORD`, a generated password goes to `scripts/out/demo-credentials.txt` (git-ignored).
+- **Decisions:**
+  - one per disruption, with a unique index (hand-written migration, because `migrate dev` needs an interactive terminal to confirm it)
+  - approval asks for a reason when it differs from the AI
+  - a denial needs the signer's typed name, a reason of at least 20 characters, and verified LAW or CASE_LAW citations
+  - after a decision the engine re-runs, offers are created and the audit trail is written
+- **Offers:** 32-byte tokens with only the SHA-256 stored. The link exists only in the simulated outbox, and "Open as passenger" reads it from there.
+- **Payouts:**
+  - micro-batches with priority passengers first, under the daily cap
+  - batch and items written before the PayPal call
+  - retry once after a 5xx or no response; adopt the batch named in a duplicate `sender_batch_id` error
+  - webhooks and polling share one transition function that never moves backwards
+  - polling: `/api/disruptions/[id]/status` every 3 s on the ops page; the passenger page also reconciles while a payment is in flight
+- **Screens:**
+  - `/ops`, the disruption board
+  - `/ops/disruptions/[id]` with Overview, Evidence, Assessment (with decision forms), Passengers (AG Grid with a trace drawer), Payouts (batches, items, webhook log, sync) and Audit tabs
+  - `/ops/outbox`
+  - `/p/[token]`, mobile first, light theme
+- **End-to-end runs** (`npm run e2e`) against the PayPal sandbox:
+  - A: AI recommended PAY and approval was idempotent. 16 items in 2 batches; 14 SUCCESS and 2 UNCLAIMED (the unregistered passenger, by design) within 37 s of sending.
+  - B: AI recommended NO_COMP (human decides) and a denial was signed. Compensation not owed for 11; 8 meal payouts, 7 SUCCESS and 1 UNCLAIMED.
+- **Fixed along the way:**
+  - simulated travel choices re-ran the engine for the whole flight; now only that passenger
+  - offer creation set refunds to OFFERED
+  - OurAirports municipality names ("Ferno (VA)") replaced with served-city names
+  - the rule-pack path is now scoped statically, so the build no longer traces the whole project
+- **Checks:** `npm run build` passes. `npm run check`: 151 tests.
+- **Not done:** the Render deploy (needs the user's Render account) and the Devpost draft (the user fills the form). `render.yaml` and the README deploy section are ready.

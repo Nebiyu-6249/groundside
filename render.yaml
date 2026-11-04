@@ -1,0 +1,70 @@
+# Render Blueprint for the hosted demo (docs/SPEC.md 16). Values marked sync: false are entered
+# in the Render dashboard on first deploy; they are never committed.
+services:
+  - type: web
+    name: groundside
+    runtime: node
+    region: frankfurt
+    # Free plan sleeps when idle; the first request after a pause waits while it wakes
+    # (docs/OPEN_QUESTIONS.md Q3). Change to starter for always-on during judging.
+    plan: free
+    # Migrations run in the build because pre-deploy commands are not available on the free plan.
+    buildCommand: npm ci --include=dev && npx prisma migrate deploy && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: NODE_ENV
+        value: production
+      - key: PAYPAL_API_BASE
+        value: https://api-m.sandbox.paypal.com
+      - key: JUDGE_MODE
+        value: "true"
+      - key: AI_MODE
+        value: live
+      - key: AI_DAILY_BUDGET_USD
+        value: "3"
+      - key: PAYOUT_DAILY_CAP_EUR
+        value: "20000"
+      - key: PAYOUT_BATCH_SIZE
+        value: "20"
+      - key: MAX_JUDGE_RUNS_PER_HOUR
+        value: "5"
+      - key: PAYPAL_UNREGISTERED_PATTERN
+        value: pax-{n}@example.com
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: APP_BASE_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: NEXT_PUBLIC_PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_WEBHOOK_ID
+        sync: false
+      - key: PAYPAL_POOL_RECEIVERS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL_ASSESS
+        sync: false
+      - key: OPENAI_MODEL_VISION
+        sync: false
+      - key: OPENAI_MODEL_TEXT
+        sync: false
+      - key: DEMO_OPS_EMAIL
+        sync: false
+      - key: DEMO_OPS_PASSWORD
+        sync: false
+      - key: OWNER_EMAIL
+        sync: false
+      - key: OWNER_PASSWORD
+        sync: false
