@@ -8,6 +8,7 @@ import { citableIds, loadRulePack } from "@/lib/rules/pack";
 import type { SessionUser } from "@/lib/auth/session";
 import { audit } from "./audit";
 import { recomputeEntitlements } from "./engine-input";
+import { appBaseUrl } from "@/lib/app-url";
 
 export class DecisionError extends Error {
   constructor(message: string) {
@@ -93,10 +94,6 @@ async function afterDecision(db: PrismaClient, user: SessionUser, disruptionId: 
   const engine = await recomputeEntitlements(db, disruptionId);
   const offers = await createOffers(db, disruptionId);
   await audit(db, { actorType: "SYSTEM", action: "OFFERS_CREATED", entityType: "Disruption", entityId: disruptionId, summary: `Engine re-run (${engine.updated} updated, ${engine.conflicts} conflicts); ${offers.created} passenger offers sent to the simulated outbox` });
-}
-
-function appBaseUrl() {
-  return (process.env.APP_BASE_URL || "http://localhost:3000").replace(/\/$/, "");
 }
 
 /**
