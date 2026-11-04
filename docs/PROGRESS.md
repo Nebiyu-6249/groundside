@@ -176,5 +176,11 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 
 - The user chose to deploy before checking the ops screens locally.
 - Checked `render.yaml` against `.env.example`: every variable is covered.
-- Added `npm run seed:hosted` and `npm run reset-demo:hosted`. They load `.env.hosted` (git-ignored) on top of `.env`, print only the target database host, and refuse to run without `DEMO_OPS_PASSWORD`, so a generated password never overwrites the local credentials file.
-- Wrote `docs/DEPLOY.md`: rotating the secrets, a Neon `hosted` branch, the Render Blueprint values, the webhook, seeding, and the Gate 3 check.
+- The user asked Claude Code to do the deploy itself. Claude Code may not sign in to dashboards or type secrets into them, so the deploy runs through the Render API instead: `scripts/deploy-render.ts` (`npm run deploy:render`).
+  - It creates a separate database `groundside_hosted` on the same Neon project, migrates and seeds it.
+  - It creates or updates the Render service from `render.yaml` with values from `.env`.
+  - It creates the PayPal webhook for the service URL.
+  - It deploys and checks `/api/health`.
+- `npm run reset-demo:hosted` restores the hosted demo data. `seed.ts --hosted` requires `DEMO_OPS_PASSWORD` and prints only the target database host.
+- Database step done: `groundside_hosted` migrated (4 migrations) and seeded with the Quick run. The local `neondb` was not changed.
+- Waiting on the user for `RENDER_API_KEY` in `.env`.
