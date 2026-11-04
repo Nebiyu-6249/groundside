@@ -2,6 +2,7 @@
 // Processing errors are recorded on the event and never turned into a 500; polling repairs state.
 
 import type { PrismaClient } from "@/generated/prisma/client";
+import { applyBatchUpdate, applyItemUpdate } from "@/lib/payouts/transitions";
 import type { WebhookEventBody } from "./webhooks";
 
 export type StoreResult = "stored" | "duplicate";
@@ -49,6 +50,16 @@ export async function processEvent(db: PrismaClient, event: WebhookEventBody): P
         where: { paypalRefundId: event.resource.id },
         data: { status: event.resource.status ?? "COMPLETED" },
       });
+    }
+    // Payout events go through the same transition functions as polling (SPEC 9.5).
+    const r = event.resource as
+      | { payout_item_id?: string; transaction_status?: string; transaction_id?: string; payout_item?: { sender_item_id?: string }; batch_header?: { payout_batch_id?: string; batch_status?: string } }
+      | undefined;
+    if (event.event_type.startsWith("PAYMENT.PAYOUTS-ITEM.") && r?.payout_item_id && r.transaction_status) {
+      await applyItemUpdate(db, { paypalItemId: r.payout_item_id, senderItemId: r.payout_item?.sender_item_id, status: r.transaction_status, transactionId: r.transaction_id }, "WEBHOOK");
+    }
+    if (event.event_type.startsWith("PAYMENT.PAYOUTSBATCH.") && r?.batch_header?.payout_batch_id && r.batch_header.batch_status) {
+      await applyBatchUpdate(db, r.batch_header.payout_batch_id, r.batch_header.batch_status, "WEBHOOK");
     }
     await db.webhookEvent.update({
       where: { id: event.id },

@@ -356,7 +356,8 @@ model Decision {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  @@index([disruptionId])
+  // One decision per disruption: a double click or replayed approval cannot create a second one.
+  @@unique([disruptionId])
 }
 
 // ---------------------------------------------------------------- bookings and passengers
@@ -634,4 +635,13 @@ model AuditEvent {
   updatedAt  DateTime  @updatedAt
 
   @@index([entityType, entityId])
+}
+
+// Simple Postgres-backed rate limit counters (docs/SPEC.md 13): one row per key and window.
+model RateLimit {
+  key         String   @id
+  count       Int
+  windowStart DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

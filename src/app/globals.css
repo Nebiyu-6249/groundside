@@ -68,3 +68,32 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Explicit themes: the ops console defaults to dark, the passenger page to light (SPEC 12). */
+[data-theme="dark"] {
+  --background: var(--ink);
+  --foreground: #e8e4da;
+  --surface: var(--ink-2);
+  --muted: #9aa3b2;
+  --line: var(--ink-3);
+  --amber: #f2a93b;
+  --green: #4cc27a;
+  --red: #f07167;
+  color-scheme: dark;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+[data-theme="light"] {
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --surface: #ffffff;
+  --muted: #5b6472;
+  --line: #d6d0c3;
+  --amber: #a85f00;
+  --green: #1f7a3d;
+  --red: #b42318;
+  color-scheme: light;
+  background: var(--background);
+  color: var(--foreground);
+}

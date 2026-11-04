@@ -19,7 +19,9 @@ async function main() {
       console.log("Demo data already exists. Run npm run reset-demo to replace it.");
       return;
     }
-    for (const r of await seedDemo(db, { size, pool, unregisteredPattern })) {
+    const { users, scenarios } = await seedDemo(db, { size, pool, unregisteredPattern });
+    for (const u of users) console.log(`User ${u}`);
+    for (const r of scenarios) {
       console.log(`Scenario ${r.scenario}: ${r.passengers} passengers, ${r.entitlements} entitlements (${size.toLowerCase()} run)`);
     }
   } finally {
