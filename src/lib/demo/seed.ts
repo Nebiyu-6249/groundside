@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { airlinePolicySchema, computePassenger, type Airport, type DisruptionInput, type PassengerInput } from "@/lib/engine";
+import { seedUsers } from "@/lib/auth/users";
 import { loadRulePack, statusMap } from "@/lib/rules/pack";
 import { fullManifest, payoutReceiver, quickManifest, seededRandom, type ManifestEntry } from "./manifest";
 import { loadScenarioWeather } from "@/lib/weather/scenario";
@@ -206,6 +207,7 @@ async function seedScenario(db: PrismaClient, scenario: Scenario, airlineId: str
 }
 
 export async function seedDemo(db: PrismaClient, opts: SeedOptions) {
+  const users = await seedUsers(db);
   const airports = loadAirports();
   for (const a of airports) {
     await db.airport.upsert({ where: { icao: a.icao }, create: a, update: a });
@@ -221,5 +223,5 @@ export async function seedDemo(db: PrismaClient, opts: SeedOptions) {
   for (const key of SCENARIO_KEYS) {
     results.push(await seedScenario(db, loadScenario(key), airline.id, byIcao, opts));
   }
-  return results;
+  return { users, scenarios: results };
 }
