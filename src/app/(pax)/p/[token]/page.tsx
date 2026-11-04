@@ -6,6 +6,7 @@ import { euros, localTime } from "@/lib/format";
 import { CONSENT_TEXT } from "@/lib/ops/passenger-choice";
 import { offerByToken, type PassengerView } from "@/lib/pax/offer";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
+import { refreshRefunds } from "@/lib/ops/refunds";
 import { chooseTravel, choosePayment } from "./actions";
 import { PaxRefresh, PaymentForm, TravelForm } from "./forms";
 
@@ -50,11 +51,13 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
       </main>
     );
   }
-  const inFlight = v.entitlements.some((e) => e.payoutStatus && ["CREATING", "PENDING", "ONHOLD", "UNCLAIMED"].includes(e.payoutStatus));
+  const refundInFlight = v.refundStatus !== null && !["COMPLETED", "FAILED", "CANCELLED"].includes(v.refundStatus);
+  const inFlight = refundInFlight || v.entitlements.some((e) => e.payoutStatus && ["CREATING", "PENDING", "ONHOLD", "UNCLAIMED"].includes(e.payoutStatus));
   if (inFlight) {
-    const { disruptionId } = await db.passenger.findUniqueOrThrow({ where: { id: v.passengerId }, select: { disruptionId: true } });
+    const disruptionId = v.disruptionId;
     try {
       await reconcileDisruption(db, disruptionId);
+      if (refundInFlight) await refreshRefunds(db, disruptionId);
       v = (await offerByToken(db, token)) ?? v;
     } catch {
       // PayPal unreachable: show the stored state.
@@ -89,7 +92,7 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
         <h2 className="font-medium">What you get</h2>
         {comp && comp.amountCents > 0 && !denied ? (
           comp.status === "PENDING_DECISION" ? (
-            <p className="mt-2">You may also be owed <strong className="font-mono">{eurWords(comp.amountCents)}</strong> compensation. The airline is checking what caused the disruption, and this page will show the decision.</p>
+            <p className="mt-2">You may be owed <strong className="font-mono">{eurWords(comp.amountCents)}</strong> compensation. The airline is checking what caused the disruption, and this page will show the decision.</p>
           ) : (
             <p className="mt-2 text-lg">You will receive <strong className="font-mono">{eurWords(comp.amountCents)}</strong> compensation.</p>
           )
@@ -123,7 +126,17 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
       {v.type === "CANCELLATION" ? (
         <section className="mt-6">
           {v.choice === "UNDECIDED" ? <TravelForm action={chooseTravel.bind(null, token)} /> : (
-            <p>Your choice: {v.choice === "REFUND" ? `refund of your ticket${refund ? ` (${euros(refund.amountCents)})` : ""}, back to your original payment method (outside this demo)` : "the new flight we booked for you"}.</p>
+            v.choice === "REFUND" ? (
+              <div className="space-y-1">
+                <p>Your choice: refund of your ticket{refund ? ` (${euros(refund.amountCents)})` : ""}{v.refundToPaypal ? ", back to the PayPal payment you booked with." : ", back to your original payment method (handled outside this demo)."}</p>
+                {v.refundToPaypal ? (
+                  <p className="text-sm" aria-live="polite">Refund status: <strong>{v.refundStatus === "COMPLETED" ? "refunded to your PayPal payment" : v.refundStatus === "FAILED" || v.refundStatus === "CANCELLED" ? "not completed; the airline has been told and will retry" : v.refundStatus ? "being processed by PayPal" : "requested"}</strong></p>
+                ) : null}
+                <p className="text-xs text-muted">The airline must refund within 7 days of your choice <span className="font-mono">(REG-8-1)</span>.</p>
+              </div>
+            ) : (
+              <p>Your choice: the new flight we booked for you.</p>
+            )
           )}
         </section>
       ) : null}

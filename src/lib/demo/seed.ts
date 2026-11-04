@@ -44,8 +44,10 @@ export async function resetDemo(db: PrismaClient): Promise<{ disruptions: number
     db.payoutItem.deleteMany({ where: { entitlement: { passengerId: { in: passengerIds } } } }),
     db.payoutBatch.deleteMany({ where: { id: { in: batchIds }, items: { none: {} } } }),
     db.disruption.deleteMany({ where: { id: { in: ids } } }),
-    db.refund.deleteMany({ where: { bookingId: { in: bookingIds } } }),
-    db.booking.deleteMany({ where: { id: { in: bookingIds }, passengers: { none: {} } } }),
+    // Bookings paid on the demo booking page hold real sandbox captures and refunds: they are
+    // kept, and only leave the flight they joined.
+    db.refund.deleteMany({ where: { bookingId: { in: bookingIds }, booking: { paypalOrderId: null } } }),
+    db.booking.deleteMany({ where: { id: { in: bookingIds }, paypalOrderId: null, passengers: { none: {} } } }),
     db.flight.deleteMany({ where: { id: { in: flightIds }, disruptions: { none: {} } } }),
   ]);
   return { disruptions: ids.length };

@@ -50,6 +50,8 @@ export async function processEvent(db: PrismaClient, event: WebhookEventBody): P
         where: { paypalRefundId: event.resource.id },
         data: { status: event.resource.status ?? "COMPLETED" },
       });
+      const { applyRefundStatus } = await import("@/lib/ops/refunds");
+      for (const r of await db.refund.findMany({ where: { paypalRefundId: event.resource.id }, select: { id: true } })) await applyRefundStatus(db, r.id);
     }
     // Payout events go through the same transition functions as polling (SPEC 9.5).
     const r = event.resource as

@@ -120,11 +120,12 @@ async function afterDecision(db: PrismaClient, user: SessionUser, disruptionId: 
  * One offer per passenger with something owed. The link token is random (32 bytes); only its
  * SHA-256 is stored on the offer. The link itself lives only in the simulated email (outbox).
  */
-export async function createOffers(db: PrismaClient, disruptionId: string) {
+export async function createOffers(db: PrismaClient, disruptionId: string, passengerIds?: string[]) {
+  const only = passengerIds ? { id: { in: passengerIds } } : {};
   // Passengers who already have an offer (care released before the decision): what the decision
   // made payable joins their existing choice, and they get an update without a new link.
   const offered = await db.passenger.findMany({
-    where: { disruptionId, offers: { some: {} } },
+    where: { disruptionId, offers: { some: {} }, ...only },
     include: { offers: { orderBy: { createdAt: "desc" }, take: 1 }, entitlements: { where: { status: "READY", kind: { not: "REFUND" } } }, disruption: { include: { flight: true, decisions: true } } },
   });
   for (const p of offered) {
@@ -143,7 +144,7 @@ export async function createOffers(db: PrismaClient, disruptionId: string) {
   }
 
   const passengers = await db.passenger.findMany({
-    where: { disruptionId, offers: { none: {} } },
+    where: { disruptionId, offers: { none: {} }, ...only },
     include: { entitlements: true, disruption: { include: { flight: true } } },
     orderBy: { manifestIndex: "asc" },
   });

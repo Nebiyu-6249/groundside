@@ -36,6 +36,7 @@ interface BookingView {
   currency: string;
   orderStatus: string | null;
   captureId: string | null;
+  joinedFlight: boolean;
   refunds: RefundView[];
 }
 
@@ -146,6 +147,19 @@ export function BookingWidget({ clientId }: { clientId: string | undefined }) {
     return () => clearInterval(timer);
   }, [booking, refundInFlight, refreshBooking]);
 
+  async function joinFlight() {
+    if (!booking) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const { path } = await postJson<{ path: string }>(`/api/demo/bookings/${booking.id}/join`);
+      window.location.assign(path);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not join the flight");
+      setBusy(false);
+    }
+  }
+
   async function requestRefund() {
     if (!booking) return;
     setBusy(true);
@@ -199,14 +213,22 @@ export function BookingWidget({ clientId }: { clientId: string | undefined }) {
               </>
             )}
           </dl>
-          {(!latestRefund || latestRefund.status === "FAILED") && booking.captureId && (
+          {!latestRefund && booking.captureId && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm">DEMO 412 has just been cancelled. Join it as a passenger to see your rights, choose a refund, and get it back on this PayPal payment.</p>
+              <button type="button" onClick={joinFlight} disabled={busy} className="rounded bg-amber px-4 py-2 text-sm font-medium text-ink disabled:opacity-60">
+                {busy ? "Opening..." : booking.joinedFlight ? "Open my passenger page" : "Join the cancelled flight"}
+              </button>
+            </div>
+          )}
+          {(!latestRefund || latestRefund.status === "FAILED") && booking.captureId && !booking.joinedFlight && (
             <button
               type="button"
               onClick={requestRefund}
               disabled={busy}
               className="mt-4 rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-60"
             >
-              {busy ? "Requesting refund..." : "Refund this booking in full"}
+              {busy ? "Requesting refund..." : "Or refund this booking directly"}
             </button>
           )}
         </section>

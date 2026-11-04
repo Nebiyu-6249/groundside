@@ -147,7 +147,7 @@ export async function getDemoBooking(bookingId: string) {
   const db = getDb();
   const booking = await db.booking.findUnique({
     where: { id: bookingId },
-    include: { refunds: { orderBy: { createdAt: "desc" } } },
+    include: { refunds: { orderBy: { createdAt: "desc" } }, passengers: { select: { id: true } } },
   });
   if (!booking) throw new DemoBookingError("Unknown booking", 404);
 
@@ -167,6 +167,7 @@ export async function getDemoBooking(bookingId: string) {
     currency: booking.currency,
     orderStatus: booking.orderStatus,
     captureId: booking.paypalCaptureId,
+    joinedFlight: booking.passengers.length > 0,
     refunds: booking.refunds.map((r) => ({
       id: r.id,
       paypalRefundId: r.paypalRefundId,

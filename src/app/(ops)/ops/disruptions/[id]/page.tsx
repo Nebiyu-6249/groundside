@@ -10,7 +10,7 @@ import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
-import { approve, assess, deny, openAsPassenger, releaseCareNow, simulateResponses, syncWithPaypal } from "../../actions";
+import { approve, assess, deny, openAsPassenger, releaseCareNow, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 
@@ -243,6 +243,30 @@ function Payouts({ d }: { d: DisruptionDetail }) {
           </table>
         </section>
       ))}
+      <section>
+        <h2 className="font-medium">Refunds (Art 8(1)(a), <span className="font-mono">REG-8-1</span>: within 7 days of the choice)</h2>
+        {d.refunds.length === 0 ? <p className="mt-1 text-sm text-muted">No passenger has chosen a refund.</p> : (
+          <table className="mt-2 w-full text-left text-xs">
+            <thead className="text-muted"><tr><th className="py-1 font-medium">Passenger</th><th className="font-medium">Booking</th><th className="font-medium">Amount</th><th className="font-medium">Method</th><th className="font-medium">Status</th><th className="font-medium">Due by</th><th /></tr></thead>
+            <tbody>
+              {d.refunds.map((r) => {
+                const daysLeft = r.daysLeft;
+                return (
+                  <tr key={r.passengerId} className="border-t border-line align-top">
+                    <td className="py-1">{r.name}</td>
+                    <td className="font-mono">{r.pnr}</td>
+                    <td className="font-mono tabular">{euros(r.amountCents)}</td>
+                    <td>{r.viaPaypal ? "PayPal capture (Payments v2)" : "Original payment method, outside this demo"}</td>
+                    <td>{r.viaPaypal ? <>{r.refundStatus ?? "not requested"}{r.paypalRefundId ? <span className="ml-1 font-mono text-muted">{r.paypalRefundId}</span> : null}{r.lastError ? <span className="block text-red">{r.lastError}</span> : null}</> : "Recorded"}</td>
+                    <td className="font-mono tabular">{r.dueBy ? `${utcTime(r.dueBy)} (${daysLeft !== null && daysLeft >= 0 ? `${daysLeft} day${daysLeft === 1 ? "" : "s"} left` : "overdue"})` : "-"}</td>
+                    <td>{r.viaPaypal && (!r.refundStatus || r.refundStatus === "FAILED") ? <ActionButton action={retryRefund.bind(null, d.id, r.passengerId)} label="Request refund" pendingLabel="Requesting" /> : null}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </section>
       <section>
         <h2 className="font-medium">Webhook log</h2>
         {d.webhooks.length === 0 ? <p className="mt-1 text-sm text-muted">No webhook events yet. Polling keeps the status correct without them.</p> : (
