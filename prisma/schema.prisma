@@ -454,6 +454,8 @@ model Offer {
   consentTextVersion String?
   consentAt          DateTime?
   ibanLast4          String?
+  // Set when the passenger asks to switch an unclaimed PayPal payout to bank transfer (SPEC F10).
+  bankSwitchRequestedAt DateTime?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
 

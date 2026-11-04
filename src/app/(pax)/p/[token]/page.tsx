@@ -7,8 +7,8 @@ import { CONSENT_TEXT } from "@/lib/ops/passenger-choice";
 import { offerByToken, type PassengerView } from "@/lib/pax/offer";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { refreshRefunds } from "@/lib/ops/refunds";
-import { chooseTravel, choosePayment } from "./actions";
-import { PaxRefresh, PaymentForm, TravelForm } from "./forms";
+import { chooseTravel, choosePayment, switchToBank } from "./actions";
+import { BankSwitchForm, PaxRefresh, PaymentForm, TravelForm } from "./forms";
 
 export const metadata: Metadata = { title: "Your flight - Demo Air", robots: { index: false } };
 
@@ -149,6 +149,20 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
             <h2 className="font-medium">Your payment</h2>
             <p className="text-sm">Paid through PayPal. In this demo the money goes to a sandbox account (demo pool): <span className="font-mono">{v.receiver ?? "none"}</span>.</p>
             <Tracker v={v} />
+            {v.unclaimed.length ? (
+              <div className="rounded border border-amber p-3 text-sm" role="status">
+                {v.offer.bankSwitchRequested ? (
+                  <p>You asked to switch to bank transfer. The PayPal payment must first come back to the airline (at the latest after 30 days unclaimed); then the airline pays by bank transfer to the account ending {v.offer.ibanLast4}. You will not be paid twice.</p>
+                ) : (
+                  <>
+                    {v.unclaimed.map((u, i) => (
+                      <p key={i}>{euros(u.amountCents)} is waiting for <span className="font-mono">{u.receiver}</span>. Claim it by {u.claimBy.slice(0, 10)} by creating or logging in to a PayPal account with that email address.</p>
+                    ))}
+                    <div className="mt-3"><BankSwitchForm action={switchToBank.bind(null, token)} /></div>
+                  </>
+                )}
+              </div>
+            ) : null}
           </div>
         ) : (
           <p>You chose bank transfer to the account ending {v.offer.ibanLast4}. Bank transfers are recorded only; they are handled outside this demo.</p>

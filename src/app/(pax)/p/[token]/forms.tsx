@@ -35,6 +35,21 @@ export function PaymentForm({ action, consentText }: { action: (prev: PaxState, 
   );
 }
 
+export function BankSwitchForm({ action }: { action: (prev: PaxState, form: FormData) => Promise<PaxState> }) {
+  const [state, run, pending] = useActionState(action, { error: null });
+  return (
+    <form action={run} className="space-y-2">
+      <label htmlFor="switchIban" className="block text-sm">Switch to bank transfer: last 4 characters of your IBAN</label>
+      <div className="flex gap-2">
+        <input id="switchIban" name="ibanLast4" required minLength={4} maxLength={4} autoComplete="off" className="w-28 rounded border border-line bg-surface px-3 py-2 font-mono" />
+        <button type="submit" disabled={pending} className="rounded border border-ink px-4 py-2 text-sm disabled:opacity-60">{pending ? "Saving" : "Switch"}</button>
+      </div>
+      {state.error ? <p role="alert" className="text-sm text-red">{state.error}</p> : null}
+      {state.ok ? <p role="status" className="text-sm">{state.ok}</p> : null}
+    </form>
+  );
+}
+
 export function TravelForm({ action }: { action: (prev: PaxState, form: FormData) => Promise<PaxState> }) {
   const [state, run, pending] = useActionState(action, { error: null });
   return (

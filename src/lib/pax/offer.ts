@@ -11,7 +11,7 @@ export async function offerByToken(db: PrismaClient, token: string) {
     include: {
       passenger: {
         include: {
-          entitlements: { include: { payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, updatedAt: true } } } },
+          entitlements: { include: { payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, updatedAt: true, receiver: true, amountCents: true, createdAt: true } } } },
           disruption: { include: { flight: { include: { originAirport: true, destinationAirport: true } }, decisions: true } },
           booking: { select: { paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true } } } },
         },
@@ -29,7 +29,8 @@ export async function offerByToken(db: PrismaClient, token: string) {
     receiver: p.payoutReceiver,
     receiverKind: p.receiverKind,
     choice: p.choice,
-    offer: { paymentChoice: offer.paymentChoice, paypalEmail: offer.paypalEmail, consentAt: offer.consentAt?.toISOString() ?? null, ibanLast4: offer.ibanLast4 },
+    offer: { paymentChoice: offer.paymentChoice, paypalEmail: offer.paypalEmail, consentAt: offer.consentAt?.toISOString() ?? null, ibanLast4: offer.ibanLast4, bankSwitchRequested: offer.bankSwitchRequestedAt !== null },
+    unclaimed: p.entitlements.flatMap((e) => e.payoutItems.filter((i) => i.status === "UNCLAIMED").map((i) => ({ amountCents: i.amountCents, receiver: i.receiver, claimBy: new Date(i.createdAt.getTime() + 30 * 86_400_000).toISOString() }))),
     flight: { number: f.flightNumber, origin: f.originAirport.city, originIata: f.originAirport.iata, destination: f.destinationAirport.city, destinationIata: f.destinationAirport.iata, schedDep: f.schedDep.toISOString(), tz: f.originAirport.tz },
     type: p.disruption.type,
     careReleased: p.disruption.careReleasedAt !== null,
