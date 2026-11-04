@@ -32,10 +32,11 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Next steps
 
-1. **Deploy to Render:** `npm run deploy:render` (`docs/DEPLOY.md`) does everything except creating the Render API key, which the user adds to `.env` as `RENDER_API_KEY`.
-   - The hosted database `groundside_hosted` is already created, migrated and seeded (2026-11-04).
+1. **Hosted demo:** https://groundside.onrender.com (Render service `srv-dblo5b1srm7s73f7rntg`, free plan, Frankfurt, auto-deploys on push to `main`).
+   - Deployed with `npm run deploy:render` through the Render CLI (installed with winget; the user ran `render login`). See `docs/DEPLOY.md`.
+   - The database is `groundside_hosted` on the same Neon project.
    - The hosted login is in `scripts/out/hosted-credentials.txt` (git-ignored; Claude Code does not read it).
-   - After the deploy is live: run the Quick run on the hosted URL (Gate 3).
+   - Next: the Quick run on the hosted URL (Gate 3). It needs a sign-in, which the user does.
 2. **Devpost draft:** the user fills in the form; Claude Code provides the text from `docs/DEMO.md` section 5.
 3. **Phase 3 items still open from SPEC** (they could move to Phase 4 or 5): the landing page (`/` is still a placeholder), the judge-mode "Start the judge demo" flow (SPEC 14, Phase 5), and the questions and receipts tabs (Phase 4).
 
