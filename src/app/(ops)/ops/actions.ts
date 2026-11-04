@@ -42,6 +42,7 @@ export async function assess(disruptionId: string): Promise<ActionState> {
 export async function approve(disruptionId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
   const user = await requireUser("DUTY_MANAGER");
   const db = getDb();
+  if (String(form.get("confirm") ?? "").trim() !== "APPROVE") return { error: "Type APPROVE to confirm." };
   // SPEC F6: the Readiness panel is all green, or the duty manager acknowledges what is open.
   const open = (await loadReadiness(db, id.parse(disruptionId))).filter((c) => !c.ok);
   if (open.length && form.get("acknowledge") !== "on") return { error: `Acknowledge the open readiness checks first: ${open.map((c) => c.label).join(", ")}.` };

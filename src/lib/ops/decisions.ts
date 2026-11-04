@@ -129,23 +129,25 @@ export async function createOffers(db: PrismaClient, disruptionId: string, passe
     include: { offers: { orderBy: { createdAt: "desc" }, take: 1 }, entitlements: { where: { status: "READY", kind: { not: "REFUND" } } }, disruption: { include: { flight: true, decisions: true } } },
   });
   for (const p of offered) {
-    if (p.entitlements.length === 0) continue;
-    const choice = p.offers[0].paymentChoice;
-    await db.entitlement.updateMany({ where: { id: { in: p.entitlements.map((e) => e.id) } }, data: { status: choice === "NONE" ? "OFFERED" : "ACCEPTED" } });
+    // The update is about the decision: every offered passenger hears it, even with nothing new
+    // to pay (after a denial).
     const decision = p.disruption.decisions[0];
+    if (!decision) continue;
+    const choice = p.offers[0].paymentChoice;
+    if (p.entitlements.length) await db.entitlement.updateMany({ where: { id: { in: p.entitlements.map((e) => e.id) } }, data: { status: choice === "NONE" ? "OFFERED" : "ACCEPTED" } });
     const header = p.displayEmail ? `To: ${p.displayEmail} (simulated email, not sent)` : "Not delivered: no email address on file.";
     await db.outboxMessage.create({
       data: {
         passengerId: p.id,
         kind: "NOTICE",
-        renderedText: `${header}\n\nDear ${p.displayName},\n\nUpdate on flight ${p.disruption.flight.flightNumber}: ${decision?.kind === "DENY_COMPENSATION" ? "the airline has decided that no compensation is owed. Your meal allowance and other care are not affected" : "compensation has been approved"}. Open your personal page with the link in our first email for the details${choice === "NONE" ? " and to choose how to be paid" : ""}.\n\nDemo Air (fictional carrier). Demo data.`,
+        renderedText: `${header}\n\nDear ${p.displayName},\n\nUpdate on flight ${p.disruption.flight.flightNumber}: ${decision?.kind === "DENY_COMPENSATION" ? "the airline has decided that no compensation is owed. Your meal allowance and other care are not affected. You can contest this with the airline or with the national enforcement body in the country of departure" : "compensation has been approved"}. Open your personal page with the link in our first email for the details${choice === "NONE" ? " and to choose how to be paid" : ""}.\n\nDemo Air (fictional carrier). Demo data.`,
       },
     });
   }
 
   const passengers = await db.passenger.findMany({
     where: { disruptionId, offers: { none: {} }, ...only },
-    include: { entitlements: true, disruption: { include: { flight: true } } },
+    include: { entitlements: true, disruption: { include: { flight: true, decisions: true } } },
     orderBy: { manifestIndex: "asc" },
   });
   let created = 0;
@@ -163,7 +165,7 @@ export async function createOffers(db: PrismaClient, disruptionId: string, passe
       data: {
         passengerId: p.id,
         kind: "NOTICE",
-        renderedText: `${header}\n\nDear ${p.displayName},\n\nYour flight ${f.flightNumber} was ${p.disruption.type === "CANCELLATION" ? "cancelled" : "delayed"}. Your personal page explains what you are entitled to and how to get paid:\n${link}\n\nDemo Air (fictional carrier). Demo data.`,
+        renderedText: `${header}\n\nDear ${p.displayName},\n\nYour flight ${f.flightNumber} was ${p.disruption.type === "CANCELLATION" ? "cancelled" : "delayed"}. Your personal page explains what you are entitled to and how to get paid:\n${link}${p.disruption.decisions[0]?.kind === "DENY_COMPENSATION" ? "\n\nThe airline has decided that no compensation is owed; meals and other care are still provided. You can contest this with the airline or with the national enforcement body in the country of departure." : ""}\n\nDemo Air (fictional carrier). Demo data.`,
       },
     });
     created++;
