@@ -107,7 +107,13 @@ Test the checkout in a regular browser (Chrome, Edge, Firefox); embedded browser
 - **Start:** `npm start`
 - **Health check:** `/api/health`
 
-Values marked `sync: false` are entered in the Render dashboard. After the first deploy, set `APP_BASE_URL`, point a PayPal sandbox webhook at `<service URL>/api/webhooks/paypal` and set `PAYPAL_WEBHOOK_ID`. Then seed the hosted database from your machine with `npm run seed:hosted`: it reads `.env.hosted` (git-ignored) on top of `.env`. Step by step: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+`npm run deploy:render` deploys from the values in `.env` plus a `RENDER_API_KEY`. It does four things:
+- creates a separate hosted database on Neon, migrates and seeds it
+- creates or updates the Render service
+- points a PayPal sandbox webhook at it
+- deploys and waits until the service is live
+
+Step by step: [`docs/DEPLOY.md`](docs/DEPLOY.md).
 
 ## Demo data
 

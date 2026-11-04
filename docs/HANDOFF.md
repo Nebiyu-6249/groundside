@@ -32,7 +32,10 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Next steps
 
-1. **Deploy to Render:** the user does the account steps in `docs/DEPLOY.md` (rotate secrets, Neon `hosted` branch, Render Blueprint, webhook, `npm run seed:hosted` with `.env.hosted`). Then run the Quick run on the hosted URL (Gate 3). User chose "Deploy first" (2026-11-04), before checking the ops screens locally.
+1. **Deploy to Render:** `npm run deploy:render` (`docs/DEPLOY.md`) does everything except creating the Render API key, which the user adds to `.env` as `RENDER_API_KEY`.
+   - The hosted database `groundside_hosted` is already created, migrated and seeded (2026-11-04).
+   - The hosted login is in `scripts/out/hosted-credentials.txt` (git-ignored; Claude Code does not read it).
+   - After the deploy is live: run the Quick run on the hosted URL (Gate 3).
 2. **Devpost draft:** the user fills in the form; Claude Code provides the text from `docs/DEMO.md` section 5.
 3. **Phase 3 items still open from SPEC** (they could move to Phase 4 or 5): the landing page (`/` is still a placeholder), the judge-mode "Start the judge demo" flow (SPEC 14, Phase 5), and the questions and receipts tabs (Phase 4).
 

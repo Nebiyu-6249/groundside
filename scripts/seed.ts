@@ -1,7 +1,6 @@
 // npm run seed [-- --full]       seed the owner's demo data (refuses if it already exists)
 // npm run reset-demo [-- --full] remove the owner's demo data and seed it again
-// npm run seed:hosted / reset-demo:hosted  the same against the hosted database: .env.hosted
-//                                         (git-ignored) overrides .env, and DEMO_OPS_PASSWORD is required
+// --hosted (used by scripts/deploy-render.ts) requires DEMO_OPS_PASSWORD and prints the target host
 // Quick run: 12 passengers per scenario. Full run: 180 (A) and 150 (B).
 
 import { getDb } from "../src/lib/db";
