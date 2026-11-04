@@ -75,6 +75,13 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
   const webhooks = paypalIds.length
     ? await db.webhookEvent.findMany({ where: { resourceId: { in: paypalIds } }, orderBy: { receivedAt: "asc" }, select: { id: true, eventType: true, verified: true, processedAt: true, error: true, receivedAt: true, resourceId: true } })
     : [];
+  // Refunds (Art 8(1)(a), REG-8-1): due within 7 days of the passenger's choice.
+  const refundPassengers = await db.passenger.findMany({
+    where: { disruptionId: id, choice: "REFUND" },
+    orderBy: { manifestIndex: "asc" },
+    select: { id: true, displayName: true, booking: { select: { pnr: true, paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true, lastError: true } } } }, entitlements: { where: { kind: "REFUND" }, select: { amountCents: true, status: true } } },
+  });
+  const choiceEvents = await db.auditEvent.findMany({ where: { action: "TRAVEL_CHOICE", entityId: { in: refundPassengers.map((p) => p.id) } }, orderBy: { createdAt: "desc" }, select: { entityId: true, createdAt: true } });
   const assessment = d.assessments[0] ?? null;
   const out = (assessment?.output ?? null) as { assessment: A1Output | null; notice: string | null } | null;
   const rules = loadRulePack();
@@ -129,6 +136,24 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
       };
     }),
     batches: batches.map((b) => ({ id: b.id, senderBatchId: b.senderBatchId, paypalBatchId: b.paypalBatchId, kind: b.kind, status: b.status, itemCount: b.itemCount, totalCents: b.totalCents, lastError: b.lastError, lastSyncedAt: b.lastSyncedAt?.toISOString() ?? null, createdAt: b.createdAt.toISOString(), items: b.items.map((i) => ({ id: i.id, name: i.entitlement.passenger.displayName, kind: i.entitlement.kind, receiver: i.receiver, amountCents: i.amountCents, status: i.status, paypalItemId: i.paypalItemId, lastError: i.lastError })) })),
+    refunds: refundPassengers.map((p) => {
+      const chosenAt = choiceEvents.find((e) => e.entityId === p.id)?.createdAt ?? null;
+      const r = p.booking.refunds[0];
+      return {
+        passengerId: p.id,
+        name: p.displayName,
+        pnr: p.booking.pnr,
+        amountCents: p.entitlements[0]?.amountCents ?? 0,
+        entitlementStatus: p.entitlements[0]?.status ?? null,
+        viaPaypal: p.booking.paymentMethod === "PAYPAL" && p.booking.paypalCaptureId !== null,
+        refundStatus: r?.status ?? null,
+        paypalRefundId: r?.paypalRefundId ?? null,
+        lastError: r?.lastError ?? null,
+        chosenAt: chosenAt?.toISOString() ?? null,
+        dueBy: chosenAt ? new Date(chosenAt.getTime() + 7 * 86_400_000).toISOString() : null,
+        daysLeft: chosenAt ? Math.ceil((chosenAt.getTime() + 7 * 86_400_000 - Date.now()) / 86_400_000) : null,
+      };
+    }),
     webhooks: webhooks.map((w) => ({ ...w, receivedAt: w.receivedAt.toISOString(), processedAt: w.processedAt?.toISOString() ?? null })),
     audit: auditEvents.map((a) => ({ id: a.id, at: a.createdAt.toISOString(), actorType: a.actorType, action: a.action, summary: a.summary })),
     rules: Object.fromEntries(rules.map((r) => [r.id, { title: r.title, kind: r.kind, summary: r.summary, url: r.url, excerpt: r.excerpt }])),

@@ -13,6 +13,7 @@ export async function offerByToken(db: PrismaClient, token: string) {
         include: {
           entitlements: { include: { payoutItems: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, updatedAt: true } } } },
           disruption: { include: { flight: { include: { originAirport: true, destinationAirport: true } }, decisions: true } },
+          booking: { select: { paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true } } } },
         },
       },
     },
@@ -32,6 +33,9 @@ export async function offerByToken(db: PrismaClient, token: string) {
     flight: { number: f.flightNumber, origin: f.originAirport.city, originIata: f.originAirport.iata, destination: f.destinationAirport.city, destinationIata: f.destinationAirport.iata, schedDep: f.schedDep.toISOString(), tz: f.originAirport.tz },
     type: p.disruption.type,
     careReleased: p.disruption.careReleasedAt !== null,
+    disruptionId: p.disruptionId,
+    refundToPaypal: p.booking.paymentMethod === "PAYPAL" && p.booking.paypalCaptureId !== null,
+    refundStatus: p.booking.refunds[0]?.status ?? null,
     decision: decision ? { kind: decision.kind, reason: decision.reason, citations: decision.citations.map((id) => ({ id, title: rules.get(id)?.title ?? id, summary: rules.get(id)?.summary ?? "" })) } : null,
     entitlements: p.entitlements.map((e) => ({
       kind: e.kind,

@@ -4,6 +4,7 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { audit } from "./audit";
 import { recomputeEntitlements } from "./engine-input";
+import { requestPassengerRefund } from "./refunds";
 
 export const CONSENT_VERSION = "consent.v1";
 export const CONSENT_TEXT =
@@ -58,4 +59,12 @@ export async function recordTravelChoice(db: PrismaClient, passengerId: string, 
   await audit(db, { actorType: actor, actorId: passengerId, action: "TRAVEL_CHOICE", entityType: "Passenger", entityId: passengerId, summary: choice === "REFUND" ? "Chose a refund instead of re-routing" : "Chose re-routing" });
   // A refund ends care (Commission guidelines 2024, 4.3.1); the engine re-run applies it.
   await recomputeEntitlements(db, p.disruptionId, [passengerId]);
+  if (choice === "REFUND") {
+    try {
+      await requestPassengerRefund(db, passengerId);
+    } catch (err) {
+      // PayPal unreachable: the choice stands; the refund can be retried from the ops console.
+      await audit(db, { actorType: "SYSTEM", action: "REFUND_FAILED", entityType: "Passenger", entityId: passengerId, summary: `Refund request failed: ${err instanceof Error ? err.message : "unknown error"}` });
+    }
+  }
 }

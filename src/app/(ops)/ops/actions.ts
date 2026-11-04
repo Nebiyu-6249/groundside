@@ -11,6 +11,7 @@ import { approveCompensation, DecisionError, passengerLink, releaseCare, signDen
 import { payDisruption } from "@/lib/payouts/orchestrator";
 import { audit } from "@/lib/ops/audit";
 import { loadReadiness } from "@/lib/ops/readiness";
+import { refreshRefunds, requestPassengerRefund } from "@/lib/ops/refunds";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { hit } from "@/lib/rate-limit";
 
@@ -89,8 +90,19 @@ export async function syncWithPaypal(disruptionId: string): Promise<ActionState>
   const db = getDb();
   await payDisruption(db, id.parse(disruptionId));
   const r = await reconcileDisruption(db, disruptionId, { force: true });
+  const refunds = await refreshRefunds(db, disruptionId);
   revalidatePath(`/ops/disruptions/${disruptionId}`);
-  return { error: null, ok: `Synced with PayPal: ${r.changed} change(s).` };
+  return { error: null, ok: `Synced with PayPal: ${r.changed + refunds} change(s).` };
+}
+
+export async function retryRefund(disruptionId: string, passengerId: string): Promise<ActionState> {
+  await requireUser("DUTY_MANAGER");
+  const db = getDb();
+  const p = await db.passenger.findFirst({ where: { id: id.parse(passengerId), disruptionId: id.parse(disruptionId), choice: "REFUND" }, select: { id: true } });
+  if (!p) return { error: "This passenger has not chosen a refund." };
+  const r = await requestPassengerRefund(db, p.id);
+  revalidatePath(`/ops/disruptions/${disruptionId}`);
+  return { error: null, ok: r === "REQUESTED" ? "Refund requested from PayPal." : r === "OUTSIDE_DEMO" ? "Recorded: refund to the original payment method, outside this demo." : "No refund is owed." };
 }
 
 export async function openAsPassenger(passengerId: string) {
