@@ -86,8 +86,17 @@ The AI recommends; code calculates; only a human can deny compensation. Model ID
 
   Anything doubtful goes to a person in the ops Receipts tab.
 - **A4 passenger questions** (`src/lib/ai/a4/`, prompt `prompts/A4.v1.md`): answers only from the passenger's case file, built by code. Code checks that every amount in the answer appears in the case file and that every citation is a verified rule. It always offers a person for legal advice, disputes and requests for a human. "Talk to a person" opens a ticket in the ops Questions tab.
+- **A3 notice writer** (`src/lib/ai/a3/`, prompt `prompts/A3.v1.md`): writes one notice per flight and outcome (compensation approved, denied with care, care only) using placeholders only. Code checks:
+  - required placeholders are present, and no others
+  - no amounts of money appear in the text
+  - only verified citations
+  - sentences stay short
+  - a denial names the national enforcement body
+
+  Code fills the name, amounts, signed reason and link for each passenger. If live AI is off, a code template is used.
 - **Evals:**
   - `npm run eval`: A1, 12 cases, report in `docs/EVAL_REPORT.md`
+  - `npm run eval:a3`: notices, report in `docs/EVAL_A3.md`
   - `npm run eval:a2`: receipts, report in `docs/EVAL_A2.md`
   - `npm run eval:a4`: questions, report in `docs/EVAL_A4.md`
 

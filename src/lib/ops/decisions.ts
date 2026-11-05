@@ -9,6 +9,7 @@ import type { SessionUser } from "@/lib/auth/session";
 import { audit } from "./audit";
 import { recomputeEntitlements } from "./engine-input";
 import { appBaseUrl } from "@/lib/app-url";
+import { noticeFor, outcomeFor, renderNotice } from "./notices";
 
 export class DecisionError extends Error {
   constructor(message: string) {
@@ -126,7 +127,7 @@ export async function createOffers(db: PrismaClient, disruptionId: string, passe
   // made payable joins their existing choice, and they get an update without a new link.
   const offered = await db.passenger.findMany({
     where: { disruptionId, offers: { some: {} }, ...only },
-    include: { offers: { orderBy: { createdAt: "desc" }, take: 1 }, entitlements: { where: { status: "READY", kind: { not: "REFUND" } } }, disruption: { include: { flight: true, decisions: true } } },
+    include: { offers: { orderBy: { createdAt: "desc" }, take: 1 }, entitlements: true, disruption: { include: { flight: true, decisions: true } } },
   });
   for (const p of offered) {
     // The update is about the decision: every offered passenger hears it, even with nothing new
@@ -134,15 +135,9 @@ export async function createOffers(db: PrismaClient, disruptionId: string, passe
     const decision = p.disruption.decisions[0];
     if (!decision) continue;
     const choice = p.offers[0].paymentChoice;
-    if (p.entitlements.length) await db.entitlement.updateMany({ where: { id: { in: p.entitlements.map((e) => e.id) } }, data: { status: choice === "NONE" ? "OFFERED" : "ACCEPTED" } });
-    const header = p.displayEmail ? `To: ${p.displayEmail} (simulated email, not sent)` : "Not delivered: no email address on file.";
-    await db.outboxMessage.create({
-      data: {
-        passengerId: p.id,
-        kind: "NOTICE",
-        renderedText: `${header}\n\nDear ${p.displayName},\n\nUpdate on flight ${p.disruption.flight.flightNumber}: ${decision?.kind === "DENY_COMPENSATION" ? "the airline has decided that no compensation is owed. Your meal allowance and other care are not affected. You can contest this with the airline or with the national enforcement body in the country of departure" : "compensation has been approved"}. Open your personal page with the link in our first email for the details${choice === "NONE" ? " and to choose how to be paid" : ""}.\n\nDemo Air (fictional carrier). Demo data.`,
-      },
-    });
+    const ready = p.entitlements.filter((e) => e.status === "READY" && e.kind !== "REFUND");
+    if (ready.length) await db.entitlement.updateMany({ where: { id: { in: ready.map((e) => e.id) } }, data: { status: choice === "NONE" ? "OFFERED" : "ACCEPTED" } });
+    await sendDecisionNotice(db, p, decision, "your personal page (use the link in our first email)");
   }
 
   const passengers = await db.passenger.findMany({
@@ -160,17 +155,39 @@ export async function createOffers(db: PrismaClient, disruptionId: string, passe
     await db.entitlement.updateMany({ where: { passengerId: p.id, status: "READY", kind: { not: "REFUND" } }, data: { status: "OFFERED" } });
     const link = `${appBaseUrl()}/p/${token}`;
     const f = p.disruption.flight;
-    const header = p.displayEmail ? `To: ${p.displayEmail} (simulated email, not sent)` : "Not delivered: no email address on file. Ops can open the page from the passenger list.";
-    await db.outboxMessage.create({
-      data: {
-        passengerId: p.id,
-        kind: "NOTICE",
-        renderedText: `${header}\n\nDear ${p.displayName},\n\nYour flight ${f.flightNumber} was ${p.disruption.type === "CANCELLATION" ? "cancelled" : "delayed"}. Your personal page explains what you are entitled to and how to get paid:\n${link}${p.disruption.decisions[0]?.kind === "DENY_COMPENSATION" ? "\n\nThe airline has decided that no compensation is owed; meals and other care are still provided. You can contest this with the airline or with the national enforcement body in the country of departure." : ""}\n\nDemo Air (fictional carrier). Demo data.`,
-      },
-    });
+    const decision = p.disruption.decisions[0];
+    if (decision) {
+      await sendDecisionNotice(db, p, decision, link);
+    } else {
+      // Before a decision (care released, or a demo booking joining): a short code notice.
+      await db.outboxMessage.create({
+        data: {
+          passengerId: p.id,
+          kind: "NOTICE",
+          renderedText: `${header(p.displayEmail)}\n\nDear ${p.displayName},\n\nYour flight ${f.flightNumber} was ${p.disruption.type === "CANCELLATION" ? "cancelled" : "delayed"}. Your personal page explains what you are entitled to and how to get paid:\n${link}\n\nDemo Air (fictional carrier). Demo data.`,
+        },
+      });
+    }
     created++;
   }
   return { created };
+}
+
+function header(email: string | null) {
+  return email ? `To: ${email} (simulated email, not sent)` : "Not delivered: no email address on file. Ops can open the page from the passenger list.";
+}
+
+/** The decision notice (A3 or template, cached per outcome), filled in for one passenger. */
+async function sendDecisionNotice(
+  db: PrismaClient,
+  p: { id: string; displayName: string; displayEmail: string | null; disruptionId: string; entitlements: { kind: string; amountCents: number; status: string }[] },
+  decision: { kind: string; reason: string },
+  link: string,
+) {
+  const owed = (kind: string) => p.entitlements.find((e) => e.kind === kind && e.status !== "NOT_OWED")?.amountCents ?? 0;
+  const notice = await noticeFor(db, p.disruptionId, outcomeFor(decision.kind, owed("COMPENSATION")));
+  const text = renderNotice(notice.text, { name: p.displayName, compensationCents: owed("COMPENSATION"), mealCents: owed("MEAL_ALLOWANCE"), link, decisionReason: decision.kind === "DENY_COMPENSATION" ? decision.reason : null });
+  await db.outboxMessage.create({ data: { passengerId: p.id, kind: "NOTICE", noticeId: notice.id, renderedText: `${header(p.displayEmail)}\n\n${text}` } });
 }
 
 /** The passenger link from the latest simulated email, for "Open as passenger". */
