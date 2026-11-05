@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 import type { PaxState } from "./actions";
 
-export function PaymentForm({ action, consentText }: { action: (prev: PaxState, form: FormData) => Promise<PaxState>; consentText: string }) {
+export function PaymentForm({ action, consentText, consentRule, consentCheckbox }: { action: (prev: PaxState, form: FormData) => Promise<PaxState>; consentText: string; consentRule: string; consentCheckbox: string }) {
   const [state, run, pending] = useActionState(action, { error: null });
   const [method, setMethod] = useState<"PAYPAL" | "BANK_TRANSFER">("PAYPAL");
   return (
@@ -20,7 +20,8 @@ export function PaymentForm({ action, consentText }: { action: (prev: PaxState, 
             <label htmlFor="paypalEmail" className="block text-sm">Email address of your PayPal account</label>
             <input id="paypalEmail" name="paypalEmail" type="email" required autoComplete="email" className="mt-1 w-full rounded border border-line bg-surface px-3 py-2" />
           </div>
-          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="consent" value="yes" required className="mt-1" /> <span>{consentText}</span></label>
+          <p className="text-sm">{consentText} <span className="font-mono text-xs text-muted">({consentRule})</span></p>
+          <label className="flex items-start gap-2 text-sm"><input type="checkbox" name="consent" value="yes" required className="mt-1" /> <span>{consentCheckbox}</span></label>
         </div>
       ) : (
         <div>

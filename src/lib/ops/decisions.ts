@@ -58,7 +58,7 @@ export interface DenialInput {
 export function validateDenial(user: SessionUser, input: DenialInput, citable: ReadonlySet<string>): string[] {
   const errors: string[] = [];
   if (input.typedName.trim().toLowerCase() !== user.name.trim().toLowerCase()) errors.push(`Type your name exactly as "${user.name}" to sign.`);
-  if (input.reason.trim().length < 20) errors.push("Write a reason of at least 20 characters.");
+  if (input.reason.trim().length < 30) errors.push("Write a reason of at least 30 characters.");
   if (input.citations.length === 0) errors.push("Cite at least one rule from the rule pack.");
   for (const c of input.citations) if (!citable.has(c)) errors.push(`${c} is not a verified rule-pack entry.`);
   return errors;
