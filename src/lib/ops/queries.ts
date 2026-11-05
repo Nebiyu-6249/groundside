@@ -5,9 +5,9 @@ import type { A1Output } from "@/lib/ai/a1/schema";
 import { loadRulePack } from "@/lib/rules/pack";
 import { airportTimeline } from "@/lib/weather/timeline";
 
-export async function boardRows(db: PrismaClient) {
+export async function boardRows(db: PrismaClient, scope: { judgeRunId: string | null } = { judgeRunId: null }) {
   const ds = await db.disruption.findMany({
-    where: { judgeRunId: null },
+    where: scope,
     orderBy: { createdAt: "asc" },
     include: {
       flight: { include: { originAirport: true, destinationAirport: true } },
@@ -80,7 +80,7 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
   const refundPassengers = await db.passenger.findMany({
     where: { disruptionId: id, choice: "REFUND" },
     orderBy: { manifestIndex: "asc" },
-    select: { id: true, displayName: true, booking: { select: { pnr: true, paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true, lastError: true } } } }, entitlements: { where: { kind: "REFUND" }, select: { amountCents: true, status: true } } },
+    select: { id: true, displayName: true, createdAt: true, booking: { select: { pnr: true, paymentMethod: true, paypalCaptureId: true, refunds: { orderBy: { createdAt: "desc" }, take: 1, select: { status: true, paypalRefundId: true, lastError: true } } } }, entitlements: { where: { kind: "REFUND" }, select: { amountCents: true, status: true } } },
   });
   const choiceEvents = await db.auditEvent.findMany({ where: { action: "TRAVEL_CHOICE", entityId: { in: refundPassengers.map((p) => p.id) } }, orderBy: { createdAt: "desc" }, select: { entityId: true, createdAt: true } });
   const receipts = await db.receipt.findMany({
@@ -172,7 +172,8 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
       };
     }),
     refunds: refundPassengers.map((p) => {
-      const chosenAt = choiceEvents.find((e) => e.entityId === p.id)?.createdAt ?? null;
+      // A choice made on the page is audited; a choice set in the demo seed dates from the seed.
+      const chosenAt = choiceEvents.find((e) => e.entityId === p.id)?.createdAt ?? p.createdAt;
       const r = p.booking.refunds[0];
       return {
         passengerId: p.id,

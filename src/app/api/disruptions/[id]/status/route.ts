@@ -2,15 +2,18 @@
 // flight, and returns a fingerprint that changes when anything the page shows has changed.
 
 import { connection } from "next/server";
+import { disruptionScope } from "@/lib/auth/scope";
 import { currentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 
 export async function GET(_req: Request, ctx: RouteContext<"/api/disruptions/[id]/status">) {
   await connection();
-  if (!(await currentUser())) return Response.json({ error: "Sign in required" }, { status: 401 });
+  const user = await currentUser();
+  if (!user) return Response.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await ctx.params;
   const db = getDb();
+  if ((await db.disruption.count({ where: { id, ...disruptionScope(user) } })) === 0) return Response.json({ error: "Not found" }, { status: 404 });
   try {
     await reconcileDisruption(db, id);
   } catch {

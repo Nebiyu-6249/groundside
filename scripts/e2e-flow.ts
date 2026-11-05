@@ -33,7 +33,7 @@ async function main() {
   const db = getDb();
   try {
     const d = await db.disruption.findFirstOrThrow({ where: { scenarioKey: key, isDemoData: true, judgeRunId: null } });
-    const user = await db.user.findFirstOrThrow({ where: { role: "DUTY_MANAGER" }, orderBy: { createdAt: "asc" }, select: { id: true, email: true, name: true, role: true } });
+    const user = await db.user.findFirstOrThrow({ where: { role: "DUTY_MANAGER" }, orderBy: { createdAt: "asc" }, select: { id: true, email: true, name: true, role: true, judgeRunId: true } });
     const t0 = Date.now();
 
     if (process.argv.includes("--release-care-first")) {

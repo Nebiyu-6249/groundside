@@ -4,13 +4,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CheckCircle2, CircleAlert } from "lucide-react";
 import { Chip, EntitlementStatus, PayoutStatus, RecommendationChip } from "@/components/status";
+import { assertDisruptionAccess } from "@/lib/auth/scope";
 import { requireUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
-import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
+import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny, resetRun, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 import { WeatherChart } from "@/components/weather-chart";
@@ -390,8 +391,9 @@ function Audit({ d }: { d: DisruptionDetail }) {
 }
 
 async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]">) {
-  await requireUser();
+  const user = await requireUser();
   const { id } = await params;
+  await assertDisruptionAccess(getDb(), user, id);
   const sp = await searchParams;
   const tab = (TABS.some(([t]) => t === sp.tab) ? sp.tab : "overview") as Tab;
   const db = getDb();
@@ -402,6 +404,17 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
   const pending = d.passengers.filter((p) => p.paymentChoice === "NONE").length;
   return (
     <>
+      {user.judgeRunId ? (
+        <aside aria-label="Judge guide" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded border border-amber p-3 text-sm">
+          <ol className="flex flex-wrap gap-x-5 gap-y-1">
+            <li><Link href="?tab=evidence" className="underline underline-offset-4">1. Read the evidence</Link></li>
+            <li><Link href="?tab=assessment" className="underline underline-offset-4">2. Check the AI&apos;s assessment, then approve or sign a denial</Link></li>
+            <li>3. Simulate passenger responses (top right)</li>
+            <li><Link href="?tab=passengers" className="underline underline-offset-4">4. Open a passenger page</Link></li>
+          </ol>
+          <ActionButton action={resetRun} label="Reset this run" pendingLabel="Resetting" />
+        </aside>
+      ) : null}
       <Header d={d} readiness={readiness} />
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-line">
         <nav aria-label="Disruption sections" className="flex gap-1">

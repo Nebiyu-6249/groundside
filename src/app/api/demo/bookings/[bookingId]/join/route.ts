@@ -1,3 +1,4 @@
+import { currentUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { joinCancelledFlight } from "@/lib/demo/join";
 import { errorResponse } from "@/lib/demo/respond";
@@ -11,7 +12,8 @@ export async function POST(_req: Request, ctx: RouteContext<"/api/demo/bookings/
     const limit = await hit(db, `join:${await ipHash()}`, 10, 3600);
     if (!limit.allowed) return Response.json({ error: "Too many requests. Try again later." }, { status: 429 });
     const { bookingId } = await ctx.params;
-    const { link } = await joinCancelledFlight(db, bookingId);
+    const judge = await currentUser();
+    const { link } = await joinCancelledFlight(db, bookingId, judge?.judgeRunId ?? null);
     return Response.json({ path: new URL(link).pathname });
   } catch (err) {
     return errorResponse(err);

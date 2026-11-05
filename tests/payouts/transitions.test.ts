@@ -48,7 +48,7 @@ describe("payout batch creation safety (SPEC 9.6)", () => {
 });
 
 describe("signed denial (golden rule 2)", () => {
-  const user = { id: "u1", email: "dm@demo.test", name: "Demo Duty Manager", role: "DUTY_MANAGER" as const };
+  const user = { id: "u1", email: "dm@demo.test", name: "Demo Duty Manager", role: "DUTY_MANAGER" as const, judgeRunId: null };
   const citable = new Set(["REG-5-3", "REG-REC-14"]);
 
   it("accepts a typed name, a reason and verified citations", () => {
