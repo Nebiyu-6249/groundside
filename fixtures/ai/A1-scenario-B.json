@@ -1,78 +1,68 @@
 {
   "key": "scenario-B",
-  "recordedAt": "2026-11-04T05:52:23.133Z",
+  "recordedAt": "2026-11-05T10:28:08.218Z",
   "model": "gpt-6-luna",
   "promptVersion": "A1.v3",
-  "inputHash": "7a97bc1325d9808ca89711616822cb55b1fcf5a5f4d98018e2edf75106183151",
+  "inputHash": "ba1f1655b4a18cf4af94d9b651d3363a4869d49ae8dc1d2d1891c65ddeb5a58c",
   "output": {
     "statedCause": {
       "category": "WEATHER",
       "location": "DEPARTURE",
-      "quote": "Dense fog since 0430LT, LVP in force, RVR below company minima,\ndeparture flow restricted by ATC."
+      "quote": "Dense fog since 0430LT, LVP in force, RVR below company minima,"
     },
     "findings": [
       {
-        "statement": "Archived observations show persistent freezing fog and very low visibility at LIMC during the departure window, consistent with the reported fog.",
+        "statement": "Observed fog, very low visibility and low runway visual range at LIMC during the departure window support the stated weather cause.",
         "effect": "SUPPORTS_STATED_CAUSE",
         "factIds": [
           "WX-LIMC-DEPARTURE-FOGSPAN",
           "WX-LIMC-DEPARTURE-MINVIS",
           "WX-LIMC-DEPARTURE-MINRVR",
-          "WX-LIMC-DEPARTURE-SIGWX",
-          "WX-LIMC-20260122T0450Z-WX",
-          "WX-LIMC-20260122T0520Z-RVR-17L"
+          "WX-LIMC-DEPARTURE-SIGWX"
         ],
         "evidenceQuotes": []
       },
       {
-        "statement": "The ops note reports that ATC restricted departure flow, but the evidence contains no separate ATC record confirming that restriction.",
-        "effect": "SUPPORTS_STATED_CAUSE",
+        "statement": "The ops note also attributes restricted departure flow to ATC, but no independent ATC record is provided.",
+        "effect": "NEUTRAL",
         "factIds": [],
         "evidenceQuotes": [
           "departure flow restricted by ATC."
         ]
       },
       {
-        "statement": "Weather observations in the previous flight's arrival window at LIMC do not show fog or other listed significant weather; the evidence does not establish a weather-related cause carried over from that flight.",
+        "statement": "The previous flight's arrival-window observations at LIMC do not show fog or freezing precipitation, and its minimum reported RVR was at or above the stated reference value. The evidence does not establish a direct causal link from that flight to this cancellation.",
         "effect": "NEUTRAL",
         "factIds": [
           "WX-LIMC-PREV_ARRIVAL-SIGWX",
-          "WX-LIMC-PREV_ARRIVAL-MINVIS"
+          "WX-LIMC-PREV_ARRIVAL-MINRVR"
         ],
-        "evidenceQuotes": []
-      },
-      {
-        "statement": "LPPT observations show good visibility in the scheduled arrival window, so the evidence does not indicate destination weather as a constraint.",
-        "effect": "NEUTRAL",
-        "factIds": [
-          "WX-LPPT-ARRIVAL-MINVIS",
-          "WX-LPPT-ARRIVAL-SIGWX"
-        ],
-        "evidenceQuotes": []
+        "evidenceQuotes": [
+          "Night stop MXP."
+        ]
       }
     ],
     "likelyCause": {
       "category": "WEATHER",
       "location": "DEPARTURE",
-      "confidence": "MEDIUM"
+      "confidence": "HIGH"
     },
     "claimSupport": "SUPPORTED",
     "extraordinaryAssessment": "LIKELY_EXTRAORDINARY",
     "knockOnFromPreviousFlight": false,
-    "reasonableMeasuresNote": "The carrier should document the applicable operating minima and how the conditions affected this flight, along with its response to ATC restrictions and reasonable steps to avoid or reduce the cancellation, including available reserve time, aircraft, or crew.",
-    "modelRecommendation": "UNCERTAIN_HUMAN_MUST_DECIDE",
+    "reasonableMeasuresNote": "The carrier must still show that it took all reasonable measures, including whether it allowed appropriate reserve time and considered alternative aircraft or crew. A human should verify the applicable operating minima for the aircraft, runway and crew, and obtain the relevant ATC records.",
+    "modelRecommendation": "NO_COMPENSATION_HUMAN_MUST_DECIDE",
     "citations": [
+      "REG-5-3",
       "REG-REC-14",
       "REG-REC-15",
-      "REG-5-3",
       "CJEU-C-294-10"
     ],
     "questionsForDutyManager": [
-      "Can the applicable aircraft, runway, and crew operating minima be confirmed, and do the records show they were exceeded at the relevant time?",
-      "Can ATC records verify the reported departure-flow restriction and its effect on DEMO 207?",
-      "What reserve time, alternative aircraft or crew, and other reasonable recovery measures were considered or available?",
-      "Was the previous flight operated by this same aircraft, and is there any direct causal link to this cancellation beyond the listed evidence?"
+      "Can the company confirm the applicable operating minima for the aircraft, runway and crew at LIMC at the relevant time?",
+      "Can ATC records confirm the claimed departure-flow restriction and its effect on this flight?",
+      "What reserve time, alternative aircraft or crew options were considered, and why were they not sufficient to operate the flight?"
     ],
-    "summary": "The stated departure-weather cause is supported by observations of persistent freezing fog and very low visibility at LIMC. The ATC restriction is reported in the ops note but lacks separate corroboration. The evidence does not show a direct knock-on from the aircraft's previous flight. A human should verify operating minima, ATC records, and reasonable measures before deciding."
+    "summary": "Observed fog, freezing fog and low visibility and RVR at LIMC support weather as the cancellation cause. The evidence does not establish a direct link to the aircraft's previous flight. Weather may be extraordinary, but the carrier must still prove that it took all reasonable measures; the duty manager should verify operating minima and the claimed ATC restriction."
   }
 }

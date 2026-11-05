@@ -8,6 +8,7 @@ import { A3_PROMPT_VERSION, fillNotice, writeNotice, type NoticeOutcome, type Pl
 import { openAiCaller } from "@/lib/ai/provider";
 import { prismaSpendLog } from "@/lib/ai/spend";
 import { loadRulePack } from "@/lib/rules/pack";
+import { displayTitle } from "@/lib/rules/display";
 
 export const TEMPLATE_VERSION = "template.v1";
 const NOTICE_RULES = ["REG-5-1-A", "REG-5-1-B", "REG-5-3", "REG-6-1", "REG-7-1", "REG-8-1", "REG-9-1", "REG-14-2", "REG-15"];
@@ -28,7 +29,7 @@ export async function noticeFor(db: PrismaClient, disruptionId: string, outcome:
   const cached = await db.notice.findFirst({ where: { disruptionId, outcome, promptVersion: { in: [A3_PROMPT_VERSION, TEMPLATE_VERSION] } }, orderBy: { createdAt: "desc" } });
   if (cached) return cached;
   const d = await db.disruption.findUniqueOrThrow({ where: { id: disruptionId }, include: { flight: { include: { originAirport: true, destinationAirport: true } } } });
-  const rules = loadRulePack().filter((r) => NOTICE_RULES.includes(r.id) && r.status === "VERIFIED").map((r) => ({ id: r.id, title: r.title, summary: r.summary }));
+  const rules = loadRulePack().filter((r) => NOTICE_RULES.includes(r.id) && r.status === "VERIFIED").map((r) => ({ id: r.id, title: displayTitle(r), summary: r.summary }));
   const ai = await writeNotice(
     { outcome, flight: { number: d.flight.flightNumber, origin: d.flight.originAirport.city, destination: d.flight.destinationAirport.city, type: d.type }, rules },
     { config: aiConfig(), caller: process.env.OPENAI_API_KEY ? openAiCaller(process.env.OPENAI_API_KEY) : null, spend: prismaSpendLog(db) },

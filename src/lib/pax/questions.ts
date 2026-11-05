@@ -9,6 +9,7 @@ import { prismaSpendLog } from "@/lib/ai/spend";
 import { audit } from "@/lib/ops/audit";
 import { hit } from "@/lib/rate-limit";
 import { loadRulePack } from "@/lib/rules/pack";
+import { displayTitle } from "@/lib/rules/display";
 
 export const QUESTIONS_PER_DAY = 10;
 
@@ -77,7 +78,7 @@ export async function askQuestion(db: PrismaClient, passengerId: string, questio
   if (!limit.allowed) throw new QuestionError(`You can ask ${QUESTIONS_PER_DAY} questions a day. Use Talk to a person for anything else.`);
   const rules = loadRulePack()
     .filter((r) => r.status === "VERIFIED" && r.kind !== "GUIDANCE")
-    .map((r) => ({ id: r.id, title: r.title, summary: r.summary }));
+    .map((r) => ({ id: r.id, title: displayTitle(r), summary: r.summary }));
   const caseFile = await buildCaseFile(db, passengerId);
   const r = await answerQuestion(q, caseFile, rules, { config: aiConfig(), caller: process.env.OPENAI_API_KEY ? openAiCaller(process.env.OPENAI_API_KEY) : null, spend: prismaSpendLog(db) });
   await db.qaMessage.create({ data: { passengerId, role: "PASSENGER", text: q, validated: true } });
