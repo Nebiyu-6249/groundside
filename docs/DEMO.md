@@ -209,3 +209,17 @@ The user rewrites this in their own words before submitting.
 - [ ] AI budget cap set; fixtures recorded for every scenario so the demo works with AI off.
 - [ ] Render service plan decided for Dec 1 to 15 (`docs/OPEN_QUESTIONS.md`).
 - [ ] Submitted by Thu Nov 12, 18:00 Dubai time (internal deadline; official cut-off is midnight Dubai time).
+
+### Checklist status (2026-11-05, Claude Code)
+
+- **Hosted URL and judge demo:** the Playwright smoke test against https://groundside.onrender.com reached a Paid row in 1.6 min, on a warm server. A cold start (free plan) has not been measured yet.
+- **Demo and sandbox buyer logins in the README:** owner decision (not published yet). Judges can use "Start the judge demo" without a login.
+- **Repo:** public, and GitHub detects the MIT license. `npm run secret-scan` finds nothing in history or the tree. The README covers SPEC 16 except the credentials above. The repo's homepage link is still empty (owner).
+- **Fresh clone:** `npm ci` then `npm run check` passed with no `.env`. `npm run eval` needs a `.env` with an OpenAI key, so it was run in the working copy only (12/12).
+- **Video:** owner.
+- **Screenshots:** `docs/screens/1-...` to `6-...` (1920x1080 PNG, synthetic data, no airline names) via `npm run screens`. The Devpost text is in `docs/DEVPOST_DRAFT.md`.
+- **Sponsor prizes:** the PayPal blog lists Best Use of AG Grid and Best Use of Render, but not how to qualify. The Devpost rules page refuses automated reads (HTTP 403), so the owner should read it. AG Grid Community (passengers grid) and AG Charts Community (weather timelines) are used; the app is deployed on Render with a Blueprint (`render.yaml`).
+- **Claims:** README, Devpost draft, landing page and `/about-data` were checked against `docs/RESEARCH.md` section 8; no conflicts.
+- **Payout cap: risk.** One scenario A judge run pays about 7,000 EUR (12 passengers), so the default `PAYOUT_DAILY_CAP_EUR=20000` allows roughly three runs a day. Check the sandbox balance (top it up in the sandbox dashboard if needed) and raise the cap on Render for judging (owner).
+- **AI off:** the A1 fixtures for both scenarios are recorded. The local smoke test runs with `AI_MODE=fixtures` and passes. A2 has recorded readings for the synthetic receipts; A3 falls back to templates and A4 to a safe answer.
+- **Render plan and the Devpost submission:** owner.

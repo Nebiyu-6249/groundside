@@ -77,7 +77,10 @@ export async function submitReceipt(db: PrismaClient, passengerId: string, file:
     throw new ReceiptError("No meal, hotel or transport costs are covered for your flight.");
   }
   const img = await processReceiptImage(file.bytes, file.mimeType);
-  const prior = priorFrom(await db.receipt.findMany({ select: { id: true, sha256: true, pHash: true, extracted: true } }));
+  // Duplicates are checked across all passengers of the same data set: the owner's demo, or one
+  // judge's run. Otherwise one judge trying a demo receipt would block it for every later judge.
+  const scope = { passenger: { disruption: { judgeRunId: ctx.p.disruption.judgeRunId } } };
+  const prior = priorFrom(await db.receipt.findMany({ where: scope, select: { id: true, sha256: true, pHash: true, extracted: true } }));
 
   // An exact duplicate is rejected without spending an AI call.
   const isExact = prior.some((x) => x.sha256 === img.sha256);

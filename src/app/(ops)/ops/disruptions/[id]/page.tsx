@@ -73,8 +73,10 @@ function Header({ d, readiness }: { d: DisruptionDetail; readiness: ReadinessChe
 
 function Overview({ d }: { d: DisruptionDetail }) {
   const approvedAt = d.audit.find((a) => a.action === "DECISION_APPROVE" || a.action === "DECISION_DENY")?.at;
-  // Payments after the decision only: meal allowances released earlier do not count.
-  const firstPaid = approvedAt ? d.audit.find((a) => a.action === "PAYOUT_ITEM_STATUS" && a.summary.includes("to SUCCESS") && a.at >= approvedAt)?.at : undefined;
+  // Only payouts sent after the decision count: meal allowances released earlier (and settling
+  // later) would otherwise make the decision look faster than it was.
+  const sentAt = new Map(d.batches.flatMap((b) => b.items.map((i) => [i.id, b.createdAt] as const)));
+  const firstPaid = approvedAt ? d.audit.find((a) => a.action === "PAYOUT_ITEM_STATUS" && a.summary.includes("to SUCCESS") && a.at >= approvedAt && (sentAt.get(a.entityId) ?? "") >= approvedAt)?.at : undefined;
   const minutes = approvedAt && firstPaid ? Math.round((Date.parse(firstPaid) - Date.parse(approvedAt)) / 6000) / 10 : null;
   const paid = d.passengers.flatMap((p) => p.entitlements).filter((e) => e.status === "PAID");
   return (
