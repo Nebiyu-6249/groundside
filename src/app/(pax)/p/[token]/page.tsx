@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { euros, localTime } from "@/lib/format";
-import { CONSENT_TEXT } from "@/lib/ops/passenger-choice";
+import { CONSENT_CHECKBOX, CONSENT_RULE, CONSENT_TEXT } from "@/lib/ops/passenger-choice";
 import { offerByToken, type PassengerView } from "@/lib/pax/offer";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { refreshRefunds } from "@/lib/ops/refunds";
@@ -157,7 +157,7 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
 
       <section className="mt-6">
         {v.offer.paymentChoice === "NONE" ? (
-          <PaymentForm action={choosePayment.bind(null, token)} consentText={CONSENT_TEXT} />
+          <PaymentForm action={choosePayment.bind(null, token)} consentText={CONSENT_TEXT} consentRule={CONSENT_RULE} consentCheckbox={CONSENT_CHECKBOX} />
         ) : v.offer.paymentChoice === "PAYPAL" ? (
           <div className="space-y-3">
             <h2 className="font-medium">Your payment</h2>

@@ -167,9 +167,9 @@ Record a rough cut at Gate 3 and the final at Gate 5. Measure the real "approval
 
 **How we built it.**
 - PayPal: Payouts API (micro-batches, idempotent `sender_batch_id`, unclaimed handling and cancellation), Orders v2 with the JS SDK for demo bookings, Payments v2 refunds, webhooks with signature verification, plus polling reconciliation.
-- AI: {{model names}} for structured cause assessment with a citation whitelist and fact-ID checks; vision receipt reading with code-side checks; multilingual passenger notices with placeholders filled by code; grounded passenger Q&A with escalation. Evaluated with {{N}} test cases ({{score}}).
+- AI: {{model names}} for structured cause assessment with a citation whitelist and fact-ID checks; vision receipt reading with code-side checks; grounded passenger Q&A with escalation (English only, user decision 2026-11-03; notices are code templates). Evaluated with {{N}} test cases ({{score}}).
 - Engine: TypeScript EU261 rules engine with {{N}} unit tests, each tied to a cited article or judgment.
-- Data: real archived METAR/TAF weather ({{source}}); synthetic passengers, clearly labelled.
+- Data: real archived METAR weather ({{source}}; archived TAF was not available for the scenario dates); synthetic passengers, clearly labelled.
 - Stack: Next.js, TypeScript, Prisma, Postgres on Neon, AG Grid and AG Charts, deployed on Render.
 
 **Challenges.** Honest notes from the build (for example, making payouts safe to retry; getting the AI to cite only what it was given).

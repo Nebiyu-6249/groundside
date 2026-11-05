@@ -6,9 +6,13 @@ import { audit } from "./audit";
 import { recomputeEntitlements } from "./engine-input";
 import { requestPassengerRefund } from "./refunds";
 
-export const CONSENT_VERSION = "consent.v1";
+// SPEC F8 wording, versioned and stored with the choice. The first sentence restates Art 7(3)
+// (REG-7-3, VERIFIED); nothing asks the passenger to give up a further claim (Art 15).
+export const CONSENT_VERSION = "consent.v2";
 export const CONSENT_TEXT =
-  "I agree that Demo Air pays the amounts shown on this page to my PayPal account, and that PayPal may receive my email address and the amount for this purpose. This is my choice; I can choose bank transfer instead. Accepting a payment does not waive any of my rights under EU Regulation 261/2004.";
+  "EU Regulation 261/2004 says compensation is paid in cash, by bank transfer, by bank order or by cheque. You can choose to receive it through PayPal instead. Choosing PayPal does not reduce your amount or any of your other rights, and you can choose bank transfer instead.";
+export const CONSENT_CHECKBOX = "I choose to receive my payment through PayPal at the email address above.";
+export const CONSENT_RULE = "REG-7-3";
 
 export class ChoiceError extends Error {
   constructor(message: string) {

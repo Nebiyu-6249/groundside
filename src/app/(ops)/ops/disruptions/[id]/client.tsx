@@ -55,7 +55,7 @@ export function DenyForm({ action, userName, citable }: { action: (prev: ActionS
       <p className="text-sm text-muted">Only a duty manager can deny compensation. Meals, hotel and transport are still paid.</p>
       <div>
         <label htmlFor="reason" className="block text-sm">Reason (shown to passengers)</label>
-        <textarea id="reason" name="reason" required minLength={20} rows={3} className="mt-1 w-full rounded border border-line bg-background px-2 py-1 text-sm" />
+        <textarea id="reason" name="reason" required minLength={30} rows={3} className="mt-1 w-full rounded border border-line bg-background px-2 py-1 text-sm" />
       </div>
       <fieldset>
         <legend className="text-sm">Rules relied on (at least one)</legend>
