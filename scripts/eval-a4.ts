@@ -9,6 +9,7 @@ import { aiConfig } from "../src/lib/ai/config";
 import { openAiCaller } from "../src/lib/ai/provider";
 import { memorySpendLog } from "../src/lib/ai/spend";
 import { loadRulePack } from "../src/lib/rules/pack";
+import { displayTitle } from "../src/lib/rules/display";
 
 interface Case {
   id: string;
@@ -23,7 +24,7 @@ async function main() {
   const caller = openAiCaller(config.apiKey);
   const spend = memorySpendLog();
   const data = JSON.parse(readFileSync(path.join(process.cwd(), "data", "evals", "a4-cases.json"), "utf8")) as { caseFiles: Record<string, CaseFile>; cases: Case[] };
-  const rules = loadRulePack().filter((r) => r.status === "VERIFIED" && r.kind !== "GUIDANCE").map((r) => ({ id: r.id, title: r.title, summary: r.summary }));
+  const rules = loadRulePack().filter((r) => r.status === "VERIFIED" && r.kind !== "GUIDANCE").map((r) => ({ id: r.id, title: displayTitle(r), summary: r.summary }));
   const rows: string[] = [];
   let passed = 0;
   for (const c of data.cases) {

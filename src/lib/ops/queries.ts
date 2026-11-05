@@ -4,6 +4,7 @@ import type { PrismaClient } from "@/generated/prisma/client";
 import type { A1Output } from "@/lib/ai/a1/schema";
 import { loadRulePack } from "@/lib/rules/pack";
 import { airportTimeline } from "@/lib/weather/timeline";
+import { displayTitle } from "@/lib/rules/display";
 
 export async function boardRows(db: PrismaClient, scope: { judgeRunId: string | null } = { judgeRunId: null }) {
   const ds = await db.disruption.findMany({
@@ -192,8 +193,8 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
     }),
     webhooks: webhooks.map((w) => ({ ...w, receivedAt: w.receivedAt.toISOString(), processedAt: w.processedAt?.toISOString() ?? null })),
     audit: auditEvents.map((a) => ({ id: a.id, at: a.createdAt.toISOString(), actorType: a.actorType, action: a.action, summary: a.summary })),
-    rules: Object.fromEntries(rules.map((r) => [r.id, { title: r.title, kind: r.kind, summary: r.summary, url: r.url, excerpt: r.excerpt }])),
-    citable: rules.filter((r) => r.status === "VERIFIED" && (r.kind === "LAW" || r.kind === "CASE_LAW")).map((r) => ({ id: r.id, title: r.title })),
+    rules: Object.fromEntries(rules.map((r) => [r.id, { title: displayTitle(r), kind: r.kind, summary: r.summary, url: r.url, excerpt: r.excerpt }])),
+    citable: rules.filter((r) => r.status === "VERIFIED" && (r.kind === "LAW" || r.kind === "CASE_LAW")).map((r) => ({ id: r.id, title: displayTitle(r) })),
   };
 }
 

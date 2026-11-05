@@ -10,6 +10,7 @@ import { aiConfig } from "../src/lib/ai/config";
 import { openAiCaller } from "../src/lib/ai/provider";
 import { memorySpendLog } from "../src/lib/ai/spend";
 import { loadRulePack } from "../src/lib/rules/pack";
+import { displayTitle } from "../src/lib/rules/display";
 
 const NOTICE_RULES = ["REG-5-1-A", "REG-5-1-B", "REG-5-3", "REG-6-1", "REG-7-1", "REG-8-1", "REG-9-1", "REG-14-2", "REG-15"];
 
@@ -17,7 +18,7 @@ async function main() {
   const config = aiConfig();
   if (!config.apiKey) throw new Error("OPENAI_API_KEY is not set");
   const spend = memorySpendLog();
-  const rules = loadRulePack().filter((r) => NOTICE_RULES.includes(r.id)).map((r) => ({ id: r.id, title: r.title, summary: r.summary }));
+  const rules = loadRulePack().filter((r) => NOTICE_RULES.includes(r.id)).map((r) => ({ id: r.id, title: displayTitle(r), summary: r.summary }));
   const sections: string[] = [];
   let passed = 0;
   for (const outcome of NOTICE_OUTCOMES) {

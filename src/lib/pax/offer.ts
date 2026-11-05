@@ -3,6 +3,7 @@
 import type { PrismaClient } from "@/generated/prisma/client";
 import { sha256 } from "@/lib/ops/decisions";
 import { loadRulePack } from "@/lib/rules/pack";
+import { displayTitle } from "@/lib/rules/display";
 
 export async function offerByToken(db: PrismaClient, token: string) {
   if (!/^[A-Za-z0-9_-]{30,64}$/.test(token)) return null;
@@ -47,13 +48,13 @@ export async function offerByToken(db: PrismaClient, token: string) {
       const c = r.checks as { outcome?: { reason?: string } } | null;
       return { id: r.id, decision: r.decision, approvedCents: r.approvedCents, merchant: x?.merchantName ?? null, total: x?.total ?? null, currency: x?.currency ?? null, printedDate: x?.date ?? null, dateReplaced: r.demoDateOverride !== null, reason: c?.outcome?.reason ?? null, payoutStatus: r.payoutItems[0]?.status ?? null, at: r.createdAt.toISOString() };
     }),
-    decision: decision ? { kind: decision.kind, reason: decision.reason, citations: decision.citations.map((id) => ({ id, title: rules.get(id)?.title ?? id, summary: rules.get(id)?.summary ?? "" })) } : null,
+    decision: decision ? { kind: decision.kind, reason: decision.reason, citations: decision.citations.map((id) => ({ id, title: rules.get(id) ? displayTitle(rules.get(id)!) : id, summary: rules.get(id)?.summary ?? "" })) } : null,
     entitlements: p.entitlements.map((e) => ({
       kind: e.kind,
       amountCents: e.amountCents,
       status: e.status,
       payoutStatus: e.payoutItems[0]?.status ?? null,
-      trace: (e.trace as { ruleId: string; outcome: string }[]).map((s) => ({ ruleId: s.ruleId, outcome: s.outcome, title: rules.get(s.ruleId)?.title ?? s.ruleId, kind: rules.get(s.ruleId)?.kind ?? "LAW" })),
+      trace: (e.trace as { ruleId: string; outcome: string }[]).map((s) => ({ ruleId: s.ruleId, outcome: s.outcome, title: rules.get(s.ruleId) ? displayTitle(rules.get(s.ruleId)!) : s.ruleId, kind: rules.get(s.ruleId)?.kind ?? "LAW" })),
     })),
   };
 }

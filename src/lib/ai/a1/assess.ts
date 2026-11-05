@@ -15,6 +15,7 @@ import type { SpendLog } from "../spend";
 import { dataBlock } from "../text";
 import { a1JsonSchema, a1OutputSchema, type A1Output, type Recommendation } from "./schema";
 import { mapRecommendation, validateA1 } from "./validate";
+import { displayTitle } from "@/lib/rules/display";
 
 // v2 (2026-11-04): weather facts are cited by ID, never quoted; airports carry ICAO and IATA codes.
 // v3 (2026-11-04): an unidentified likely cause has LOW confidence.
@@ -117,7 +118,7 @@ export function buildA1UserMessage(input: A1Input, rules: readonly Rule[]): stri
   };
   const ruleLines = rules
     .filter((r) => A1_RULE_IDS.includes(r.id) && r.status === "VERIFIED")
-    .map((r) => `${r.id} | ${r.title} | ${r.excerpt}`)
+    .map((r) => `${r.id} | ${displayTitle(r)} | ${r.excerpt}`)
     .join("\n");
   const factLines = input.facts.map((f) => `${f.id} | ${f.text}`).join("\n") || "(no weather facts)";
   return [
