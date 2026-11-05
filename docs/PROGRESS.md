@@ -298,3 +298,4 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - Count-up of the paid total (instant with reduced motion).
   - Enter or Space opens the passenger trace drawer from the grid.
 - 205 tests.
+- Hosted smoke test (`SMOKE_URL=https://groundside.onrender.com npm run smoke`) passed on the first try: the judge path with live AI reached a Paid row in 1.6 min (Gate 5 target: under 3 min); public pages and the 404 page are fine.

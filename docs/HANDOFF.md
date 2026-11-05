@@ -4,7 +4,7 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 5 in progress (2026-11-05).** Next for Claude Code: run `SMOKE_URL=https://groundside.onrender.com npm run smoke` against the hosted app, then work through the Gate 5 checklist (`docs/DEMO.md` section 7). Done:
+- **Phase 5 in progress (2026-11-05).** Hosted smoke test passed (judge path to a Paid row in 1.6 min). Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7). Done:
   - judge mode, error pages, security headers
   - secret scan, fresh-clone check, Playwright smoke test
   - A3 notices and the design pass
