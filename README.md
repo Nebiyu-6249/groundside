@@ -154,7 +154,31 @@ npm run dev
 
 Open http://localhost:3000. `GET /api/health` reports database status.
 
-Every variable is documented in [`.env.example`](.env.example).
+### Environment variables
+
+Every variable has a comment in [`.env.example`](.env.example). Copy it to `.env`, which is git-ignored, and fill it in.
+
+| Variable | Purpose |
+|---|---|
+| `DATABASE_URL` | Neon pooled connection (the app) |
+| `DIRECT_URL` | Neon direct connection (migrations) |
+| `APP_BASE_URL` | Base URL for passenger links; on Render, `RENDER_EXTERNAL_URL` is used when this is empty |
+| `SESSION_SECRET` | 32 or more random bytes, hex |
+| `PAYPAL_API_BASE` | `https://api-m.sandbox.paypal.com` (the app refuses any other host) |
+| `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` | Sandbox REST app credentials |
+| `NEXT_PUBLIC_PAYPAL_CLIENT_ID` | Same client ID, for the JS SDK on the booking page |
+| `PAYPAL_WEBHOOK_ID` | Webhook for this environment; on Render it is found by URL when empty |
+| `SANDBOX_BALANCE_ESTIMATE_EUR` | Optional balance estimate for the Readiness panel (the balance API returns 403 in sandbox) |
+| `PAYPAL_POOL_RECEIVERS` | Sandbox personal accounts that receive demo payouts |
+| `PAYPAL_UNREGISTERED_PATTERN` | Email pattern that produces UNCLAIMED payouts, with `{n}` |
+| `PAYOUT_DAILY_CAP_EUR`, `PAYOUT_BATCH_SIZE` | Safety cap and micro-batch size |
+| `OPENAI_API_KEY` | OpenAI key |
+| `OPENAI_MODEL_ASSESS`, `OPENAI_MODEL_VISION`, `OPENAI_MODEL_TEXT` | Models for A1, A2, and A3 and A4 |
+| `AI_MODE`, `AI_DAILY_BUDGET_USD` | `live` or `fixtures`; daily AI spend cap |
+| `JUDGE_MODE`, `MAX_JUDGE_RUNS_PER_HOUR` | Judge demo on the hosted app, and its rate limit |
+| `OWNER_EMAIL`, `OWNER_PASSWORD` | Owner login, seeded |
+| `DEMO_OPS_EMAIL`, `DEMO_OPS_PASSWORD` | Shared demo duty-manager login, seeded |
+| `RENDER_API_KEY`, `RENDER_OWNER_ID` | Optional, for `npm run deploy:render` only |
 
 ### PayPal sandbox setup
 
