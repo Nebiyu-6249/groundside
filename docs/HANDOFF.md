@@ -4,7 +4,21 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 5 in progress (2026-11-05): judge mode, error pages and security headers are done.** Gate 4 still waits on the user's recorded walkthrough. Next: the Playwright smoke test (if time), final README and Devpost text, the user's video, and the Gate 5 checklist (`docs/DEMO.md` section 7).
+- **Phase 5 in progress (2026-11-05).** Next for Claude Code: run `SMOKE_URL=https://groundside.onrender.com npm run smoke` against the hosted app, then work through the Gate 5 checklist (`docs/DEMO.md` section 7). Done:
+  - judge mode, error pages, security headers
+  - secret scan, fresh-clone check, Playwright smoke test
+  - A3 notices and the design pass
+- **Owner to-do** (the user said they will do these later):
+  1. Record the Gate 4 walkthrough (`docs/DEMO.md` section 3) and approve Gate 4.
+  2. Rotate the Neon password and the PayPal sandbox secret that appeared in chat, then update them on Render (dashboard, or `RENDER_API_KEY` plus `npm run deploy:render`).
+  3. Decide whether to publish the shared demo login (password in `scripts/out/hosted-credentials.txt`) and the sandbox buyer login in the README and the Devpost text. Judges can use Start the judge demo without either.
+  4. Add 3 to 5 real receipt photos (personal data covered) to `fixtures/receipts/`, at least one without a `demoDateOverride`; then run `npm run eval:a2`.
+  5. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`) for the early eligibility check, and later the final submission with the video.
+  6. Record and upload the video (under 3:00).
+  7. Check the sandbox business balance in the PayPal dashboard; set `PAYOUT_DAILY_CAP_EUR` for two weeks of judging.
+  8. Decide the Render plan for judging (free sleeps when idle; starter is always on).
+  9. Read the AG Grid and Render sponsor-prize requirements and tick them on the form.
+  10. Optional: tell Claude Code to change the meal-receipt rule (currently: receipts reimburse food above the flat allowance up to the daily maximum). Gate 4 still waits on the user's recorded walkthrough. Next: the Playwright smoke test (if time), final README and Devpost text, the user's video, and the Gate 5 checklist (`docs/DEMO.md` section 7).
 - **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**
     - release care before the decision

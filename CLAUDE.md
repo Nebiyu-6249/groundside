@@ -141,9 +141,9 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - **GATE 4:** recorded walkthrough of the full demo path (`docs/DEMO.md` section 3).
 
 ### Phase 5: Hardening and submission (Mon Nov 9 to Wed Nov 11). STATUS: in progress (started 2026-11-05)
-- [ ] Design pass against `docs/SPEC.md` section 12; accessibility check; empty, loading and error states
+- [x] Design pass against `docs/SPEC.md` section 12; accessibility check; empty, loading and error states
 - [x] Judge mode, demo reset, rate limits, spend cap verified
-- [ ] Playwright smoke test of the demo path (if time)
+- [x] Playwright smoke test of the demo path (if time)
 - [ ] Final README, Devpost text, architecture diagram (Mermaid in README)
 - [ ] Video recorded and uploaded (user), Devpost updated
 - **GATE 5:** `docs/DEMO.md` submission checklist fully ticked.
