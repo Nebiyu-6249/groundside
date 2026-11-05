@@ -4,7 +4,8 @@ import { after } from "next/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { clearSession, requireUser } from "@/lib/auth/session";
+import { assertDisruptionAccess, assertPassengerAccess } from "@/lib/auth/scope";
+import { clearSession, requireUser, type SessionUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { runAssessment } from "@/lib/ops/assessment";
 import { approveCompensation, DecisionError, passengerLink, releaseCare, signDenial } from "@/lib/ops/decisions";
@@ -16,6 +17,7 @@ import { cancelUnclaimed, sendReminder, UnclaimedError } from "@/lib/payouts/unc
 import { ReceiptError, reviewReceipt } from "@/lib/receipts/service";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { hit } from "@/lib/rate-limit";
+import { JudgeError, resetJudgeRun } from "@/lib/judge/run";
 
 export interface ActionState {
   error: string | null;
@@ -24,13 +26,32 @@ export interface ActionState {
 
 const id = z.string().min(1).max(64);
 
+/**
+ * Signed in (with the role, if given) and allowed to see this disruption: a judge only their own
+ * run (SPEC 13). Every action that takes a disruption ID goes through here.
+ */
+async function authorize(disruptionId: string, role?: SessionUser["role"]): Promise<SessionUser> {
+  const user = await requireUser(role);
+  await assertDisruptionAccess(getDb(), user, id.parse(disruptionId));
+  return user;
+}
+
+/** The payout item, receipt or passenger must belong to the disruption named in the action. */
+async function belongs(kind: "payoutItem" | "receipt", itemId: string, disruptionId: string): Promise<boolean> {
+  const db = getDb();
+  const n = kind === "payoutItem"
+    ? await db.payoutItem.count({ where: { id: id.parse(itemId), entitlement: { passenger: { disruptionId } } } })
+    : await db.receipt.count({ where: { id: id.parse(itemId), passenger: { disruptionId } } });
+  return n > 0;
+}
+
 export async function logout() {
   await clearSession();
   redirect("/login");
 }
 
 export async function assess(disruptionId: string): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
   const db = getDb();
   const limit = await hit(db, `assess:${disruptionId}`, 5, 3600);
   if (!limit.allowed) return { error: "The AI assessment can run 5 times an hour per disruption. Try again later." };
@@ -40,7 +61,7 @@ export async function assess(disruptionId: string): Promise<ActionState> {
 }
 
 export async function approve(disruptionId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
   const db = getDb();
   if (String(form.get("confirm") ?? "").trim() !== "APPROVE") return { error: "Type APPROVE to confirm." };
   // SPEC F6: the Readiness panel is all green, or the duty manager acknowledges what is open.
@@ -55,12 +76,14 @@ export async function approve(disruptionId: string, _prev: ActionState, form: Fo
     if (err instanceof DecisionError) return { error: err.message };
     throw err;
   }
+  // Passengers who already chose PayPal (care released first) are paid at once.
+  after(async () => void (await payDisruption(db, disruptionId)));
   revalidatePath(`/ops/disruptions/${disruptionId}`);
   return { error: null, ok: "Approved. Passenger offers are in the outbox." };
 }
 
 export async function deny(disruptionId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
   try {
     await signDenial(getDb(), user, id.parse(disruptionId), {
       typedName: String(form.get("typedName") ?? ""),
@@ -76,7 +99,7 @@ export async function deny(disruptionId: string, _prev: ActionState, form: FormD
 }
 
 export async function releaseCareNow(disruptionId: string): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
   let r;
   try {
     r = await releaseCare(getDb(), user, id.parse(disruptionId));
@@ -89,7 +112,7 @@ export async function releaseCareNow(disruptionId: string): Promise<ActionState>
 }
 
 export async function syncWithPaypal(disruptionId: string): Promise<ActionState> {
-  await requireUser();
+  await authorize(disruptionId);
   const db = getDb();
   await payDisruption(db, id.parse(disruptionId));
   const r = await reconcileDisruption(db, disruptionId, { force: true });
@@ -99,7 +122,8 @@ export async function syncWithPaypal(disruptionId: string): Promise<ActionState>
 }
 
 export async function remindUnclaimed(disruptionId: string, payoutItemId: string): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
+  if (!(await belongs("payoutItem", payoutItemId, disruptionId))) return { error: "This payout is not on this flight." };
   try {
     await sendReminder(getDb(), id.parse(payoutItemId), user.id);
   } catch (err) {
@@ -111,7 +135,8 @@ export async function remindUnclaimed(disruptionId: string, payoutItemId: string
 }
 
 export async function cancelUnclaimedItem(disruptionId: string, payoutItemId: string): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
+  if (!(await belongs("payoutItem", payoutItemId, disruptionId))) return { error: "This payout is not on this flight." };
   let r;
   try {
     r = await cancelUnclaimed(getDb(), id.parse(payoutItemId), { type: "USER", id: user.id });
@@ -124,8 +149,9 @@ export async function cancelUnclaimedItem(disruptionId: string, payoutItemId: st
 }
 
 export async function decideReceipt(disruptionId: string, receiptId: string, _prev: ActionState, form: FormData): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
   const db = getDb();
+  if (!(await belongs("receipt", receiptId, disruptionId))) return { error: "This receipt is not on this flight." };
   const approveIt = form.get("decision") === "approve";
   let r;
   try {
@@ -140,7 +166,7 @@ export async function decideReceipt(disruptionId: string, receiptId: string, _pr
 }
 
 export async function closeTicket(disruptionId: string, ticketId: string): Promise<ActionState> {
-  const user = await requireUser("DUTY_MANAGER");
+  const user = await authorize(disruptionId, "DUTY_MANAGER");
   const db = getDb();
   const t = await db.ticket.updateMany({ where: { id: id.parse(ticketId), status: "OPEN", passenger: { disruptionId: id.parse(disruptionId) } }, data: { status: "CLOSED" } });
   if (t.count) await audit(db, { actorType: "USER", actorId: user.id, action: "TICKET_CLOSED", entityType: "Disruption", entityId: disruptionId, summary: `${user.name} closed a passenger ticket` });
@@ -149,7 +175,7 @@ export async function closeTicket(disruptionId: string, ticketId: string): Promi
 }
 
 export async function retryRefund(disruptionId: string, passengerId: string): Promise<ActionState> {
-  await requireUser("DUTY_MANAGER");
+  await authorize(disruptionId, "DUTY_MANAGER");
   const db = getDb();
   const p = await db.passenger.findFirst({ where: { id: id.parse(passengerId), disruptionId: id.parse(disruptionId), choice: "REFUND" }, select: { id: true } });
   if (!p) return { error: "This passenger has not chosen a refund." };
@@ -158,8 +184,23 @@ export async function retryRefund(disruptionId: string, passengerId: string): Pr
   return { error: null, ok: r === "REQUESTED" ? "Refund requested from PayPal." : r === "OUTSIDE_DEMO" ? "Recorded: refund to the original payment method, outside this demo." : "No refund is owed." };
 }
 
+/** Judge mode: "Reset this run" gives the judge a fresh copy of their scenario (SPEC 14). */
+export async function resetRun(): Promise<ActionState> {
+  const user = await requireUser("DUTY_MANAGER");
+  if (!user.judgeRunId) return { error: "Only a judge demo can be reset here. The owner resets with npm run reset-demo." };
+  let disruptionId: string;
+  try {
+    disruptionId = await resetJudgeRun(getDb(), user.judgeRunId);
+  } catch (err) {
+    if (err instanceof JudgeError) return { error: err.message };
+    throw err;
+  }
+  redirect(`/ops/disruptions/${disruptionId}?tab=evidence`);
+}
+
 export async function openAsPassenger(passengerId: string) {
-  await requireUser();
+  const user = await requireUser();
+  await assertPassengerAccess(getDb(), user, id.parse(passengerId));
   const link = await passengerLink(getDb(), id.parse(passengerId));
   if (!link) redirect("/ops?error=no-offer");
   redirect(new URL(link).pathname);
@@ -170,7 +211,7 @@ export async function openAsPassenger(passengerId: string) {
  * most, bank transfer for the scripted ones; then payouts start in the background.
  */
 export async function simulateResponses(disruptionId: string): Promise<ActionState> {
-  await requireUser("DUTY_MANAGER");
+  await authorize(disruptionId, "DUTY_MANAGER");
   const db = getDb();
   const { simulatePassengerResponses } = await import("@/lib/ops/simulate");
   const n = await simulatePassengerResponses(db, id.parse(disruptionId));

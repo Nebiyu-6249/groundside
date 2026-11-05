@@ -14,6 +14,8 @@ export interface SessionUser {
   email: string;
   name: string;
   role: "DUTY_MANAGER" | "VIEWER";
+  /** Set for judge-mode users: they see only this run (SPEC 13). */
+  judgeRunId: string | null;
 }
 
 function secret(): Uint8Array {
@@ -49,7 +51,7 @@ export async function currentUser(): Promise<SessionUser | null> {
   try {
     const { payload } = await jwtVerify(token, secret(), { algorithms: ["HS256"] });
     if (!payload.sub) return null;
-    const user = await getDb().user.findUnique({ where: { id: payload.sub }, select: { id: true, email: true, name: true, role: true } });
+    const user = await getDb().user.findUnique({ where: { id: payload.sub }, select: { id: true, email: true, name: true, role: true, judgeRunId: true } });
     return user;
   } catch {
     return null;

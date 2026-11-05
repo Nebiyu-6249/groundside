@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Chip, RecommendationChip } from "@/components/status";
+import { disruptionScope } from "@/lib/auth/scope";
 import { requireUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { euros, localTime } from "@/lib/format";
@@ -10,8 +11,8 @@ import { boardRows } from "@/lib/ops/queries";
 export const metadata: Metadata = { title: "Disruptions - Groundside" };
 
 async function Board() {
-  await requireUser();
-  const rows = await boardRows(getDb());
+  const user = await requireUser();
+  const rows = await boardRows(getDb(), disruptionScope(user));
   if (rows.length === 0) {
     return <p className="mt-6 text-muted">No disruptions yet. Run <code className="font-mono">npm run reset-demo</code> to load the demo scenarios.</p>;
   }

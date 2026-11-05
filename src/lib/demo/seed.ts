@@ -27,7 +27,12 @@ export function loadPolicy() {
 
 /** Removes the owner's demo disruptions and everything hanging off them. Phase 0 demo bookings stay. */
 export async function resetDemo(db: PrismaClient): Promise<{ disruptions: number }> {
-  const disruptions = await db.disruption.findMany({ where: { isDemoData: true, judgeRunId: null }, select: { id: true, flightId: true, flight: { select: { previousFlightId: true } } } });
+  return removeDisruptions(db, { isDemoData: true, judgeRunId: null });
+}
+
+/** Removes demo disruptions matching the filter (the owner's, or a judge run's) and what hangs off them. */
+export async function removeDisruptions(db: PrismaClient, where: { isDemoData: true; judgeRunId: string | null | { in: string[] } }): Promise<{ disruptions: number }> {
+  const disruptions = await db.disruption.findMany({ where, select: { id: true, flightId: true, flight: { select: { previousFlightId: true } } } });
   if (disruptions.length === 0) return { disruptions: 0 };
   const ids = disruptions.map((d) => d.id);
   const passengers = await db.passenger.findMany({ where: { disruptionId: { in: ids } }, select: { id: true, bookingId: true } });
@@ -95,6 +100,8 @@ interface SeedOptions {
   size: SeedSize;
   pool: readonly string[];
   unregisteredPattern: string;
+  /** Judge mode: the run this copy of the scenario belongs to. */
+  judgeRunId?: string;
 }
 
 async function seedScenario(db: PrismaClient, scenario: Scenario, airlineId: string, airports: Map<string, Airport>, opts: SeedOptions) {
@@ -125,12 +132,14 @@ async function seedScenario(db: PrismaClient, scenario: Scenario, airlineId: str
     data: {
       flightId: flight.id, scenarioKey: scenario.key, type: scenario.type, informedAt: times.informedAt,
       opsNote: scenario.opsNote, maintenanceLog: scenario.maintenanceLog, status: "DRAFT", isDemoData: true,
+      judgeRunId: opts.judgeRunId ?? null,
     },
   });
   await seedEvidence(db, disruption.id, scenario);
 
   const manifest: ManifestEntry[] = opts.size === "FULL" ? fullManifest(scenario) : quickManifest(scenario);
-  const random = seededRandom(scenario.key.charCodeAt(0) * 1000 + manifest.length);
+  // PNRs only. The owner's copy is reproducible; a judge's copy gets its own, since PNRs are unique.
+  const random = seededRandom(opts.judgeRunId ? parseInt(createHash("sha256").update(opts.judgeRunId).digest("hex").slice(0, 8), 16) : scenario.key.charCodeAt(0) * 1000 + manifest.length);
   // Connecting bookings split the fare 70/30 between the two segments (demo data).
   const segmentsFor = (e: ManifestEntry) => {
     if (e.finalDestination === destination.icao) {
@@ -210,6 +219,21 @@ async function seedScenario(db: PrismaClient, scenario: Scenario, airlineId: str
 
 export async function seedDemo(db: PrismaClient, opts: SeedOptions) {
   const users = await seedUsers(db);
+  const { airlineId, byIcao } = await ensureReferenceData(db);
+  const results = [];
+  for (const key of SCENARIO_KEYS) {
+    results.push(await seedScenario(db, loadScenario(key), airlineId, byIcao, opts));
+  }
+  return { users, scenarios: results };
+}
+
+/** One scenario, for example a judge's own copy. Returns the new disruption's ID. */
+export async function seedOneScenario(db: PrismaClient, key: (typeof SCENARIO_KEYS)[number], opts: SeedOptions) {
+  const { airlineId, byIcao } = await ensureReferenceData(db);
+  return seedScenario(db, loadScenario(key), airlineId, byIcao, opts);
+}
+
+async function ensureReferenceData(db: PrismaClient) {
   const airports = loadAirports();
   for (const a of airports) {
     await db.airport.upsert({ where: { icao: a.icao }, create: a, update: a });
@@ -221,9 +245,5 @@ export async function seedDemo(db: PrismaClient, opts: SeedOptions) {
     update: { name: DEMO_AIRLINE.name, isCommunityCarrier: DEMO_AIRLINE.isCommunityCarrier, policy },
   });
   const byIcao = new Map(airports.map((a) => [a.icao, a]));
-  const results = [];
-  for (const key of SCENARIO_KEYS) {
-    results.push(await seedScenario(db, loadScenario(key), airline.id, byIcao, opts));
-  }
-  return { users, scenarios: results };
+  return { airlineId: airline.id, byIcao };
 }

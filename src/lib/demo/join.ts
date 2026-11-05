@@ -11,7 +11,8 @@ import { DemoBookingError } from "./booking";
 
 export const JOIN_SCENARIO = "A";
 
-export async function joinCancelledFlight(db: PrismaClient, bookingId: string): Promise<{ passengerId: string; link: string }> {
+/** Joins the owner's scenario A flight, or, for a signed-in judge, the flight in their own run (SPEC 14). */
+export async function joinCancelledFlight(db: PrismaClient, bookingId: string, judgeRunId: string | null = null): Promise<{ passengerId: string; link: string }> {
   const booking = await db.booking.findUnique({ where: { id: bookingId }, include: { passengers: { select: { id: true } } } });
   if (!booking || booking.paymentMethod !== "PAYPAL" || !booking.paypalCaptureId || !booking.paypalOrderId) throw new DemoBookingError("Only a paid demo booking can join the flight", 409);
   if (booking.passengers.length) {
@@ -19,7 +20,7 @@ export async function joinCancelledFlight(db: PrismaClient, bookingId: string): 
     if (!link) throw new DemoBookingError("This booking already joined the flight", 409);
     return { passengerId: booking.passengers[0].id, link };
   }
-  const d = await db.disruption.findFirst({ where: { scenarioKey: JOIN_SCENARIO, isDemoData: true, judgeRunId: null }, include: { flight: true } });
+  const d = await db.disruption.findFirst({ where: judgeRunId ? { judgeRunId, type: "CANCELLATION" } : { scenarioKey: JOIN_SCENARIO, isDemoData: true, judgeRunId: null }, include: { flight: true } });
   if (!d) throw new DemoBookingError("The demo flight is not set up. Run npm run reset-demo.", 409);
   const template = await db.passenger.findFirst({ where: { disruptionId: d.id, finalDestination: d.flight.destination, fareType: "PUBLIC", priorityReason: null }, orderBy: { manifestIndex: "asc" } });
   if (!template) throw new DemoBookingError("No template passenger on the demo flight", 409);

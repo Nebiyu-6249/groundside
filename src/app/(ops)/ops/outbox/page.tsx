@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { disruptionScope } from "@/lib/auth/scope";
 import { requireUser } from "@/lib/auth/session";
 import { getDb } from "@/lib/db";
 import { utcTime } from "@/lib/format";
@@ -7,8 +8,8 @@ import { utcTime } from "@/lib/format";
 export const metadata: Metadata = { title: "Simulated outbox - Groundside" };
 
 async function Outbox() {
-  await requireUser();
-  const messages = await getDb().outboxMessage.findMany({ orderBy: { createdAt: "desc" }, take: 200, include: { passenger: { select: { displayName: true } } } });
+  const user = await requireUser();
+  const messages = await getDb().outboxMessage.findMany({ where: { passenger: { disruption: disruptionScope(user) } }, orderBy: { createdAt: "desc" }, take: 200, include: { passenger: { select: { displayName: true } } } });
   if (messages.length === 0) return <p className="mt-6 text-muted">Nothing yet. Notices appear here after a decision.</p>;
   return (
     <ul className="mt-6 space-y-3">

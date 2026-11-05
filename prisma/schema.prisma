@@ -171,10 +171,15 @@ model User {
   name         String
   passwordHash String
   role         UserRole
+  // Judge mode: a judge's user sees only this run's disruptions (SPEC 13, 14).
+  judgeRunId   String?
+  judgeRun     JudgeRun?  @relation(fields: [judgeRunId], references: [id], onDelete: Cascade)
   decisions    Decision[]
   reviews      Receipt[]
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
+  @@index([judgeRunId])
 }
 
 model JudgeRun {
@@ -184,6 +189,7 @@ model JudgeRun {
   size        JudgeRunSize
   expiresAt   DateTime
   disruptions Disruption[]
+  users       User[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
