@@ -4,7 +4,8 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 ## Where things stand (2026-11-04)
 
-- **Phase 4 is built (2026-11-05); Gate 4 waits on the user's recorded walkthrough** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
+- **Phase 5 in progress (2026-11-05): judge mode, error pages and security headers are done.** Gate 4 still waits on the user's recorded walkthrough. Next: the Playwright smoke test (if time), final README and Devpost text, the user's video, and the Gate 5 checklist (`docs/DEMO.md` section 7).
+- **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**
     - release care before the decision
     - readiness panel with typed APPROVE

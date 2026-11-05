@@ -244,3 +244,34 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - A3 notice writer (notices are code templates)
   - the landing page and judge mode (Phase 5)
   - the owner's real receipt photos (`fixtures/receipts/`)
+
+### 2026-11-05: Phase 5 started (user said "continue"; Gate 4 recording still the user's)
+
+- **Defaults taken on the Gate 4 questions** (the user can override):
+  - meal-receipt rule kept
+  - consent text switched to SPEC F8 (`consent.v2`, cites REG-7-3)
+  - denial reasons need 30 characters (SPEC F6)
+  - `docs/DEMO.md` corrected to English only and METAR only
+- **Judge mode (SPEC 13, 14):**
+  - "Start the judge demo" on `/` (scenario A or B) creates a `JudgeRun` and seeds a private Quick run (own PNR seed). It creates a duty-manager user tied to the run (new `User.judgeRunId`, migration `phase5_judge_users`) and signs the judge in.
+  - Every ops page, action, status route and receipt image route checks `assertDisruptionAccess`/`disruptionScope`. Actions on payout items and receipts also check the item belongs to the disruption.
+  - Guide strip, "Reset this run", and judge bookings joining the judge's own flight.
+  - Rate limit `MAX_JUDGE_RUNS_PER_HOUR`; expired runs removed when a new run starts; a failed start rolls back.
+- **Walked the path as a judge in the local browser** (first look at the ops screens; screenshots in `docs/screens/`):
+  1. evidence with weather charts
+  2. release meals, then simulate responses: 8 meal payouts, 7 paid, 1 unclaimed
+  3. AI assessment: PAY, weather claim not supported, technical cause from the maintenance log, 0.0017 USD
+  4. approve with typed APPROVE and acknowledgement
+  5. compensation payouts moved to Paid live in the grid
+- **Found and fixed on that walk:**
+  - approval did not start payouts for passengers who had already chosen PayPal
+  - seeded refund choices had no due date
+  - the judge seed reused the owner's PNRs
+- **Hardening:**
+  - `error.tsx`, `global-error.tsx` and `not-found.tsx` with no stack traces
+  - security headers: CSP `frame-ancestors 'none'`, `base-uri`, `object-src`; plus `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`
+  - The PayPal SDK still loads.
+- **Verified:**
+  - rate limits exist for login, judge runs, receipts, questions, AI re-runs, passenger actions and joins; the Postgres limiter refused the 4th of 3
+  - A2 and A4 fall back without calling the model at the budget cap and in fixtures mode (new tests)
+- README: architecture diagram (Mermaid) and a judge-mode section. 198 tests.

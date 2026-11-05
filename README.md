@@ -2,10 +2,41 @@
 
 When a flight from an EU airport is cancelled or badly delayed, Groundside checks the airline's stated cause against real archived weather reports, works out what every passenger is owed under EU Regulation 261/2004, and pays them through PayPal once a duty manager approves.
 
-Built for the PayPal AI Hackathon. **Status: in development (Phase 4: passenger experience, receipts, refunds and questions).**
+Built for the PayPal AI Hackathon. **Status: in development (Phase 5: hardening and submission).**
 
 - Live demo: https://groundside.onrender.com (free plan: the first request after a quiet spell can take up to a minute while it wakes)
-- Demo credentials: published here once the hosted demo is up (sandbox only)
+- Try it: open the live demo and press **Start the judge demo**. You get your own copy of a scenario (12 synthetic passengers), signed in as its duty manager, for 24 hours. No login needed.
+- Shared demo login and sandbox buyer account for the booking page: to be published here (sandbox only)
+
+## Architecture
+
+```mermaid
+flowchart LR
+  subgraph Evidence
+    OPS[Ops note and maintenance log<br/>demo data]
+    WX[Archived METAR<br/>Iowa Environmental Mesonet]
+  end
+  WX --> FACTS[Weather facts<br/>numbered by code]
+  OPS --> A1
+  FACTS --> A1[A1 cause assessment<br/>OpenAI structured output]
+  RULES[(Rule pack<br/>VERIFIED entries)] --> A1
+  A1 --> VAL{Code validators<br/>citations, fact IDs,<br/>quotes, no money}
+  VAL --> REC[Recommendation<br/>mapped by code]
+  REC --> DM((Duty manager<br/>approves or signs denial))
+  ENG[EU261 engine<br/>pure TypeScript, traced] --> DM
+  RULES --> ENG
+  DM --> OFFERS[Passenger pages<br/>token links]
+  OFFERS --> CHOICE{PayPal with consent<br/>or bank transfer}
+  CHOICE --> ORCH[Payout orchestrator<br/>idempotent micro-batches]
+  ORCH --> PP[PayPal Payouts API<br/>sandbox]
+  PP -- webhooks, verified --> REC2[Shared transition function]
+  ORCH -- polling --> REC2
+  OFFERS --> RCPT[Receipt photo] --> A2[A2 vision reading] --> CHK{Receipt checks<br/>in code} --> ORCH
+  OFFERS --> Q[Question] --> A4[A4 grounded answer] --> QV{Amount and citation<br/>checks} --> OFFERS
+  OFFERS --> REFUND[Refund choice] --> PAY2[PayPal Payments v2<br/>refund to capture]
+```
+
+The AI recommends; code calculates every amount; only a person can deny compensation.
 
 ## What it does
 
@@ -71,6 +102,19 @@ The AI recommends; code calculates; only a human can deny compensation. Model ID
 
 - Passengers, bookings, the airline ("Demo Air (fictional carrier)") and flight numbers are synthetic and labelled "Demo data" on screen.
 - Weather reports are real archived observations, labelled with their source and retrieval time.
+
+## Judge mode
+
+With `JUDGE_MODE=true` (set on the hosted app), the landing page offers **Start the judge demo** (SPEC 14):
+- It creates a `JudgeRun` and seeds a private Quick run of scenario A or B.
+- It signs the visitor in as a duty manager who can see only that run.
+- The judge gets a guide strip and a "Reset this run" control. A demo booking made while signed in joins the judge's own flight.
+
+Guard rails:
+- `MAX_JUDGE_RUNS_PER_HOUR` per hashed IP
+- runs and their data are removed after 24 hours, when the next run starts
+- the daily payout cap (`PAYOUT_DAILY_CAP_EUR`)
+- the AI budget (`AI_DAILY_BUDGET_USD`)
 
 ## Local setup
 
