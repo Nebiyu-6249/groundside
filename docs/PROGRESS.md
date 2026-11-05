@@ -275,3 +275,26 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - rate limits exist for login, judge runs, receipts, questions, AI re-runs, passenger actions and joins; the Postgres limiter refused the 4th of 3
   - A2 and A4 fall back without calling the model at the budget cap and in fixtures mode (new tests)
 - README: architecture diagram (Mermaid) and a judge-mode section. 198 tests.
+
+### 2026-11-05: Phase 5 build continued (user: "continue the main build")
+
+- **Secret scan** (`npm run secret-scan`): checks the whole git history and every tracked file for:
+  - database URLs with passwords
+  - OpenAI, PayPal and Render keys
+  - private keys, bearer tokens and long secret assignments
+
+  It prints locations only. Result: nothing found. One false positive, an npm integrity hash in `package-lock.json`, is excluded.
+- **Fresh clone:** cloned from GitHub into a scratch folder with no `.env`; `npm ci` then `npm run check` passed (198 tests at that time).
+- **Playwright smoke test** (`npm run smoke`, `e2e/judge-path.spec.ts`), with `@playwright/test` 1.64.1 and Chromium.
+  - Runs the judge path: start the demo, evidence, release meals, simulate responses, AI assessment (recorded result locally), APPROVE, a Paid row in the grid, the audit entry. It also checks the public pages and the 404 page.
+  - Against a local dev server it passed in 3.0 min; the first run against a cold dev server timed out while pages compiled, hence one retry.
+  - `SMOKE_URL=https://groundside.onrender.com npm run smoke` runs it against the hosted app.
+- **A3 notice writer (SPEC 8.3):** one notice per disruption and outcome (approved, denied with care, care only), cached in `Notice`.
+  - Placeholders only; code fills name, amounts, signed reason and link.
+  - Validators: required and allowed placeholders, no money in the text, rule-list citations, sentence length, the national enforcement body in denials.
+  - Code templates when AI is off. `{{DECISION_REASON}}` was added to the SPEC placeholder list so the signed reason is quoted word for word.
+  - `npm run eval:a3`: 3/3 on the first try, 0.0014 USD. A scenario B denial run used the A3 notice for all passengers.
+- **Design pass (SPEC 12):** contrast computed for every text colour on both themes. Light-theme amber was 4.41 as text and 3.71 under ink on buttons; it is now `#945400` (5.37) with white button text, via a new `on-amber` token.
+  - Count-up of the paid total (instant with reduced motion).
+  - Enter or Space opens the passenger trace drawer from the grid.
+- 205 tests.

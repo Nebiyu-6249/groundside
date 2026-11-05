@@ -216,8 +216,12 @@ Every legal statement cites an entry in [`rules/`](rules/): Regulation (EC) No 2
 ## Checks
 
 ```bash
-npm run check   # typecheck, lint, unit tests
+npm run check        # typecheck, lint, unit tests
+npm run smoke        # Playwright: the judge demo path in a real browser (local dev server, sandbox payouts)
+npm run secret-scan  # git history and tracked files, prints locations only
 ```
+
+`SMOKE_URL=https://groundside.onrender.com npm run smoke` runs the smoke test against the hosted app. Install the browser once with `npx playwright install chromium`.
 
 ## License
 
