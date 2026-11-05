@@ -1,6 +1,6 @@
 # Devpost draft (early eligibility check)
 
-Draft text for the Devpost form, from `docs/DEMO.md` section 5. Every number below was measured in this project on 2026-11-04. Phase 4 features are marked "in progress" until they are built. Rewrite it in your own words before submitting.
+Draft text for the Devpost form, from `docs/DEMO.md` section 5. Every number below was measured in this project on 2026-11-04 and 2026-11-05. Rewrite it in your own words before submitting.
 
 ---
 
@@ -23,7 +23,10 @@ Groundside does both on the night.
 - **Computed entitlements:** a deterministic EU261 engine computes each passenger's compensation, meals, hotel and transport caps, and refunds. Every amount is traced to the rule and inputs that produced it.
 - **One decision:** the duty manager approves once. A denial must be signed with a typed name, a written reason and a rule citation. Meals and hotel are paid either way.
 - **Passenger page:** each passenger gets a personal page, chooses PayPal (with explicit consent) or bank transfer, and is paid through the PayPal Payouts API, with live status.
-- **In progress:** meal-receipt upload read by a vision model and checked by code; Art 8 refunds back to the original PayPal payment; grounded passenger questions and answers.
+- **Receipts:** passengers photograph meal, hotel or taxi receipts. A vision model reads them; code checks duplicates, the time window, the totals, excluded items and the remaining allowance before reimbursing through PayPal. Anything doubtful goes to a person.
+- **Refunds:** a ticket booked with PayPal on the demo page joins the cancelled flight. Choosing a refund returns it to the original PayPal payment (Payments v2), with the 7-day deadline tracked.
+- **Questions:** passengers ask about their case and get answers grounded only in their own case file. Code checks every amount and citation, and they can always ask for a person.
+- **Judge mode:** "Start the judge demo" gives each visitor a private copy of a scenario for 24 hours, with no login.
 
 ## How we built it
 
@@ -40,10 +43,14 @@ Groundside does both on the night.
   - that no money amount appears
 
   Code, not the model, maps the result to the recommendation shown. Failures retry once, then fall back to "uncertain, a human decides". A daily spend cap serves a recorded result when reached. Evaluated with 12 cases: 12 of 12 pass on two full runs, including a prompt-injection case.
+- **AI receipts and questions:**
+  - Receipt reading (vision, strict JSON): 5 of 5 synthetic receipts read exactly.
+  - Passenger answers: 8 of 8 eval cases pass, including injection, legal-advice and "add it all up" cases.
+  - The AI never approves a receipt and never states an amount that is not in the case file.
 - **Rule pack:** 46 entries (Regulation 261/2004, CJEU judgments, Commission guidelines), each checked word for word against the official text from the EU Publications Office.
-- **Engine:** a pure TypeScript EU261 engine with 64 unit tests, each naming the rule it exercises. The project has 155 tests in all.
+- **Engine:** a pure TypeScript EU261 engine with 64 unit tests, each naming the rule it exercises. The project has 198 tests in all.
 - **Data:** real archived METAR from the Iowa Environmental Mesonet (public domain), for Frankfurt on 2026-01-24 and Milan Malpensa freezing fog on 2026-01-22. Passengers and the airline are synthetic and labelled as demo data.
-- **Stack:** Next.js, TypeScript, Prisma, Postgres on Neon, AG Grid, Tailwind. Deployed on Render through the Render CLI.
+- **Stack:** Next.js, TypeScript, Prisma, Postgres on Neon, AG Grid and AG Charts (weather timelines), sharp, Tailwind. Deployed on Render through the Render CLI.
 
 ## Challenges
 
@@ -73,11 +80,12 @@ Keeping the AI to the parts it is good at (reading evidence, explaining) and lea
 
 ## Built with
 
-paypal-payouts, paypal-orders, paypal-webhooks, openai, nextjs, typescript, prisma, postgresql, neon, ag-grid, render, tailwindcss
+paypal-payouts, paypal-orders, paypal-webhooks, openai, nextjs, typescript, prisma, postgresql, neon, ag-grid, ag-charts, render, tailwindcss
 
 ## Try it
 
 - **Hosted demo:** https://groundside.onrender.com. On the free plan, the first request after a quiet spell can take up to a minute.
-- **Demo login:** `duty.manager@demo.groundside.test`, with the password you choose to publish.
+- **No login needed:** press "Start the judge demo" on the hosted page.
+- **Shared demo login (optional):** `duty.manager@demo.groundside.test`, with the password you choose to publish.
 - **Code:** https://github.com/Nebiyu-6249/groundside
 - **Video:** to be added in Phase 5.
