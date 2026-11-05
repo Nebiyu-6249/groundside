@@ -15,9 +15,10 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
   4. Add 3 to 5 real receipt photos (personal data covered) to `fixtures/receipts/`, at least one without a `demoDateOverride`; then run `npm run eval:a2`.
   5. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`) for the early eligibility check, and later the final submission with the video.
   6. Record and upload the video (under 3:00).
-  7. Check the sandbox business balance in the PayPal dashboard; set `PAYOUT_DAILY_CAP_EUR` for two weeks of judging.
+  7. **Payout cap (judging risk):** one scenario A judge run pays about 7,000 EUR, so the current `PAYOUT_DAILY_CAP_EUR=20000` allows about three runs a day. Check the sandbox business balance (top it up in the sandbox dashboard if needed) and raise the cap on Render, for example to 200000.
   8. Decide the Render plan for judging (free sleeps when idle; starter is always on).
-  9. Read the AG Grid and Render sponsor-prize requirements and tick them on the form.
+  9. Read the Devpost rules page (it blocks automated reads) for the AG Grid and Render prize criteria and the submission requirements, and tick the prizes on the form.
+  11. Set the GitHub repo's homepage link to https://groundside.onrender.com.
   10. Optional: tell Claude Code to change the meal-receipt rule (currently: receipts reimburse food above the flat allowance up to the daily maximum). Gate 4 still waits on the user's recorded walkthrough. Next: the Playwright smoke test (if time), final README and Devpost text, the user's video, and the Gate 5 checklist (`docs/DEMO.md` section 7).
 - **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**

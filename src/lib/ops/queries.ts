@@ -192,7 +192,7 @@ export async function disruptionDetail(db: PrismaClient, id: string) {
       };
     }),
     webhooks: webhooks.map((w) => ({ ...w, receivedAt: w.receivedAt.toISOString(), processedAt: w.processedAt?.toISOString() ?? null })),
-    audit: auditEvents.map((a) => ({ id: a.id, at: a.createdAt.toISOString(), actorType: a.actorType, action: a.action, summary: a.summary })),
+    audit: auditEvents.map((a) => ({ id: a.id, at: a.createdAt.toISOString(), actorType: a.actorType, action: a.action, entityId: a.entityId, summary: a.summary })),
     rules: Object.fromEntries(rules.map((r) => [r.id, { title: displayTitle(r), kind: r.kind, summary: r.summary, url: r.url, excerpt: r.excerpt }])),
     citable: rules.filter((r) => r.status === "VERIFIED" && (r.kind === "LAW" || r.kind === "CASE_LAW")).map((r) => ({ id: r.id, title: displayTitle(r) })),
   };

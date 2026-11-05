@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // No dev-mode badge: screenshots and recordings are taken from the dev server too.
+  devIndicators: false,
   partialPrefetching: true,
   // pg and the Prisma adapter run on the Node.js server only.
   serverExternalPackages: ["pg", "@prisma/adapter-pg"],

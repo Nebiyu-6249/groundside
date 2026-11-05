@@ -299,3 +299,20 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - Enter or Space opens the passenger trace drawer from the grid.
 - 205 tests.
 - Hosted smoke test (`SMOKE_URL=https://groundside.onrender.com npm run smoke`) passed on the first try: the judge path with live AI reached a Paid row in 1.6 min (Gate 5 target: under 3 min); public pages and the 404 page are fine.
+
+### 2026-11-05: Gate 5 checklist work
+
+- **README:** environment variable table (SPEC 16).
+- **Claims:** checked against the do-not-claim list; nothing to change.
+- **Golden rule 10:** CJEU case titles named real airlines ("McDonagh v Ryanair") in the denial form, the passenger "Why" list and the AI prompts.
+  - `src/lib/rules/display.ts` shows case law as "Case C-12/11, 31 January 2013"; the rule pack keeps the official titles.
+  - A test asserts no airline name appears in any displayed title or summary.
+  - The A1 eval is still 12/12 and A4 8/8 after the change.
+- **Devpost screenshots** (`npm run screens`, `scripts/screens.ts`): six 1920x1080 PNGs in `docs/screens/`, captured from two local judge runs with live AI.
+- **Found while capturing, fixed:**
+  - Receipt duplicates were checked across every passenger in the database, so one judge's demo receipt would block it for every later judge. Duplicates are now checked within one data set (the owner's demo, or one judge run).
+  - The Overview "time from decision to first passenger paid" counted meal payouts sent before the decision. It now counts only payouts sent after it.
+  - The Next dev badge showed in captures (`devIndicators: false`).
+- **Payout cap risk:** a scenario A judge run pays about 7,000 EUR, so the default 20,000 EUR daily cap allows about three runs a day. Owner to raise it on Render after checking the sandbox balance.
+- **Sponsor prizes:** the PayPal blog lists Best Use of AG Grid (5,000/2,000/3 x 1,000 USD) and Best Use of Render (Render credits), with no qualifying rules. The Devpost rules page returns 403 to automated reads.
+- **Checklist status:** recorded under `docs/DEMO.md` section 7.
