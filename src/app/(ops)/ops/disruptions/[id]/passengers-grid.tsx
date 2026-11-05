@@ -57,6 +57,11 @@ export function PassengersGrid({ rows, rules, openAsPassenger }: { rows: Row[]; 
           defaultColDef={{ sortable: true, resizable: true, enableCellChangeFlash: true }}
           rowSelection={{ mode: "singleRow", enableClickSelection: true, checkboxes: false }}
           onRowClicked={(e) => e.data && !e.rowPinned && setSelected(e.data)}
+          // Keyboard: Enter or Space on a focused cell opens the same trace drawer (SPEC 12).
+          onCellKeyDown={(e) => {
+            const key = (e.event as KeyboardEvent | null)?.key;
+            if ((key === "Enter" || key === " ") && e.data && !e.rowPinned) setSelected(e.data);
+          }}
         />
       </div>
       {selected ? (

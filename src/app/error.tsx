@@ -15,7 +15,7 @@ export default function ErrorPage({ error, retry }: { error: unknown; retry: () 
       <h1 className="text-xl font-semibold">Something went wrong on this page</h1>
       <p className="mt-2">Nothing was lost, and no payment is sent twice: every payment has its own idempotency key. Try again; if it keeps failing, go back to the start.</p>
       <div className="mt-6 flex gap-3">
-        <button type="button" onClick={() => retry()} className="rounded bg-amber px-4 py-2 text-sm font-medium text-ink">Try again</button>
+        <button type="button" onClick={() => retry()} className="rounded bg-amber px-4 py-2 text-sm font-medium text-on-amber">Try again</button>
         <Link href="/" className="rounded border border-line px-4 py-2 text-sm">Back to the start</Link>
       </div>
     </main>
