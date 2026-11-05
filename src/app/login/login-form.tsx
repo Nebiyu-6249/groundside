@@ -16,7 +16,7 @@ export function LoginForm({ demoEmail }: { demoEmail: string | null }) {
         <input id="password" name="password" type="password" autoComplete="current-password" required className="mt-1 w-full rounded border border-line bg-surface px-3 py-2" />
       </div>
       {state.error ? <p role="alert" className="text-sm text-red">{state.error}</p> : null}
-      <button type="submit" disabled={pending} className="w-full rounded bg-amber px-4 py-2 font-medium text-ink disabled:opacity-60">
+      <button type="submit" disabled={pending} className="w-full rounded bg-amber px-4 py-2 font-medium text-on-amber disabled:opacity-60">
         {pending ? "Signing in" : "Sign in"}
       </button>
     </form>

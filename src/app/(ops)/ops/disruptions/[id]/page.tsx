@@ -15,6 +15,7 @@ import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny,
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
 import { PassengersGrid } from "./passengers-grid";
 import { WeatherChart } from "@/components/weather-chart";
+import { CountUpEuros } from "@/components/count-up";
 
 export const metadata: Metadata = { title: "Disruption - Groundside" };
 
@@ -79,7 +80,7 @@ function Overview({ d }: { d: DisruptionDetail }) {
   return (
     <div className="space-y-6">
       <div className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded border border-line p-3"><p className="text-xs text-muted">Paid so far</p><p className="mt-1 font-mono text-xl tabular">{euros(paid.reduce((s, e) => s + e.amountCents, 0))}</p><p className="text-xs text-muted">{paid.length} payments</p></div>
+        <div className="rounded border border-line p-3"><p className="text-xs text-muted">Paid so far</p><p className="mt-1 font-mono text-xl tabular"><CountUpEuros cents={paid.reduce((s, e) => s + e.amountCents, 0)} /></p><p className="text-xs text-muted">{paid.length} payments</p></div>
         <div className="rounded border border-line p-3"><p className="text-xs text-muted">Time from decision to first passenger paid</p><p className="mt-1 font-mono text-xl tabular">{minutes === null ? "Not yet" : `${minutes} min`}</p><p className="text-xs text-muted">Measured in this run</p></div>
         <div className="rounded border border-line p-3"><p className="text-xs text-muted">AI recommendation</p><div className="mt-2"><RecommendationChip value={d.assessment?.shown} /></div><p className="mt-1 text-xs text-muted">AI recommendation. A duty manager decides.</p></div>
       </div>

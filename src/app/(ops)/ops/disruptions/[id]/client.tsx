@@ -9,7 +9,7 @@ export function ActionButton({ action, label, pendingLabel, tone = "neutral" }: 
   const [state, run, pending] = useActionState<ActionState>(async () => action(), { error: null });
   return (
     <form action={run} className="inline-flex flex-col gap-1">
-      <button type="submit" disabled={pending} className={tone === "primary" ? "rounded bg-amber px-3 py-1.5 text-sm font-medium text-ink disabled:opacity-60" : "rounded border border-line px-3 py-1.5 text-sm hover:border-amber disabled:opacity-60"}>
+      <button type="submit" disabled={pending} className={tone === "primary" ? "rounded bg-amber px-3 py-1.5 text-sm font-medium text-on-amber disabled:opacity-60" : "rounded border border-line px-3 py-1.5 text-sm hover:border-amber disabled:opacity-60"}>
         {pending ? pendingLabel : label}
       </button>
       {state.error ? <span role="alert" className="text-xs text-red">{state.error}</span> : state.ok ? <span role="status" className="text-xs text-muted">{state.ok}</span> : null}
@@ -42,7 +42,7 @@ export function ApproveForm({ action, aiDiffers, openChecks, totals }: { action:
       </div>
       {state.error ? <p role="alert" className="text-sm text-red">{state.error}</p> : null}
       {state.ok ? <p role="status" className="text-sm">{state.ok}</p> : null}
-      <button type="submit" disabled={pending} className="rounded bg-amber px-3 py-1.5 text-sm font-medium text-ink disabled:opacity-60">{pending ? "Approving" : "Approve compensation"}</button>
+      <button type="submit" disabled={pending} className="rounded bg-amber px-3 py-1.5 text-sm font-medium text-on-amber disabled:opacity-60">{pending ? "Approving" : "Approve compensation"}</button>
     </form>
   );
 }
@@ -88,7 +88,7 @@ export function ReceiptReviewForm({ action }: { action: (prev: ActionState, form
         <input name="reason" required minLength={5} className="mt-1 w-full rounded border border-line bg-background px-2 py-1 text-sm" />
       </label>
       <div className="flex gap-2">
-        <button type="submit" name="decision" value="approve" disabled={pending} className="rounded bg-amber px-3 py-1 text-sm font-medium text-ink disabled:opacity-60">Approve</button>
+        <button type="submit" name="decision" value="approve" disabled={pending} className="rounded bg-amber px-3 py-1 text-sm font-medium text-on-amber disabled:opacity-60">Approve</button>
         <button type="submit" name="decision" value="reject" disabled={pending} className="rounded border border-red px-3 py-1 text-sm text-red disabled:opacity-60">Reject</button>
       </div>
       {state.error ? <p role="alert" className="text-xs text-red">{state.error}</p> : state.ok ? <p role="status" className="text-xs">{state.ok}</p> : null}

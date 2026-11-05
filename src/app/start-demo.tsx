@@ -18,7 +18,7 @@ export function StartDemo() {
           <span><span className="font-medium">B: real fog.</span> DEMO 207 Milan to Lisbon is cancelled in freezing fog. The AI should find the claim supported; a duty manager signs the denial, and meals are still paid.</span>
         </label>
       </fieldset>
-      <button type="submit" disabled={pending} className="w-full rounded bg-amber px-4 py-3 font-medium text-ink disabled:opacity-60 sm:w-auto">
+      <button type="submit" disabled={pending} className="w-full rounded bg-amber px-4 py-3 font-medium text-on-amber disabled:opacity-60 sm:w-auto">
         {pending ? "Setting up your copy" : "Start the judge demo"}
       </button>
       <p className="text-sm text-muted">You get your own copy with 12 passengers, signed in as its duty manager, for 24 hours. Payouts use the PayPal sandbox; no real money moves. The first start after a quiet spell can take up to a minute while the free server wakes.</p>

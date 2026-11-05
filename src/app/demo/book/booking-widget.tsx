@@ -216,7 +216,7 @@ export function BookingWidget({ clientId }: { clientId: string | undefined }) {
           {!latestRefund && booking.captureId && (
             <div className="mt-4 space-y-2">
               <p className="text-sm">DEMO 412 has just been cancelled. Join it as a passenger to see your rights, choose a refund, and get it back on this PayPal payment.</p>
-              <button type="button" onClick={joinFlight} disabled={busy} className="rounded bg-amber px-4 py-2 text-sm font-medium text-ink disabled:opacity-60">
+              <button type="button" onClick={joinFlight} disabled={busy} className="rounded bg-amber px-4 py-2 text-sm font-medium text-on-amber disabled:opacity-60">
                 {busy ? "Opening..." : booking.joinedFlight ? "Open my passenger page" : "Join the cancelled flight"}
               </button>
             </div>

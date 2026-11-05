@@ -10,7 +10,8 @@
   --paper-2: #ece7dc;
   --muted: #5b6472;
   --line: #d6d0c3;
-  --amber: #a85f00;
+  --amber: #945400;
+  --on-amber: #ffffff;
   --green: #1f7a3d;
   --red: #b42318;
 
@@ -27,6 +28,7 @@
     --muted: #9aa3b2;
     --line: var(--ink-3);
     --amber: #f2a93b;
+    --on-amber: #0f1622;
     --green: #4cc27a;
     --red: #f07167;
   }
@@ -39,6 +41,7 @@
   --color-muted: var(--muted);
   --color-line: var(--line);
   --color-amber: var(--amber);
+  --color-on-amber: var(--on-amber);
   --color-green: var(--green);
   --color-red: var(--red);
   --font-sans: var(--font-plex-sans);
@@ -77,6 +80,7 @@ body {
   --muted: #9aa3b2;
   --line: var(--ink-3);
   --amber: #f2a93b;
+    --on-amber: #0f1622;
   --green: #4cc27a;
   --red: #f07167;
   color-scheme: dark;
@@ -90,7 +94,8 @@ body {
   --surface: #ffffff;
   --muted: #5b6472;
   --line: #d6d0c3;
-  --amber: #a85f00;
+  --amber: #945400;
+  --on-amber: #ffffff;
   --green: #1f7a3d;
   --red: #b42318;
   color-scheme: light;
