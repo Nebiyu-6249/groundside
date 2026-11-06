@@ -31,3 +31,6 @@ npm-debug.log*
 # Playwright output
 /test-results/
 /playwright-report/
+
+# Walkthrough videos (large; screenshots are committed)
+/docs/walkthrough/video/
