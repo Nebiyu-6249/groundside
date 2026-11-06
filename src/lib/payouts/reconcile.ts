@@ -2,6 +2,7 @@
 // changes through the shared transition functions. Throttled to once per 10 s per disruption.
 
 import type { PrismaClient } from "@/generated/prisma/client";
+import { paypalAccount } from "@/lib/paypal/account";
 import { batchDetailSchema, getPayoutBatch } from "@/lib/paypal/payouts";
 import { resendStuckBatches } from "./orchestrator";
 import { applyBatchUpdate, applyItemUpdate, FINAL_BATCH, FINAL_ITEM } from "./transitions";
@@ -16,7 +17,8 @@ export async function reconcileDisruption(db: PrismaClient, disruptionId: string
 
   await resendStuckBatches(db, disruptionId);
   const batches = await db.payoutBatch.findMany({
-    where: { paypalBatchId: { not: null }, items: { some: { entitlement: { passenger: { disruptionId } } } } },
+    // Only batches of the current PayPal app: earlier apps' batches are archived (src/lib/paypal/account.ts).
+    where: { paypalBatchId: { not: null }, paypalAccount: paypalAccount(), items: { some: { entitlement: { passenger: { disruptionId } } } } },
     include: { items: { select: { status: true } } },
   });
   let changed = 0;

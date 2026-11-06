@@ -6,6 +6,7 @@
 
 import type { PrismaClient } from "@/generated/prisma/client";
 import { audit } from "@/lib/ops/audit";
+import { paypalAccount } from "@/lib/paypal/account";
 import { cancelPayoutItem, getPayoutItem, payoutItemSchema } from "@/lib/paypal/payouts";
 import { applyItemUpdate, NO_MONEY } from "./transitions";
 
@@ -23,6 +24,8 @@ const eur = (cents: number) => `${(cents / 100).toFixed(2)} EUR`;
 async function unclaimedItem(db: PrismaClient, payoutItemId: string) {
   const item = await db.payoutItem.findUnique({ where: { id: payoutItemId }, include: { entitlement: { include: { passenger: true } } } });
   if (!item || item.status !== "UNCLAIMED") throw new UnclaimedError("This payout is not unclaimed.");
+  const batch = await db.payoutBatch.findUnique({ where: { id: item.batchId }, select: { paypalAccount: true } });
+  if (batch?.paypalAccount !== paypalAccount()) throw new UnclaimedError("This payout was made with an earlier PayPal sandbox app and is archived.");
   return item;
 }
 
@@ -73,7 +76,7 @@ export async function requestBankSwitch(db: PrismaClient, passengerId: string, i
   if (!/^[A-Za-z0-9]{4}$/.test(ibanLast4)) throw new UnclaimedError("Enter the last 4 characters of your IBAN.");
   const offer = await db.offer.findFirst({ where: { passengerId }, orderBy: { createdAt: "desc" } });
   if (!offer || offer.paymentChoice !== "PAYPAL") throw new UnclaimedError("Only a PayPal payment can be switched to bank transfer.");
-  const items = await db.payoutItem.findMany({ where: { status: "UNCLAIMED", entitlement: { passengerId } } });
+  const items = await db.payoutItem.findMany({ where: { status: "UNCLAIMED", entitlement: { passengerId }, batch: { paypalAccount: paypalAccount() } } });
   if (items.length === 0) throw new UnclaimedError("You have no unclaimed PayPal payment to switch.");
   if (!offer.bankSwitchRequestedAt) {
     await db.offer.update({ where: { id: offer.id }, data: { bankSwitchRequestedAt: new Date(), ibanLast4: ibanLast4.toUpperCase() } });
