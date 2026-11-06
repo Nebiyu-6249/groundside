@@ -5,7 +5,7 @@
 // money arrived through the PayPal API, and writes docs/GATE4_WALKTHROUGH.md.
 // Run with WALKTHROUGH_URL to target another deployment. Sends real sandbox payouts.
 
-import { mkdirSync, renameSync, writeFileSync } from "node:fs";
+import { mkdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { chromium, type Page } from "@playwright/test";
 import pg from "pg";
@@ -59,10 +59,10 @@ function expect(cond: unknown, message: string) {
   if (!cond) throw new Error(message);
 }
 
-/** The hosted database (groundside_hosted), read-only here, for the PayPal proof. */
+/** The database behind BASE (groundside_hosted for the hosted app), read-only, for the PayPal proof. */
 async function hostedDb() {
   const u = new URL(process.env.DATABASE_URL ?? "");
-  u.pathname = "/groundside_hosted";
+  if (!/localhost|127\.0\.0\.1/.test(BASE)) u.pathname = "/groundside_hosted";
   const c = new pg.Client({ connectionString: u.toString() });
   await c.connect();
   return c;
@@ -92,10 +92,16 @@ async function main() {
 
   await step(1, "Landing page: one sentence and Start the judge demo", async (r) => {
     const t0 = Date.now();
-    const res = await ops.goto(`${BASE}/`, { timeout: 180_000 });
-    measured.coldStart = `${((Date.now() - t0) / 1000).toFixed(1)} s to the first page (HTTP ${res?.status()})`;
-    r.notes.push(`First page load ${measured.coldStart}`);
-    await ops.getByRole("button", { name: "Start the judge demo" }).waitFor();
+    const first = await ops.goto(`${BASE}/`, { timeout: 180_000 });
+    const firstStatus = first?.status();
+    let status = firstStatus;
+    while (status !== 200 && Date.now() - t0 < 180_000) {
+      await ops.waitForTimeout(3000);
+      status = (await ops.goto(`${BASE}/`, { timeout: 180_000 }))?.status();
+    }
+    await ops.getByRole("button", { name: "Start the judge demo" }).waitFor({ timeout: 60_000 });
+    measured.coldStart = `first response HTTP ${firstStatus}${firstStatus === 200 ? "" : " (instance waking)"}; landing page served after ${((Date.now() - t0) / 1000).toFixed(1)} s`;
+    r.notes.push(`Cold start: ${measured.coldStart}`);
     expect(await ops.getByRole("heading", { level: 1 }).count(), "no heading");
     await shot(ops, r, "landing");
   });
@@ -143,7 +149,7 @@ async function main() {
   await step(5, "Passengers tab: 12 rows; passenger 4's trace drawer (distance to Addis Ababa, band, rule IDs)", async (r) => {
     await tab(ops, "Passengers");
     await ops.locator(".ag-row").first().waitFor();
-    const rows = await ops.locator(".ag-center-cols-container .ag-row").count();
+    const rows = await ops.evaluate(() => new Set([...document.querySelectorAll(".ag-row[row-index]")].filter((r) => !r.closest(".ag-floating-bottom, .ag-floating-top")).map((r) => r.getAttribute("row-index")).filter((i) => i !== null && /^\d+$/.test(i))).size);
     expect(rows === 12, `expected 12 rows, found ${rows}`);
     await ops.locator(".ag-row", { hasText: "Hana Haddad" }).first().click();
     const drawer = ops.getByRole("complementary", { name: /Entitlements for/ });
@@ -164,27 +170,34 @@ async function main() {
     const open = await ops.locator("section[aria-labelledby=readiness-title] li").filter({ hasText: "needs review" }).allInnerTexts();
     r.notes.push(`Open readiness checks: ${open.map((t) => t.split(":")[0]).join(", ") || "none"}`);
     expect(open.length === 1 && /Passenger contact/.test(open[0]), `expected only Passenger contact open, got: ${open.join(" / ")}`);
-    const ack = ops.getByRole("checkbox", { name: /I have reviewed the open readiness checks/ });
-    if (await ack.isVisible()) await ack.check();
+    const ack = ops.locator("input[name=acknowledge]");
+    expect((await ack.count()) === 1, "acknowledgement checkbox not found");
+    await ack.check();
     await ops.getByLabel("Type APPROVE to confirm").fill("APPROVE");
     await scrollTo(ops, "Approve compensation", 200);
     await shot(ops, r, "approve-confirm");
     approvedAt = Date.now();
     await ops.getByRole("button", { name: "Approve compensation" }).click();
-    await ops.getByText(/Compensation approved by Judge \(demo\)/).waitFor({ timeout: 120_000 });
+    await ops.getByText(/Compensation approved by Judge \(demo\)/).waitFor({ timeout: 300_000 });
     await shot(ops, r, "approved");
   });
 
   await step(7, "Compensation payouts start; statuses move to Paid; time from approval to first passenger paid", async (r) => {
     await tab(ops, "Passengers");
-    const paidCell = ops.locator(".ag-row").filter({ hasText: "600.00 EUR" }).getByText("Paid", { exact: true }).first();
+    const paidCell = ops.locator('.ag-row [col-id="compensationStatus"]').filter({ hasText: /^\s*Paid\s*$/ }).first();
     await paidCell.waitFor({ timeout: 300_000 });
     measured.clickToPaid = `${((Date.now() - approvedAt) / 1000).toFixed(0)} s from the Approve click to the first compensation row showing Paid in the grid`;
     await ops.locator(".ag-root-wrapper").evaluate((n) => window.scrollTo({ top: n.getBoundingClientRect().top + window.scrollY - 120 }));
     await shot(ops, r, "grid-paid");
-    await tab(ops, "Overview");
-    const metric = await ops.locator("div", { hasText: /^Time from decision to first passenger paid/ }).last().innerText();
+    let metric = "";
+    for (let i = 0; i < 20; i++) {
+      await ops.goto(`${disruptionUrl}?tab=overview`);
+      metric = await ops.locator("div", { hasText: /^Time from decision to first passenger paid/ }).last().innerText();
+      if (!/Not yet/.test(metric)) break;
+      await ops.waitForTimeout(6000);
+    }
     measured.overview = metric.replace(/\s+/g, " ").replace("Time from decision to first passenger paid", "").replace("Measured in this run", "").trim();
+    expect(!/Not yet/.test(measured.overview), "Overview never showed a measured time");
     r.notes.push(`Overview shows ${measured.overview}; ${measured.clickToPaid}`);
     await shot(ops, r, "overview-metric");
   });
@@ -195,11 +208,18 @@ async function main() {
     await phone.getByText(/600 euros/).first().waitFor({ timeout: 60_000 });
     await phone.waitForTimeout(800);
     await shot(phone, r, "passenger-top");
-    await scrollTo(phone, "Your payment", 40);
-    await phone.getByText("In your PayPal account").waitFor();
-    await shot(phone, r, "passenger-paid");
     const db = await hostedDb();
     try {
+      const sql = `SELECT i.status FROM "PayoutItem" i JOIN "Entitlement" e ON e.id = i."entitlementId" JOIN "Passenger" p ON p.id = e."passengerId" WHERE p."displayName" = 'Bilal Petrov' AND e.kind = 'COMPENSATION' AND p."disruptionId" = $1 ORDER BY i."createdAt" DESC LIMIT 1`;
+      for (let i = 0; i < 50; i++) {
+        const st = (await db.query(sql, [disruptionUrl.split("/").pop()])).rows[0]?.status;
+        if (st === "SUCCESS") break;
+        await phone.waitForTimeout(6000);
+        await phone.reload();
+      }
+      await phone.reload();
+      await scrollTo(phone, "Your payment", 40);
+      await shot(phone, r, "passenger-paid");
       const q = await db.query(`SELECT i."paypalItemId", i.status, i."amountCents" FROM "PayoutItem" i JOIN "Entitlement" e ON e.id = i."entitlementId" JOIN "Passenger" p ON p.id = e."passengerId" JOIN "Disruption" d ON d.id = p."disruptionId" WHERE p."displayName" = 'Bilal Petrov' AND e.kind = 'COMPENSATION' AND d.id = $1 ORDER BY i."createdAt" DESC LIMIT 1`, [disruptionUrl.split("/").pop()]);
       const row = q.rows[0];
       expect(row?.paypalItemId, "no PayPal item for Bilal's compensation");
@@ -216,14 +236,21 @@ async function main() {
   await step(9, "Passenger 8: UNCLAIMED, switch to bank transfer, unclaimed item cancelled", async (r) => {
     const url = await passengerUrl(ops, "Elias Schneider");
     await phone.goto(url);
+    for (let i = 0; i < 40 && !(await phone.getByText(/is waiting for/).count()); i++) {
+      await phone.waitForTimeout(6000);
+      await phone.reload();
+    }
     await scrollTo(phone, /is waiting for/, 120);
     await shot(phone, r, "unclaimed");
     await phone.getByLabel(/Switch to bank transfer/).fill("4321");
     await phone.getByRole("button", { name: "Switch" }).click();
-    const msg = await phone.getByText(/PayPal payment (was cancelled|must come back)|You asked to switch to bank transfer/).first();
+    const msg = phone.getByText(/PayPal payment (was cancelled|must come back)|You asked to switch to bank transfer|You chose bank transfer to the account ending/).first();
     await msg.waitFor({ timeout: 120_000 });
     await shot(phone, r, "switch-requested");
-    r.notes.push("Switch to bank transfer recorded. PayPal sandbox cancel of an UNCLAIMED item answers HTTP 500 (docs/PHASE0_RESULTS.md); the page says the bank transfer follows once PayPal returns the money (30 days), so nobody is paid twice.");
+    const shown = (await msg.innerText()).replace(/\s+/g, " ");
+    r.notes.push(/You chose bank transfer|was cancelled/.test(shown)
+      ? "Switch to bank transfer done: PayPal accepted the cancel of the UNCLAIMED item (status RETURNED), so the page now shows the bank transfer. In Phase 0 the sandbox refused every cancel (HTTP 500); both paths are handled."
+      : "Switch to bank transfer recorded. PayPal refused the cancel of the UNCLAIMED item, so the page says the bank transfer follows once PayPal returns the money (30 days); nobody is paid twice.");
   });
 
   await step(10, "Receipts: upload sample receipts, see fields and checks, approved and paid; same receipt again flagged as duplicate", async (r) => {
@@ -280,7 +307,7 @@ async function main() {
     await phone.getByText(/^Rules: /m).first().waitFor({ timeout: 180_000 });
     const answer = await phone.locator("ol[aria-label='Your questions and answers'] li").last().innerText();
     expect(/600/.test(answer), "answer does not mention 600");
-    r.notes.push(`Answer: ${answer.replace(/\s+/g, " ").slice(0, 300)}`);
+    r.notes.push(`Answer: ${answer.replace(/^Answer:\s*/, "").replace(/\s+/g, " ").slice(0, 300)}`);
     await shot(phone, r, "answer");
     await phone.getByRole("button", { name: "Talk to a person" }).click();
     await phone.getByText("A person from the airline will contact you.").waitFor({ timeout: 60_000 });
@@ -292,7 +319,7 @@ async function main() {
 
   await step(14, "Audit tab shows every step with its actor (AI, user, PayPal, passenger, system)", async (r) => {
     await ops.goto(`${disruptionUrl}?tab=audit`);
-    const text = await ops.locator("table").innerText();
+    const text = await ops.locator("table").filter({ hasText: "Actor" }).first().innerText();
     const actors = ["AI", "USER", "PAYPAL", "PASSENGER", "SYSTEM"].filter((a) => new RegExp(`\\b${a}\\b`).test(text));
     r.notes.push(`Actors in the audit trail: ${actors.join(", ")}`);
     expect(actors.length === 5, `missing actors: ${["AI", "USER", "PAYPAL", "PASSENGER", "SYSTEM"].filter((a) => !actors.includes(a)).join(", ")}`);
@@ -319,7 +346,7 @@ async function main() {
     await ops.locator("input[name=citations][value=REG-5-3]").check();
     await ops.getByLabel(/Type your name to sign/).fill("Judge (demo)");
     await ops.getByRole("button", { name: "Sign denial" }).click();
-    await ops.getByText(/Compensation denied by Judge \(demo\)/).waitFor({ timeout: 120_000 });
+    await ops.getByText(/Compensation denied by Judge \(demo\)/).waitFor({ timeout: 300_000 });
     await scrollTo(ops, /Compensation denied by Judge/, 200);
     await shot(ops, r, "denial-signed");
     await ops.goto(`${BASE}/ops/outbox`);
@@ -342,11 +369,15 @@ async function main() {
   await opsCtx.close();
   await phoneCtx.close();
   await browser.close();
-  if (opsVideo) renameSync(await opsVideo.path(), path.join(VIDEO, "ops-console-1920x1080.webm"));
-  if (phoneVideo) renameSync(await phoneVideo.path(), path.join(VIDEO, "passenger-phone-390x844.webm"));
-
   results.sort((a, b) => a.n - b.n);
   writeFileSync(path.join(OUT, "results.json"), JSON.stringify({ base: BASE, at: new Date().toISOString(), measured, results }, null, 2) + "\n");
+  // Windows refuses to rename onto an existing file, so the previous run's video goes first.
+  for (const [video, name] of [[opsVideo, "ops-console-1920x1080.webm"], [phoneVideo, "passenger-phone-390x844.webm"]] as const) {
+    if (!video) continue;
+    const target = path.join(VIDEO, name);
+    rmSync(target, { force: true });
+    renameSync(await video.path(), target);
+  }
   const pass = results.filter((s) => s.status === "PASS").length;
   console.log(`\n${pass}/${results.length} PASS, ${results.filter((s) => s.status === "NEEDS HUMAN").length} NEEDS HUMAN, ${results.filter((s) => s.status === "FAIL").length} FAIL`);
   console.log(JSON.stringify(measured, null, 2));

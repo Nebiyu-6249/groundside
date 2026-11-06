@@ -316,3 +316,16 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
 - **Payout cap risk:** a scenario A judge run pays about 7,000 EUR, so the default 20,000 EUR daily cap allows about three runs a day. Owner to raise it on Render after checking the sandbox balance.
 - **Sponsor prizes:** the PayPal blog lists Best Use of AG Grid (5,000/2,000/3 x 1,000 USD) and Best Use of Render (Render credits), with no qualifying rules. The Devpost rules page returns 403 to automated reads.
 - **Checklist status:** recorded under `docs/DEMO.md` section 7.
+
+### 2026-11-06: Gate 4 walkthrough on the hosted app
+
+- **Synthetic receipts:** seven photo-style samples rendered with Playwright and degraded with sharp (`npm run receipts:make`), each with a sidecar of expected values from its source.
+  - Invented merchants, zeroed IDs, card **** 0000, footer "Sample receipt - Groundside demo".
+  - A2 prompt `A2.v2` flags faded print. `npm run eval:a2`: reading 12/12, decisions 8/8 including the duplicate re-upload, 0.0057 USD.
+- **Arabic check:** a fresh subagent reviewed the Arabic on receipt g (the product is English only). Two right-to-left ordering bugs in mixed Arabic and number lines were fixed in the generator. Reviewed by AI, not by a human reader.
+- **Walkthrough** (`npm run walkthrough`, `scripts/walkthrough.ts`): every step of `docs/DEMO.md` section 3 against https://groundside.onrender.com, with video and per-step screenshots; passenger steps on a 390x844 phone viewport.
+  - The first run had 7 failures, all in the script: the approval acknowledgement box was not ticked, so the approval was rejected and steps 7 and 8 had nothing to wait for. Also a 503 while Render woke, pinned grid rows counted, a meal "Paid" mistaken for compensation, the audit table locator, and the bank-switch wait expecting the cancel to fail.
+  - The second run: 13 PASS, 1 NEEDS HUMAN (the PayPal buyer checkout needs a password Claude Code does not type), 0 FAIL. Approval to first passenger paid: 0.7 min. Report: `docs/GATE4_WALKTHROUGH.md`.
+  - The video rename failed on Windows after the run (an old file in the way), before results.json was written. The script now writes the results first, and this run's results were rebuilt from its log.
+- **Gate 4:** approved under the user's standing instruction.
+
