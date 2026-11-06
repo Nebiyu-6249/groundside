@@ -1,0 +1,11 @@
+{
+  "base": "https://groundside.onrender.com",
+  "at": "2026-11-06T18:21:18.739Z",
+  "idleMinutesBefore": 25,
+  "firstResponse": {
+    "status": 503,
+    "seconds": 3.6
+  },
+  "landingServedSeconds": 51.5,
+  "firstJudgeStartSeconds": 15.7
+}

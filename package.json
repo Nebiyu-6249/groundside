@@ -39,7 +39,8 @@
     "walkthrough": "tsx --env-file=.env scripts/walkthrough.ts",
     "walkthrough:report": "tsx scripts/walkthrough-report.ts",
     "smoke": "playwright test",
-    "e2e": "tsx --env-file=.env scripts/e2e-flow.ts"
+    "e2e": "tsx --env-file=.env scripts/e2e-flow.ts",
+    "cold-start": "tsx scripts/cold-start.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.1",
