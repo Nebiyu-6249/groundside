@@ -11,6 +11,7 @@ import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
+import { approvalCostCents, costConfirmationPhrase } from "@/lib/ops/approval-cost";
 import { holdMessage, payoutHold, queuedPayouts } from "@/lib/payouts/limits";
 import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny, resetRun, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
@@ -154,11 +155,16 @@ function Evidence({ d }: { d: DisruptionDetail }) {
 /** What an approval pays, for the confirmation (SPEC F6). */
 function approvalTotals(d: DisruptionDetail) {
   const ents = d.passengers.flatMap((p) => p.entitlements);
+  const costCents = approvalCostCents(ents);
+  const capCents = payoutSettings().dailyCapCents;
   const sum = (kinds: string[]) => ents.filter((e) => kinds.includes(e.kind) && e.amountCents > 0 && e.status !== "NOT_OWED").reduce((s, e) => s + e.amountCents, 0);
   return {
     passengers: d.passengers.filter((p) => p.entitlements.some((e) => e.kind === "COMPENSATION" && e.amountCents > 0 && e.status !== "NOT_OWED")).length,
     compensation: euros(sum(["COMPENSATION"])),
     care: euros(sum(["MEAL_ALLOWANCE", "HOTEL_REIMBURSEMENT_CAP", "TRANSPORT_REIMBURSEMENT_CAP"])),
+    cost: euros(costCents),
+    cap: euros(capCents),
+    confirmPhrase: costConfirmationPhrase(costCents, capCents),
   };
 }
 
