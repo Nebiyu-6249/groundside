@@ -17,7 +17,7 @@ export function ActionButton({ action, label, pendingLabel, tone = "neutral" }: 
   );
 }
 
-export function ApproveForm({ action, aiDiffers, openChecks, totals }: { action: (prev: ActionState, form: FormData) => Promise<ActionState>; aiDiffers: boolean; openChecks: string[]; totals: { passengers: number; compensation: string; care: string } }) {
+export function ApproveForm({ action, aiDiffers, openChecks, totals }: { action: (prev: ActionState, form: FormData) => Promise<ActionState>; aiDiffers: boolean; openChecks: string[]; totals: { passengers: number; compensation: string; care: string; cost: string; cap: string; confirmPhrase: string | null } }) {
   const [state, run, pending] = useActionState(action, { error: null });
   return (
     <form action={run} className="space-y-3 rounded border border-line p-4">
@@ -35,6 +35,13 @@ export function ApproveForm({ action, aiDiffers, openChecks, totals }: { action:
           <input type="checkbox" name="acknowledge" required className="mt-1" />
           <span>I have reviewed the open readiness checks ({openChecks.join(", ")}) and approve anyway. This is logged.</span>
         </label>
+      ) : null}
+      {totals.confirmPhrase ? (
+        <div className="rounded border border-amber p-3">
+          <p className="text-sm">This approval can pay up to <span className="font-mono tabular">{totals.cost}</span> of sandbox money, more than today&apos;s payout cap of <span className="font-mono tabular">{totals.cap}</span>. Payouts would continue over several days and use most of the sandbox balance.</p>
+          <label htmlFor="confirmCost" className="mt-2 block text-sm">Type <span className="font-mono">{totals.confirmPhrase}</span> to confirm the cost</label>
+          <input id="confirmCost" name="confirmCost" required autoComplete="off" className="mt-1 w-56 rounded border border-line bg-background px-2 py-1 font-mono text-sm" />
+        </div>
       ) : null}
       <div>
         <label htmlFor="confirmApprove" className="block text-sm">Type APPROVE to confirm</label>

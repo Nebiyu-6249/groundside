@@ -9,7 +9,8 @@ import { clearSession, requireUser, type SessionUser } from "@/lib/auth/session"
 import { getDb } from "@/lib/db";
 import { runAssessment } from "@/lib/ops/assessment";
 import { approveCompensation, DecisionError, passengerLink, releaseCare, signDenial } from "@/lib/ops/decisions";
-import { payDisruption } from "@/lib/payouts/orchestrator";
+import { payDisruption, payoutSettings } from "@/lib/payouts/orchestrator";
+import { approvalCostCents, costConfirmationPhrase } from "@/lib/ops/approval-cost";
 import { audit } from "@/lib/ops/audit";
 import { loadReadiness } from "@/lib/ops/readiness";
 import { refreshRefunds, requestPassengerRefund } from "@/lib/ops/refunds";
@@ -67,6 +68,10 @@ export async function approve(disruptionId: string, _prev: ActionState, form: Fo
   // SPEC F6: the Readiness panel is all green, or the duty manager acknowledges what is open.
   const open = (await loadReadiness(db, id.parse(disruptionId))).filter((c) => !c.ok);
   if (open.length && form.get("acknowledge") !== "on") return { error: `Acknowledge the open readiness checks first: ${open.map((c) => c.label).join(", ")}.` };
+  // A large run (above one day's payout cap) needs its cost typed (owner decision 2026-11-06).
+  const ents = await db.entitlement.findMany({ where: { passenger: { disruptionId: id.parse(disruptionId) } }, select: { kind: true, amountCents: true, status: true } });
+  const phrase = costConfirmationPhrase(approvalCostCents(ents), payoutSettings().dailyCapCents);
+  if (phrase && String(form.get("confirmCost") ?? "").trim() !== phrase) return { error: `This approval costs more than one day's payout cap. Type ${phrase} to confirm the cost.` };
   try {
     const r = await approveCompensation(db, user, disruptionId, String(form.get("differsReason") ?? ""));
     if (r.created && open.length) {
