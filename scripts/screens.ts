@@ -81,8 +81,8 @@ async function main() {
     await scrollTo(a, "AI recommendation. A duty manager decides.", 140);
     await shot(a, "1-assessment-scenario-a");
 
-    const ack = a.getByRole("checkbox", { name: /I have reviewed the open readiness checks/ });
-    if (await ack.isVisible()) await ack.check();
+    const ack = a.locator("input[name=acknowledge]");
+    if (await ack.count()) await ack.check();
     await a.getByLabel("Type APPROVE to confirm").fill("APPROVE");
     await a.getByRole("button", { name: "Approve compensation" }).click();
     await a.getByText(/Compensation approved by Judge \(demo\)/).waitFor({ timeout: 120_000 });

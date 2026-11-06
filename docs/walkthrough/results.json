@@ -1,0 +1,190 @@
+{
+  "base": "https://groundside.onrender.com",
+  "at": "2026-11-06T16:20:01.751196Z",
+  "measured": {
+    "coldStart": "first response HTTP 200; landing page served after 4.5 s",
+    "overview": "0.7 min",
+    "clickToPaid": "44 s from the Approve click to the first compensation row showing Paid in the grid",
+    "paypalProof": "PayPal payout item FZKMFRH28ADPJ: SUCCESS, transaction ID 9KT11695KH672561B, 600.00 EUR (GET /v1/payments/payouts-item, debug f104120c2e792)"
+  },
+  "results": [
+    {
+      "n": 1,
+      "title": "Landing page: one sentence and Start the judge demo",
+      "status": "PASS",
+      "seconds": 5.4,
+      "shots": [
+        "01-landing.png"
+      ],
+      "notes": [
+        "Cold start: first response HTTP 200; landing page served after 4.5 s"
+      ]
+    },
+    {
+      "n": 2,
+      "title": "Scenario A opens on the Evidence tab: ops note says weather, three timelines, maintenance log shows the pump failure",
+      "status": "PASS",
+      "seconds": 11.1,
+      "shots": [
+        "02-evidence-notes.png",
+        "02-weather-timelines.png"
+      ],
+      "notes": [
+        "3 weather timelines"
+      ]
+    },
+    {
+      "n": 3,
+      "title": "Release care now, then Simulate passenger responses: meal allowances go out and turn Paid",
+      "status": "PASS",
+      "seconds": 39.5,
+      "shots": [
+        "03-meal-payouts-paid.png"
+      ],
+      "notes": []
+    },
+    {
+      "n": 4,
+      "title": "Assessment tab: claim versus evidence, fact chips, rule chips, recommendation pay",
+      "status": "PASS",
+      "seconds": 18.8,
+      "shots": [
+        "04-assessment.png"
+      ],
+      "notes": [
+        "Recommendation: Pay compensation"
+      ]
+    },
+    {
+      "n": 5,
+      "title": "Passengers tab: 12 rows; passenger 4's trace drawer (distance to Addis Ababa, band, rule IDs)",
+      "status": "PASS",
+      "seconds": 3.6,
+      "shots": [
+        "05-trace-addis-ababa.png"
+      ],
+      "notes": []
+    },
+    {
+      "n": 6,
+      "title": "Approve: readiness green except the flagged missing email; type APPROVE",
+      "status": "PASS",
+      "seconds": 12.1,
+      "shots": [
+        "06-approve-confirm.png",
+        "06-approved.png"
+      ],
+      "notes": [
+        "Open readiness checks: Passenger contact"
+      ]
+    },
+    {
+      "n": 7,
+      "title": "Compensation payouts start; statuses move to Paid; time from approval to first passenger paid",
+      "status": "PASS",
+      "seconds": 40,
+      "shots": [
+        "07-grid-paid.png",
+        "07-overview-metric.png"
+      ],
+      "notes": [
+        "Overview shows 0.7 min; 44 s from the Approve click to the first compensation row showing Paid in the grid"
+      ]
+    },
+    {
+      "n": 8,
+      "title": "Passenger 2 on a phone: what happened, 600 EUR, PayPal, status Paid; money proven through the PayPal API",
+      "status": "PASS",
+      "seconds": 12.5,
+      "shots": [
+        "08-passenger-paid.png",
+        "08-passenger-top.png"
+      ],
+      "notes": [
+        "PayPal payout item FZKMFRH28ADPJ: SUCCESS, transaction ID 9KT11695KH672561B, 600.00 EUR (GET /v1/payments/payouts-item, debug f104120c2e792)"
+      ]
+    },
+    {
+      "n": 9,
+      "title": "Passenger 8: UNCLAIMED, switch to bank transfer, unclaimed item cancelled",
+      "status": "PASS",
+      "seconds": 12.2,
+      "shots": [
+        "09-switch-requested.png",
+        "09-unclaimed.png"
+      ],
+      "notes": [
+        "Switch to bank transfer done: PayPal accepted the cancel of the UNCLAIMED item (status RETURNED), so the page now shows the bank transfer. In Phase 0 the sandbox refused every cancel (HTTP 500); both paths are handled."
+      ]
+    },
+    {
+      "n": 10,
+      "title": "Receipts: upload sample receipts, see fields and checks, approved and paid; same receipt again flagged as duplicate",
+      "status": "PASS",
+      "seconds": 46,
+      "shots": [
+        "10-ops-receipt-checks.png",
+        "10-ops-receipt-paid.png",
+        "10-passenger-receipts.png"
+      ],
+      "notes": [
+        "Hotel invoice: AUTO_APPROVED - Approved 160.00 EUR of 179.00 EUR: the rest is above the remaining allowance.",
+        "Cafe receipt: REJECTED - Your allowance for this kind of expense is already used.",
+        "Cafe receipt again: REJECTED - This receipt was already submitted."
+      ]
+    },
+    {
+      "n": 11,
+      "title": "Demo booking: book with the sandbox buyer, join the flight, choose refund, refund completes",
+      "status": "NEEDS HUMAN",
+      "seconds": 5.1,
+      "shots": [
+        "11-booking-page.png"
+      ],
+      "notes": [
+        "NEEDS HUMAN: the PayPal sandbox checkout asks for the buyer's password, which Claude Code does not type. The exact clicks are in docs/GATE4_WALKTHROUGH.md."
+      ]
+    },
+    {
+      "n": 12,
+      "title": "Passenger question: Why 600 and not more? answered with the citation; Talk to a person creates a ticket",
+      "status": "PASS",
+      "seconds": 10.9,
+      "shots": [
+        "12-answer.png",
+        "12-ops-ticket.png",
+        "12-talk-to-person.png"
+      ],
+      "notes": [
+        "Answer: Your flight\u2019s great-circle distance from Frankfurt to Dubai is 4,844 km. The compensation band for this distance is 600.00 EUR, which is the applicable amount rather than a starting amount that increases with distance. It has been paid to your PayPal account. Rules: REG-7-1, REG-7-4"
+      ]
+    },
+    {
+      "n": 13,
+      "title": "Scenario B: AI says fog supported; signed denial; notices say no compensation, care provided, how to contest; meal payouts still go out",
+      "status": "PASS",
+      "seconds": 51.4,
+      "shots": [
+        "13-care-paid.png",
+        "13-denial-notices.png",
+        "13-denial-signed.png"
+      ],
+      "notes": [
+        "Claim support: supported"
+      ]
+    },
+    {
+      "n": 14,
+      "title": "Audit tab shows every step with its actor (AI, user, PayPal, passenger, system)",
+      "status": "PASS",
+      "seconds": 2,
+      "shots": [
+        "14-audit.png"
+      ],
+      "notes": [
+        "Actors in the audit trail: AI, USER, PAYPAL, PASSENGER, SYSTEM"
+      ]
+    }
+  ],
+  "note": "Rebuilt from the run log (scripts/out/walkthrough-hosted.log) because the video rename failed before results.json was written; fixed in the script."
+}

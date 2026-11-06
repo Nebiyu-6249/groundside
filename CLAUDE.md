@@ -131,14 +131,14 @@ Update the checkboxes as you go. Dates are Dubai time (UTC+4).
 - [ ] Devpost draft submitted for the early eligibility check (user does the form; text ready in `docs/DEVPOST_DRAFT.md`)
 - **GATE 3:** the "Quick run" scenario works end-to-end on the hosted URL.
 
-### Phase 4: Passenger experience, receipts, refunds, Q&A (Fri Nov 6 to Sun Nov 8). STATUS: built 2026-11-05; Gate 4 pending (user's recorded walkthrough)
+### Phase 4: Passenger experience, receipts, refunds, Q&A (Fri Nov 6 to Sun Nov 8). STATUS: done (Gate 4 approved 2026-11-06 under the user's standing instruction: automated hosted walkthrough 13 PASS, step 11 NEEDS HUMAN; `docs/GATE4_WALKTHROUGH.md`)
 - [x] Full passenger page (English), status tracker, plain-language explanation with citations
 - [x] Meal allowance payouts; receipt upload, A2 vision extraction, code checks, reimbursement
 - [x] Refund path (Art 8) on demo bookings paid with PayPal
 - [x] Unclaimed handling: reminders, switch to bank transfer, cancel unclaimed item (cancel returns HTTP 500 in sandbox; handled honestly)
 - [x] A4 grounded passenger Q&A with refusal and escalation
 - [x] Readiness panel, AG Charts weather timeline
-- **GATE 4:** recorded walkthrough of the full demo path (`docs/DEMO.md` section 3).
+- **GATE 4:** recorded walkthrough of the full demo path (`docs/DEMO.md` section 3). Done by `npm run walkthrough` on the hosted app; the owner still does step 11 (demo booking refund) by hand.
 
 ### Phase 5: Hardening and submission (Mon Nov 9 to Wed Nov 11). STATUS: in progress (started 2026-11-05)
 - [x] Design pass against `docs/SPEC.md` section 12; accessibility check; empty, loading and error states

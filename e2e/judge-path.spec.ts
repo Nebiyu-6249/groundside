@@ -29,8 +29,8 @@ test("a judge goes from the landing page to a paid passenger", async ({ page }) 
   // AI assessment, then approval with the typed confirmation.
   await page.getByRole("button", { name: "Run AI assessment" }).click();
   await expect(page.getByText("AI recommendation. A duty manager decides.").first()).toBeVisible({ timeout: 120_000 });
-  const ack = page.getByRole("checkbox", { name: /I have reviewed the open readiness checks/ });
-  if (await ack.isVisible()) await ack.check();
+  const ack = page.locator("input[name=acknowledge]");
+  if (await ack.count()) await ack.check();
   await page.getByLabel("Type APPROVE to confirm").fill("APPROVE");
   await page.getByRole("button", { name: "Approve compensation" }).click();
   await expect(page.getByText(/Compensation approved by Judge \(demo\)/)).toBeVisible({ timeout: 120_000 });

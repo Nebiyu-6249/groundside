@@ -8,24 +8,36 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 - **Internal:** Thu Nov 12, 18:00 Dubai (14:00 UTC), six hours before the official cut-off.
 - **Judging:** Dec 1 to 15; the hosted demo and the sandbox must keep working through it.
 
-## Where things stand (2026-11-04)
+## Arabic
 
-- **Phase 5 in progress (2026-11-05).** Hosted smoke test passed (judge path to a Paid row in 1.6 min). Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7). Done:
-  - judge mode, error pages, security headers
-  - secret scan, fresh-clone check, Playwright smoke test
-  - A3 notices and the design pass
-- **Owner to-do** (the user said they will do these later):
-  1. Record the Gate 4 walkthrough (`docs/DEMO.md` section 3) and approve Gate 4.
-  2. Rotate the Neon password and the PayPal sandbox secret that appeared in chat, then update them on Render (dashboard, or `RENDER_API_KEY` plus `npm run deploy:render`).
-  3. Decide whether to publish the shared demo login (password in `scripts/out/hosted-credentials.txt`) and the sandbox buyer login in the README and the Devpost text. Judges can use Start the judge demo without either.
-  4. Add 3 to 5 real receipt photos (personal data covered) to `fixtures/receipts/`, at least one without a `demoDateOverride`; then run `npm run eval:a2`.
-  5. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`) for the early eligibility check, and later the final submission with the video.
-  6. Record and upload the video (under 3:00).
-  7. **Payout cap (judging risk):** one scenario A judge run pays about 7,000 EUR, so the current `PAYOUT_DAILY_CAP_EUR=20000` allows about three runs a day. Check the sandbox business balance (top it up in the sandbox dashboard if needed) and raise the cap on Render, for example to 200000.
-  8. Decide the Render plan for judging (free sleeps when idle; starter is always on).
-  9. Read the Devpost rules page (it blocks automated reads) for the AG Grid and Render prize criteria and the submission requirements, and tick the prizes on the form.
-  11. Set the GitHub repo's homepage link to https://groundside.onrender.com.
-  10. Optional: tell Claude Code to change the meal-receipt rule (currently: receipts reimburse food above the flat allowance up to the daily maximum). Gate 4 still waits on the user's recorded walkthrough. Next: the Playwright smoke test (if time), final README and Devpost text, the user's video, and the Gate 5 checklist (`docs/DEMO.md` section 7).
+- The product is English only (user decision 2026-11-03). There is no Arabic passenger page, notice or Q&A answer.
+- The only Arabic in the project is printed on sample receipt g (`fixtures/receipts/g-dubai-restaurant-aed.jpg`), a synthetic Dubai restaurant receipt.
+- **Reviewed by AI, not by a human reader** (2026-11-06): a fresh subagent checked wording, amounts and right-to-left layout.
+  - Wording and amounts were fine.
+  - It found two ordering bugs in mixed Arabic and number lines (the address number and the VAT value). Both are fixed in `scripts/make-receipts.ts`, along with an Arabic comma, an Arabic TRN label and the Arabic total label on the TOTAL line.
+
+## Where things stand (2026-11-06)
+
+- **Gate 4 approved (2026-11-06)** under the user's standing instruction ("if all of Parts 1 to 3 pass, treat Gate 4 as approved").
+  - `npm run walkthrough` drove every step of `docs/DEMO.md` section 3 on https://groundside.onrender.com in a fresh browser: 13 PASS, 1 NEEDS HUMAN (step 11), 0 FAIL. Report: `docs/GATE4_WALKTHROUGH.md`; screenshots in `docs/walkthrough/`; videos in `docs/walkthrough/video/` (git-ignored).
+  - Approval to first passenger paid: 0.7 min on the Overview (44 s from the Approve click to a Paid compensation row).
+  - Money proven through PayPal's API: payout item SUCCESS with a transaction ID (in the report).
+  - In this run the sandbox accepted the cancel of an UNCLAIMED item (RETURNED); in Phase 0 it refused every cancel (HTTP 500). Both paths are handled.
+  - The run did not measure a cold wake: the instance was still awake from the run before.
+  - `npm run walkthrough:report` regenerates the report from `docs/walkthrough/results.json`. One judge walkthrough uses 2 judge runs (of 5 per hour per IP) and about 7,000 sandbox EUR.
+- **Receipts:** seven synthetic photo-style samples in `fixtures/receipts/` (`npm run receipts:make`), labelled as samples everywhere. `npm run eval:a2`: reading 12/12, decisions 8/8 (`docs/EVAL_A2.md`).
+- **Phase 5 in progress.** Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7): final README, Devpost text, architecture diagram.
+- **Owner to-do:**
+  1. Step 11 of the walkthrough by hand (about 2 minutes): the exact clicks are at the end of `docs/GATE4_WALKTHROUGH.md`.
+  2. Tell Claude Code the sandbox business balance, so `PAYOUT_DAILY_CAP_EUR` can be set for Dec 1 to 15 judging. Changing it on Render needs the dashboard or a `RENDER_API_KEY` in `.env` (then `npm run deploy:render`). The cap is 20,000 EUR now, about three judge runs a day.
+  3. Add `SANDBOX_BUYER_EMAIL` and `SANDBOX_BUYER_PASSWORD` to `.env`, then run `npm run publish-logins` to publish the buyer login next to the demo login (already published).
+  4. Rotate the Neon password and the PayPal sandbox secret that appeared in chat, then update them on Render.
+  5. Decide the Render plan for judging (free sleeps when idle; starter is always on).
+  6. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`), record and upload the video (under 3:00), and tick the prizes.
+  7. Paste the AG Grid and Render prize requirements (the Devpost rules page blocks automated reads).
+  8. Set the GitHub repo's homepage link to https://groundside.onrender.com.
+  9. Optional: decide on the meal-receipt rule (currently: receipts reimburse food above the flat allowance, up to the daily maximum; where the flat allowance already equals the maximum, every meal receipt is rejected as "allowance already used").
+  10. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
 - **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**
     - release care before the decision
