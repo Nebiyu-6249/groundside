@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
-interface StepResult { n: number; title: string; status: string; seconds: number; shots: string[]; notes: string[] }
+interface StepResult { n: number; title: string; status: string; seconds: number; shots: string[]; notes: string[]; byHand?: boolean }
 const data = JSON.parse(readFileSync(path.join(process.cwd(), "docs", "walkthrough", "results.json"), "utf8")) as { base: string; at: string; measured: Record<string, string>; results: StepResult[]; note?: string };
 
 const steps = data.results.sort((a, b) => a.n - b.n);
@@ -20,7 +20,7 @@ const lines = [
   "Videos are in `docs/walkthrough/video/` (not committed). Screenshots are below.",
   ...(data.note ? ["", `Note: ${data.note}`] : []),
   "",
-  `**Result: ${count("PASS")} PASS, ${count("NEEDS HUMAN")} NEEDS HUMAN, ${count("FAIL")} FAIL** out of ${steps.length} steps.`,
+  `**Result: ${count("PASS")} PASS, ${count("NEEDS HUMAN")} NEEDS HUMAN, ${count("FAIL")} FAIL** out of ${steps.length} steps${steps.some((x) => x.byHand) ? ` (step${steps.filter((x) => x.byHand).length > 1 ? "s" : ""} ${steps.filter((x) => x.byHand).map((x) => x.n).join(", ")} done by hand by the owner)` : ""}.`,
   "",
   "## Measured",
   "",
@@ -32,10 +32,10 @@ const lines = [
   "",
   "| Step | Result | Time | Screenshots | Notes |",
   "|---|---|---|---|---|",
-  ...steps.map((s) => `| ${s.n}. ${s.title} | ${s.status} | ${s.seconds} s | ${s.shots.map((f) => `[${f.replace(/^\d+-/, "").replace(".png", "")}](walkthrough/${f})`).join(", ")} | ${s.notes.join("<br>").replaceAll("|", "/")} |`),
+  ...steps.map((s) => `| ${s.n}. ${s.title} | ${s.status}${s.byHand ? " (by hand)" : ""} | ${s.byHand ? "-" : `${s.seconds} s`} | ${s.shots.map((f) => `[${f.replace(/^\d+-/, "").replace(".png", "")}](walkthrough/${f})`).join(", ")} | ${s.notes.join("<br>").replaceAll("|", "/")} |`),
   "",
 ];
-if (steps.some((s) => s.status === "NEEDS HUMAN")) {
+if (steps.some((s) => s.status === "NEEDS HUMAN" || s.byHand)) {
   lines.push(
     "## Step 11 for the owner (about 2 minutes)",
     "",

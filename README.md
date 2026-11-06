@@ -253,7 +253,7 @@ npm run secret-scan  # git history and tracked files, prints locations only
 npm run walkthrough  # every step of docs/DEMO.md section 3 on the hosted app, with video and screenshots
 ```
 
-The latest walkthrough of the hosted app is in [`docs/GATE4_WALKTHROUGH.md`](docs/GATE4_WALKTHROUGH.md): 13 of 14 steps passed automatically; the demo booking step needs a person to log in to the PayPal sandbox checkout.
+The latest walkthrough of the hosted app is in [`docs/GATE4_WALKTHROUGH.md`](docs/GATE4_WALKTHROUGH.md): all 14 steps passed: 13 automatically, and the demo booking step by hand, because it needs a person to log in to the PayPal sandbox checkout.
 
 `SMOKE_URL=https://groundside.onrender.com npm run smoke` runs the smoke test against the hosted app. Install the browser once with `npx playwright install chromium`.
 

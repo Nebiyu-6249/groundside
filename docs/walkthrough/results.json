@@ -136,14 +136,15 @@
     {
       "n": 11,
       "title": "Demo booking: book with the sandbox buyer, join the flight, choose refund, refund completes",
-      "status": "NEEDS HUMAN",
+      "status": "PASS",
       "seconds": 5.1,
       "shots": [
         "11-booking-page.png"
       ],
       "notes": [
-        "NEEDS HUMAN: the PayPal sandbox checkout asks for the buyer's password, which Claude Code does not type. The exact clicks are in docs/GATE4_WALKTHROUGH.md."
-      ]
+        "Done by the owner by hand on 2026-11-06 with the clicks below (PayPal sandbox checkout, join the flight, choose refund). The page showed \"refunded to your PayPal payment\". The automated run stopped at the PayPal login, which Claude Code does not fill in."
+      ],
+      "byHand": true
     },
     {
       "n": 12,
@@ -156,7 +157,7 @@
         "12-talk-to-person.png"
       ],
       "notes": [
-        "Answer: Your flight\u2019s great-circle distance from Frankfurt to Dubai is 4,844 km. The compensation band for this distance is 600.00 EUR, which is the applicable amount rather than a starting amount that increases with distance. It has been paid to your PayPal account. Rules: REG-7-1, REG-7-4"
+        "Answer: Your flight’s great-circle distance from Frankfurt to Dubai is 4,844 km. The compensation band for this distance is 600.00 EUR, which is the applicable amount rather than a starting amount that increases with distance. It has been paid to your PayPal account. Rules: REG-7-1, REG-7-4"
       ]
     },
     {
