@@ -104,7 +104,7 @@ The AI recommends; code calculates; only a human can deny compensation. Model ID
 - **Evals:**
   - `npm run eval`: A1, 12 cases, report in `docs/EVAL_REPORT.md`
   - `npm run eval:a3`: notices, report in `docs/EVAL_A3.md`
-  - `npm run eval:a2`: receipts, report in `docs/EVAL_A2.md`
+  - `npm run eval:a2`: receipts, report in `docs/EVAL_A2.md`. Every receipt in the repo is a **synthetic sample, not a real receipt**. The 7 photo-style samples in `fixtures/receipts/` come from `npm run receipts:make`: invented merchants, zeroed tax IDs, phones and card digits, and the footer "Sample receipt - Groundside demo". The plain test images in `fixtures/receipts-synthetic/` are synthetic too.
   - `npm run eval:a4`: questions, report in `docs/EVAL_A4.md`
 
   All use the live model.

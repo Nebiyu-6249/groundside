@@ -1,6 +1,7 @@
 // Demo receipts a passenger page can submit without a photo of its own (judges, the video).
-// Synthetic ones are drawn by code; the owner's real photos (fixtures/receipts/) may carry a
-// demoDateOverride in their sidecar, which the UI labels (SPEC 8.2). Uploads never get one.
+// All are synthetic samples made by code (scripts/make-receipts.ts and make-synthetic-receipts.ts);
+// none is a real receipt. A sidecar may still set demoDateOverride (SPEC 8.2), labelled in the UI;
+// the current samples carry their scenarios' real dates and need none. Uploads never get one.
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -18,7 +19,9 @@ const MIME: Record<string, string> = { ".png": "image/png", ".jpg": "image/jpeg"
 
 export function listDemoReceipts(): DemoReceipt[] {
   const out: DemoReceipt[] = [];
-  for (const [dir, synthetic] of [["receipts", false], ["receipts-synthetic", true]] as const) {
+  // The photo-style samples (fixtures/receipts) when they exist; the plain test images otherwise.
+  const sources = existsSync(path.join(process.cwd(), "fixtures", "receipts")) ? ([["receipts", true]] as const) : ([["receipts-synthetic", true]] as const);
+  for (const [dir, synthetic] of sources) {
     const base = path.join(process.cwd(), "fixtures", dir);
     if (!existsSync(base)) continue;
     for (const f of readdirSync(base).sort()) {

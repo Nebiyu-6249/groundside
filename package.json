@@ -24,6 +24,7 @@
     "deploy:render": "tsx --env-file=.env scripts/deploy-render.ts",
     "reset-demo:hosted": "tsx --env-file=.env scripts/deploy-render.ts --db-only --reset",
     "explain": "tsx --env-file=.env scripts/explain-passenger.ts",
+    "receipts:make": "tsx scripts/make-receipts.ts",
     "receipts:synthetic": "tsx scripts/make-synthetic-receipts.ts",
     "weather:dates": "tsx scripts/find-weather-dates.ts",
     "weather:fetch": "tsx scripts/fetch-weather.ts",

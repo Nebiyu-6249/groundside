@@ -1,0 +1,33 @@
+{
+  "recordedAt": "2026-11-06T11:35:54.446Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/c-frankfurt-hotel-invoice.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "HOTEL ROLLFELD NORD",
+    "merchantLocation": "Frankfurt Airport area; Probestrasse 0, 00000 Frankfurt am Main",
+    "isAtAirport": null,
+    "date": "2026-01-25",
+    "time": "07:32",
+    "currency": "EUR",
+    "total": 179,
+    "lineItems": [
+      {
+        "description": "Room, 1 night (24-25 Jan 2026)",
+        "amount": 179,
+        "category": "HOTEL"
+      }
+    ],
+    "language": "English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt prints Frankfurt Airport area, but it does not make clear whether the hotel is located at the airport itself."
+  }
+}

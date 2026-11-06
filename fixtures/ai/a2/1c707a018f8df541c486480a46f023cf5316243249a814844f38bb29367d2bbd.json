@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-06T11:36:16.174Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/f-frankfurt-total-mismatch.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "SNACKBAR TERMINAL EINS",
+    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Halle A; Beispielweg 0, 00000 Frankfurt am Main",
+    "isAtAirport": true,
+    "date": "2026-01-24",
+    "time": "21:34",
+    "currency": "EUR",
+    "total": 14.4,
+    "lineItems": [
+      {
+        "description": "Currywurst",
+        "amount": 5.9,
+        "category": "FOOD"
+      },
+      {
+        "description": "Pommes klein",
+        "amount": 3.6,
+        "category": "FOOD"
+      },
+      {
+        "description": "Cola 0,5 l",
+        "amount": 2.9,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "German",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "Receipt is clearly legible. It is marked “Sample receipt - Groundside demo.”"
+  }
+}

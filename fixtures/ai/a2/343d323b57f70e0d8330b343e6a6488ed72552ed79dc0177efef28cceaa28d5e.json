@@ -1,0 +1,27 @@
+{
+  "recordedAt": "2026-11-06T11:36:09.427Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/e-frankfurt-faded.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "KIOSK STEIG NULL",
+    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Gate A; Musterplatz 0, 00000 Frankfurt am Main",
+    "isAtAirport": true,
+    "date": null,
+    "time": null,
+    "currency": "EUR",
+    "total": 21.7,
+    "lineItems": [],
+    "language": "German",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "LOW",
+      "time": "LOW",
+      "currency": "HIGH",
+      "total": "LOW",
+      "lineItems": "LOW"
+    },
+    "legibilityNotes": "The receipt is very faded and creased. The total appears to read 21,70 EUR, but the amount is faint. No date or time is legible, and the item descriptions and amounts cannot be read."
+  }
+}

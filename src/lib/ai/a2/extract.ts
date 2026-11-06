@@ -11,7 +11,7 @@ import type { SpendLog } from "../spend";
 import { mapStrings, stripEmoji } from "../text";
 import { a2JsonSchema, a2OutputSchema, type A2Output } from "./schema";
 
-export const A2_PROMPT_VERSION = "A2.v1";
+export const A2_PROMPT_VERSION = "A2.v2";
 
 export interface A2Deps {
   config: AiConfig;
