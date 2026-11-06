@@ -20,24 +20,26 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 
 - **Gate 4 approved (2026-11-06)** under the user's standing instruction ("if all of Parts 1 to 3 pass, treat Gate 4 as approved").
   - `npm run walkthrough` drove every step of `docs/DEMO.md` section 3 on https://groundside.onrender.com in a fresh browser: 13 PASS, 1 NEEDS HUMAN (step 11), 0 FAIL. Report: `docs/GATE4_WALKTHROUGH.md`; screenshots in `docs/walkthrough/`; videos in `docs/walkthrough/video/` (git-ignored).
+  - Step 11 (demo booking refund) was done by hand by the owner on 2026-11-06 and passed, so the walkthrough is 14 of 14.
   - Approval to first passenger paid: 0.7 min on the Overview (44 s from the Approve click to a Paid compensation row).
   - Money proven through PayPal's API: payout item SUCCESS with a transaction ID (in the report).
   - In this run the sandbox accepted the cancel of an UNCLAIMED item (RETURNED); in Phase 0 it refused every cancel (HTTP 500). Both paths are handled.
   - The run did not measure a cold wake: the instance was still awake from the run before.
-  - `npm run walkthrough:report` regenerates the report from `docs/walkthrough/results.json`. One judge walkthrough uses 2 judge runs (of 5 per hour per IP) and about 7,000 sandbox EUR.
+  - `npm run walkthrough:report` regenerates the report from `docs/walkthrough/results.json`. One judge walkthrough uses 2 judge runs (of 5 per hour per IP) and about 5,830 sandbox EUR (measured 2026-11-06).
 - **Receipts:** seven synthetic photo-style samples in `fixtures/receipts/` (`npm run receipts:make`), labelled as samples everywhere. `npm run eval:a2`: reading 12/12, decisions 8/8 (`docs/EVAL_A2.md`).
 - **Phase 5 in progress.** Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7): final README, Devpost text, architecture diagram.
 - **Owner to-do:**
-  1. Step 11 of the walkthrough by hand (about 2 minutes): the exact clicks are at the end of `docs/GATE4_WALKTHROUGH.md`.
-  2. Tell Claude Code the sandbox business balance, so `PAYOUT_DAILY_CAP_EUR` can be set for Dec 1 to 15 judging. Changing it on Render needs the dashboard or a `RENDER_API_KEY` in `.env` (then `npm run deploy:render`). The cap is 20,000 EUR now, about three judge runs a day.
-  3. Add `SANDBOX_BUYER_EMAIL` and `SANDBOX_BUYER_PASSWORD` to `.env`, then run `npm run publish-logins` to publish the buyer login next to the demo login (already published).
-  4. Rotate the Neon password and the PayPal sandbox secret that appeared in chat, then update them on Render.
-  5. Decide the Render plan for judging (free sleeps when idle; starter is always on).
-  6. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`), record and upload the video (under 3:00), and tick the prizes.
-  7. Paste the AG Grid and Render prize requirements (the Devpost rules page blocks automated reads).
-  8. Set the GitHub repo's homepage link to https://groundside.onrender.com.
-  9. Optional: decide on the meal-receipt rule (currently: receipts reimburse food above the flat allowance, up to the daily maximum; where the flat allowance already equals the maximum, every meal receipt is rejected as "allowance already used").
-  10. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
+  1. **Payout cap and balance.** The sandbox business balance was 21,578.92 EUR on 2026-11-06 (it started at 100,000). One full judge walkthrough sends about 5,830 EUR, so the balance covers about three more.
+     - Set `PAYOUT_DAILY_CAP_EUR=6000` on Render (dashboard, Environment; saving redeploys) and in your local `.env`. That allows one full judge run per day. Claude Code cannot change Render variables without a `RENDER_API_KEY`.
+     - Top the balance up to about 100,000 EUR before Dec 1 (15 days at one run a day need about 90,000). Most of the money paid so far sits in the pool personal sandbox accounts (`PAYPAL_POOL_RECEIVERS`): log in to sandbox.paypal.com as each one and send the balance back to the business account. Some sources say the developer dashboard can also edit a sandbox account's balance; check the balance afterwards.
+  2. Add `SANDBOX_BUYER_EMAIL` and `SANDBOX_BUYER_PASSWORD` to `.env`, then run `npm run publish-logins` to publish the buyer login next to the demo login (already published).
+  3. Rotate the Neon password and the PayPal sandbox secret that appeared in chat, then update them on Render.
+  4. Decide the Render plan for judging (free sleeps when idle; starter is always on).
+  5. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`), record and upload the video (under 3:00), and tick the prizes.
+  6. Paste the AG Grid and Render prize requirements (the Devpost rules page blocks automated reads).
+  7. Set the GitHub repo's homepage link to https://groundside.onrender.com.
+  8. Optional: decide on the meal-receipt rule (currently: receipts reimburse food above the flat allowance, up to the daily maximum; where the flat allowance already equals the maximum, every meal receipt is rejected as "allowance already used").
+  9. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
 - **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**
     - release care before the decision

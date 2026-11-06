@@ -70,7 +70,7 @@ Measured in the PayPal sandbox on the hosted database, 2026-11-04:
 Measured again on 2026-11-06 by an automated walkthrough of the whole demo on the hosted app, in a fresh browser (`docs/GATE4_WALKTHROUGH.md`):
 - **Approval to first passenger paid:** 0.7 min (44 s from the Approve click to a Paid row in the grid).
 - **Money arrived:** PayPal's API reported the 600 EUR payout item as SUCCESS with a transaction ID.
-- **Steps:** 13 of 14 passed without a person; the demo booking needs a person to log in to the PayPal sandbox checkout.
+- **Steps:** all 14 passed, 13 without a person. The demo booking refund was done by hand, because it needs a person to log in to the PayPal sandbox checkout.
 
 ## What we learned
 

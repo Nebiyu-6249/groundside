@@ -328,4 +328,6 @@ Raw notes for `docs/PHASE0_RESULTS.md`.
   - The second run: 13 PASS, 1 NEEDS HUMAN (the PayPal buyer checkout needs a password Claude Code does not type), 0 FAIL. Approval to first passenger paid: 0.7 min. Report: `docs/GATE4_WALKTHROUGH.md`.
   - The video rename failed on Windows after the run (an old file in the way), before results.json was written. The script now writes the results first, and this run's results were rebuilt from its log.
 - **Gate 4:** approved under the user's standing instruction.
+- **Step 11 by hand:** the owner booked with the sandbox buyer, joined the flight, chose the refund, and saw "refunded to your PayPal payment". The walkthrough report now shows 14 of 14 PASS, step 11 marked as done by hand.
+- **Payout cap:** the owner reported a sandbox balance of 21,578.92 EUR. Measured cost of one full judge walkthrough on the hosted database: about 5,830 EUR (A 5,395, B 435, fees not counted). Recommended `PAYOUT_DAILY_CAP_EUR=6000` (one full run a day, `.env.example` updated) and a top-up to about 100,000 EUR before judging; the Render variable is the owner's to set.
 
