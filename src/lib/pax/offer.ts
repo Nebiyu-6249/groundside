@@ -59,4 +59,13 @@ export async function offerByToken(db: PrismaClient, token: string) {
   };
 }
 
+/** Why this passenger's accepted payments are waiting, if they are (demo cap or sandbox balance). */
+export async function passengerHold(db: PrismaClient, passengerId: string, capCents: number) {
+  const { payoutHold } = await import("@/lib/payouts/limits");
+  const hold = await payoutHold(db, capCents);
+  if (!hold) return null;
+  const waiting = await db.entitlement.count({ where: { passengerId, kind: { in: ["COMPENSATION", "MEAL_ALLOWANCE"] }, status: "ACCEPTED", amountCents: { gt: 0 }, payoutItems: { none: { status: { notIn: ["FAILED", "RETURNED", "BLOCKED", "CANCELED", "DENIED", "REFUNDED", "REVERSED"] } } } } });
+  return waiting > 0 ? hold : null;
+}
+
 export type PassengerView = NonNullable<Awaited<ReturnType<typeof offerByToken>>>;

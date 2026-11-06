@@ -2,6 +2,12 @@
 
 Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/PROGRESS.md`.
 
+## Deadlines
+
+- **Official (Devpost rules, confirmed by the user 2026-11-06):** Thu Nov 12, 2026, 12:00 PM PT, which is 20:00 UTC and Fri Nov 13, 00:00 Dubai.
+- **Internal:** Thu Nov 12, 18:00 Dubai (14:00 UTC), six hours before the official cut-off.
+- **Judging:** Dec 1 to 15; the hosted demo and the sandbox must keep working through it.
+
 ## Where things stand (2026-11-04)
 
 - **Phase 5 in progress (2026-11-05).** Hosted smoke test passed (judge path to a Paid row in 1.6 min). Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7). Done:

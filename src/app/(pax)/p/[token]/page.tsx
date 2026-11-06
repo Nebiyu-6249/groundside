@@ -4,7 +4,8 @@ import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { euros, localTime } from "@/lib/format";
 import { CONSENT_CHECKBOX, CONSENT_RULE, CONSENT_TEXT } from "@/lib/ops/passenger-choice";
-import { offerByToken, type PassengerView } from "@/lib/pax/offer";
+import { offerByToken, passengerHold, type PassengerView } from "@/lib/pax/offer";
+import { payoutSettings } from "@/lib/payouts/orchestrator";
 import { reconcileDisruption } from "@/lib/payouts/reconcile";
 import { refreshRefunds } from "@/lib/ops/refunds";
 import { chooseTravel, choosePayment, switchToBank } from "./actions";
@@ -67,6 +68,7 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
       // PayPal unreachable: show the stored state.
     }
   }
+  const hold = v.offer.paymentChoice === "PAYPAL" ? await passengerHold(db, v.passengerId, payoutSettings().dailyCapCents) : null;
   const comp = v.entitlements.find((e) => e.kind === "COMPENSATION");
   const CARE_ORDER = ["MEAL_ALLOWANCE", "HOTEL_REIMBURSEMENT_CAP", "TRANSPORT_REIMBURSEMENT_CAP"];
   const care = v.entitlements.filter((e) => CARE_ORDER.includes(e.kind) && e.amountCents > 0).sort((a, b) => CARE_ORDER.indexOf(a.kind) - CARE_ORDER.indexOf(b.kind));
@@ -163,6 +165,13 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
             <h2 className="font-medium">Your payment</h2>
             <p className="text-sm">Paid through PayPal. In this demo the money goes to a sandbox account (demo pool): <span className="font-mono">{v.receiver ?? "none"}</span>.</p>
             <Tracker v={v} />
+            {hold ? (
+              <p role="status" className="rounded border border-amber p-3 text-sm">
+                {hold.kind === "CAP"
+                  ? `Your payment is approved and queued. This demo sends at most a fixed amount through PayPal each day, and today's amount is used up; it goes out after ${hold.resumesAt?.slice(11, 16)} UTC on ${hold.resumesAt?.slice(0, 10)}. Nothing is lost.`
+                  : "Your payment is approved and queued. The demo's PayPal sandbox account needs topping up before more payments can go out. Nothing is lost."}
+              </p>
+            ) : null}
             {v.unclaimed.length ? (
               <div className="rounded border border-amber p-3 text-sm" role="status">
                 {v.offer.bankSwitchRequested ? (
