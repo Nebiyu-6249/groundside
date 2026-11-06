@@ -1,13 +1,15 @@
 // npm run walkthrough:report
 // Turns docs/walkthrough/results.json (from npm run walkthrough) into docs/GATE4_WALKTHROUGH.md.
 
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 interface StepResult { n: number; title: string; status: string; seconds: number; shots: string[]; notes: string[]; byHand?: boolean }
 const data = JSON.parse(readFileSync(path.join(process.cwd(), "docs", "walkthrough", "results.json"), "utf8")) as { base: string; at: string; measured: Record<string, string>; results: StepResult[]; note?: string };
 
 const steps = data.results.sort((a, b) => a.n - b.n);
+const coldFile = path.join(process.cwd(), "docs", "walkthrough", "cold-start.json");
+const cold = existsSync(coldFile) ? (JSON.parse(readFileSync(coldFile, "utf8")) as { at: string; idleMinutesBefore: number; firstResponse: { status: number; seconds: number }; landingServedSeconds: number; firstJudgeStartSeconds: number }) : null;
 const count = (s: string) => steps.filter((x) => x.status === s).length;
 const lines = [
   "# Gate 4 walkthrough",
@@ -24,7 +26,8 @@ const lines = [
   "",
   "## Measured",
   "",
-  `- **Cold start:** ${data.measured.coldStart ?? "not measured"}.${/HTTP 200/.test(data.measured.coldStart ?? "") ? " The instance was already awake from an earlier run, so this run did not measure a cold wake. An earlier run hit a sleeping instance, which first answered HTTP 503 while Render woke it." : ""}`,
+  `- **Start-up in the walkthrough run:** ${data.measured.coldStart ?? "not measured"}.${/HTTP 200/.test(data.measured.coldStart ?? "") ? " The instance was already awake from an earlier run, so this run did not measure a cold wake. An earlier run hit a sleeping instance, which first answered HTTP 503 while Render woke it." : ""}`,
+  ...(cold ? [`- **Cold start, measured separately** (\`npm run cold-start -- --wait-minutes=${cold.idleMinutesBefore}\`, ${cold.at.replace("T", " ").slice(0, 16)} UTC, after ${cold.idleMinutesBefore} minutes with no requests on Render's free plan): the first response was HTTP ${cold.firstResponse.status} after ${cold.firstResponse.seconds} s while Render woke the instance; the landing page was served after ${cold.landingServedSeconds} s; the first "Start the judge demo" then took ${cold.firstJudgeStartSeconds} s to show the Evidence tab.`] : []),
   `- **Approval to first passenger paid:** ${data.measured.overview ?? "not measured"} on the Overview tab (from the decision to the first PayPal SUCCESS after it). That was ${data.measured.clickToPaid ?? "not measured"}.`,
   `- **Money arrived:** ${data.measured.paypalProof ?? "not proven"}. This replaces logging in to the receiver account: PayPal's own API reports the payout item as SUCCESS with a transaction ID.`,
   "",

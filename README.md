@@ -251,6 +251,7 @@ npm run check        # typecheck, lint, unit tests
 npm run smoke        # Playwright: the judge demo path in a real browser (local dev server, sandbox payouts)
 npm run secret-scan  # git history and tracked files, prints locations only
 npm run walkthrough  # every step of docs/DEMO.md section 3 on the hosted app, with video and screenshots
+npm run cold-start -- --wait-minutes=25  # hosted cold start: landing page and first judge demo after Render sleeps
 ```
 
 The latest walkthrough of the hosted app is in [`docs/GATE4_WALKTHROUGH.md`](docs/GATE4_WALKTHROUGH.md): all 14 steps passed: 13 automatically, and the demo booking step by hand, because it needs a person to log in to the PayPal sandbox checkout.

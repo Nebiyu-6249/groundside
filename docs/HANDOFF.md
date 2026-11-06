@@ -29,17 +29,14 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 - **Receipts:** seven synthetic photo-style samples in `fixtures/receipts/` (`npm run receipts:make`), labelled as samples everywhere. `npm run eval:a2`: reading 12/12, decisions 8/8 (`docs/EVAL_A2.md`).
 - **Phase 5 in progress.** Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7): final README, Devpost text, architecture diagram.
 - **Owner to-do:**
-  1. **Payout cap and balance.** The sandbox business balance was 21,578.92 EUR on 2026-11-06 (it started at 100,000). One full judge walkthrough sends about 5,830 EUR, so the balance covers about three more.
-     - Set `PAYOUT_DAILY_CAP_EUR=6000` on Render (dashboard, Environment; saving redeploys) and in your local `.env`. That allows one full judge run per day. Claude Code cannot change Render variables without a `RENDER_API_KEY`.
-     - Top the balance up to about 100,000 EUR before Dec 1 (15 days at one run a day need about 90,000). Most of the money paid so far sits in the pool personal sandbox accounts (`PAYPAL_POOL_RECEIVERS`): log in to sandbox.paypal.com as each one and send the balance back to the business account. Some sources say the developer dashboard can also edit a sandbox account's balance; check the balance afterwards.
-  2. Add `SANDBOX_BUYER_EMAIL` and `SANDBOX_BUYER_PASSWORD` to `.env`, then run `npm run publish-logins` to publish the buyer login next to the demo login (already published).
-  3. Rotate the Neon password and the PayPal sandbox secret that appeared in chat, then update them on Render.
+  1. **Render variables (blocks the switch to the new PayPal app).** `.env` has the new PayPal app (client ID, secret, `NEXT_PUBLIC_PAYPAL_CLIENT_ID`, webhook ID) and `PAYOUT_DAILY_CAP_EUR=12000`, but Render still runs the old app. Either add `RENDER_API_KEY` to `.env` and ask Claude Code to run `npm run deploy:render` (it syncs the variables and redeploys, which rebuilds `NEXT_PUBLIC_` values), or change `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_ID` and `PAYOUT_DAILY_CAP_EUR` in the Render dashboard. Then Claude Code runs the hosted smoke test.
+  2. Delete the old PayPal sandbox app only after Render runs the new one and the smoke test passes (its webhook still points at the hosted URL until then).
+  3. Add `SANDBOX_BUYER_EMAIL` and `SANDBOX_BUYER_PASSWORD` to `.env`, then run `npm run publish-logins` to publish the buyer login next to the demo login (already published).
+  - Secrets (owner decision 2026-11-06): the new PayPal app replaces the leaked PayPal secret. Its own client secret was pasted in chat, and the owner accepted that. The Neon password is not rotated, by owner decision.
   4. Decide the Render plan for judging (free sleeps when idle; starter is always on).
   5. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`), record and upload the video (under 3:00), and tick the prizes.
-  6. Paste the AG Grid and Render prize requirements (the Devpost rules page blocks automated reads).
-  7. Set the GitHub repo's homepage link to https://groundside.onrender.com.
-  8. Optional: decide on the meal-receipt rule (currently: receipts reimburse food above the flat allowance, up to the daily maximum; where the flat allowance already equals the maximum, every meal receipt is rejected as "allowance already used").
-  9. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
+  6. Put `prize-aggrid.txt` and `prize-render.txt` in the repo root (they were not there on 2026-11-06); Claude Code checks them and deletes them without committing.
+  7. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
 - **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**
     - release care before the decision
@@ -120,7 +117,7 @@ npm run dev -- --port 3001
   - The Article 6 care thresholds use the delayed flight's own distance; compensation uses first departure to final destination.
   - The Art 7(2) reduction for cancellations needs an accepted re-routing.
   - The Sturgeon long-haul 50 percent reduction applies to B3 delays of 180 to 239 minutes, and also needs the Demo Air policy flag.
-  - Choosing a refund ends care (Commission guidelines 2024, 4.3.1): first meal allowance only, no hotel or transport.
+  - Choosing a refund ends care (Commission guidelines 2024, 4.3.1): the flat meal allowance only, no meal receipts, hotel or transport.
 - `AGENTS.md` is written by `next dev`; it points to the Next 16 docs in `node_modules/next/dist/docs/`.
 - Stopping the background `npm run dev` task can leave the Next process running; `next dev` then reports the PID.
 - The PayPal JS SDK may call `onCancel` after the buyer approved; the demo page captures on cancel too, and the server captures only APPROVED orders.

@@ -13,7 +13,8 @@ Note: Rebuilt from the run log (scripts/out/walkthrough-hosted.log) because the 
 
 ## Measured
 
-- **Cold start:** first response HTTP 200; landing page served after 4.5 s. The instance was already awake from an earlier run, so this run did not measure a cold wake. An earlier run hit a sleeping instance, which first answered HTTP 503 while Render woke it.
+- **Start-up in the walkthrough run:** first response HTTP 200; landing page served after 4.5 s. The instance was already awake from an earlier run, so this run did not measure a cold wake. An earlier run hit a sleeping instance, which first answered HTTP 503 while Render woke it.
+- **Cold start, measured separately** (`npm run cold-start -- --wait-minutes=25`, 2026-11-06 18:21 UTC, after 25 minutes with no requests on Render's free plan): the first response was HTTP 503 after 3.6 s while Render woke the instance; the landing page was served after 51.5 s; the first "Start the judge demo" then took 15.7 s to show the Evidence tab.
 - **Approval to first passenger paid:** 0.7 min on the Overview tab (from the decision to the first PayPal SUCCESS after it). That was 44 s from the Approve click to the first compensation row showing Paid in the grid.
 - **Money arrived:** PayPal payout item FZKMFRH28ADPJ: SUCCESS, transaction ID 9KT11695KH672561B, 600.00 EUR (GET /v1/payments/payouts-item, debug f104120c2e792). This replaces logging in to the receiver account: PayPal's own API reports the payout item as SUCCESS with a transaction ID.
 
