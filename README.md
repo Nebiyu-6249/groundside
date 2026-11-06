@@ -82,7 +82,7 @@ The AI recommends; code calculates; only a human can deny compensation. Model ID
   - the summary is short
 
   Code, not the model, maps the result to the shown recommendation. A failed check gets one retry; a second failure shows "uncertain, a human decides". When live AI is unavailable or the daily budget (`AI_DAILY_BUDGET_USD`) is reached, a recorded result is shown with a visible label. Every call is logged with its token count and estimated cost.
-- **A2 receipt reading** (`src/lib/ai/a2/`, prompt `prompts/A2.v1.md`): reads a receipt photo into fields with per-field confidence. The photo is resized and stripped of metadata with `sharp` before the AI sees it. Code checks decide, in order:
+- **A2 receipt reading** (`src/lib/ai/a2/`, prompt `prompts/A2.v2.md`): reads a receipt photo into fields with per-field confidence. The photo is resized and stripped of metadata with `sharp` before the AI sees it. Code checks decide, in order:
   1. duplicates across all passengers: same file, or a similar photo with the same amount or time
   2. a repeat claim with the same merchant, total and time
   3. the disruption time window
@@ -250,7 +250,10 @@ Every legal statement cites an entry in [`rules/`](rules/): Regulation (EC) No 2
 npm run check        # typecheck, lint, unit tests
 npm run smoke        # Playwright: the judge demo path in a real browser (local dev server, sandbox payouts)
 npm run secret-scan  # git history and tracked files, prints locations only
+npm run walkthrough  # every step of docs/DEMO.md section 3 on the hosted app, with video and screenshots
 ```
+
+The latest walkthrough of the hosted app is in [`docs/GATE4_WALKTHROUGH.md`](docs/GATE4_WALKTHROUGH.md): 13 of 14 steps passed automatically; the demo booking step needs a person to log in to the PayPal sandbox checkout.
 
 `SMOKE_URL=https://groundside.onrender.com npm run smoke` runs the smoke test against the hosted app. Install the browser once with `npx playwright install chromium`.
 
