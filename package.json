@@ -36,6 +36,7 @@
     "screens": "tsx scripts/screens.ts",
     "screens:limits": "tsx --env-file=.env scripts/screens-limits.ts",
     "publish-logins": "tsx --env-file=.env scripts/publish-logins.ts",
+    "walkthrough": "tsx --env-file=.env scripts/walkthrough.ts",
     "smoke": "playwright test",
     "e2e": "tsx --env-file=.env scripts/e2e-flow.ts"
   },
