@@ -88,7 +88,7 @@ Build only if Phases 0 to 4 are done by Sun Nov 8.
 
 ### 2.5 Manifests
 
-**Full run (owner only, used for the video): 180 passengers on scenario A, 150 on scenario B.**
+**Full run (owner only, not used for the video): 180 passengers on scenario A, 150 on scenario B.** It pays over 100,000 EUR of sandbox money, so approving it requires typing the cost (`PAY <amount> EUR`) whenever it is above one day's payout cap (owner decision 2026-11-06). The video uses the 12-passenger quick run.
 
 | Group | Count (A) | Notes |
 |---|---|---|
@@ -130,7 +130,7 @@ Sandbox cost of one quick run is roughly 5,000 EUR. Size `PAYOUT_DAILY_CAP_EUR` 
 7. Compensation payouts start for every passenger who already chose PayPal. Grid cells flash as statuses move to Paid; the header shows time from approval to first passenger paid.
 8. Open passenger 2's page on a phone-sized view: what happened, 600 EUR, PayPal consent, status Paid. Log in to the sandbox receiver account in another tab to show the money arrived.
 9. Passenger 8: UNCLAIMED, switch to bank transfer, unclaimed item cancelled.
-10. Receipts: upload a fixture receipt, see extracted fields and checks, approved and paid; upload the same receipt again, flagged as duplicate.
+10. Receipts: upload the cafe receipt (`a-frankfurt-cafe.jpg`): the fields and checks show, and it is approved within the meal allowance left and paid. The passenger got a flat 15 EUR at once; further meals are reimbursed up to 60 EUR per 24 hours in total (Demo Air policy, owner decision 2026-11-06). Upload the hotel invoice (capped at 160 EUR), then the cafe receipt again: flagged as a duplicate.
 11. Demo booking: book a seat with the sandbox buyer account, it joins the flight, choose refund, refund completes.
 12. Passenger question: "Why 600 and not more?" answered with the citation; "I want to talk to a person" creates a ticket.
 13. Switch to scenario B: AI says fog supported; sign the denial with reason and citations; passengers' notices say no compensation, meals and hotel provided, how to contest. Meal payouts still go out.
@@ -142,14 +142,14 @@ Record the hosted app at 1920x1080, browser zoom 110%, no personal bookmarks or 
 
 | Time | Screen | Voiceover |
 |---|---|---|
-| 0:00-0:12 | Board at night, DEMO 412 turns to Cancelled, 180 passengers | "Twenty-thirty in Frankfurt. The flight to Dubai is cancelled. A hundred and eighty people are at the gate, and under EU law most of them are owed six hundred euros each, plus a meal and a hotel. Usually they get a paper voucher and a claim form." |
+| 0:00-0:12 | Board at night, DEMO 412 turns to Cancelled (12-passenger quick run) | "Twenty-thirty in Frankfurt. The flight to Dubai is cancelled. Under EU law most passengers are owed six hundred euros each, plus meals and a hotel. Usually they get a paper voucher and a claim form. We follow twelve of them." |
 | 0:12-0:22 | Title card: Groundside | "Groundside is the disruption desk for that night. AI checks the cause, code works out what's owed, a person approves, and PayPal pays." |
 | 0:22-0:50 | Evidence tab, then Assessment card | "The ops note says weather. Groundside pulled the real weather reports for Frankfurt, Dubai and Madrid, where the aircraft came from. Clear skies at all three. The maintenance log shows a failed hydraulic pump. So the AI flags it: weather claim not supported. Every finding points to a weather observation or a line in the log, and it can only cite rules from a verified list." |
 | 0:50-1:05 | "Release care now", rows turn Paid | "Meals are owed whatever the cause, so they go out first, before anyone decides on compensation." |
 | 1:05-1:20 | Grid, trace drawer | "Every amount is computed by code, not by the AI. This passenger connects to Addis Ababa, so distance runs to her final destination. Six hundred euros, and here's every rule behind it." |
 | 1:20-1:40 | Approve, cells flash, counter | "One approval. Each passenger chooses PayPal on their own page, and payouts start. Webhooks and polling keep every row honest, and a retried batch can never pay twice." |
 | 1:40-1:58 | Phone: passenger page; sandbox account balance | "The passenger sees what happened in plain words, chooses PayPal with clear consent or a bank transfer, and the money lands in minutes." |
-| 1:58-2:12 | Receipt upload, checks, duplicate flagged | "Bought dinner? Snap the receipt. Vision AI reads it, code checks the time, the caps and duplicates, and reimburses it." |
+| 1:58-2:12 | Cafe receipt upload: fields, checks, approved and paid; same receipt again flagged as duplicate | "Fifteen euros for a meal went out at once. Bought more? Snap the receipt. Vision AI reads it, code checks the time, the daily meal limit and duplicates, and reimburses it." |
 | 2:12-2:30 | Scenario B: fog supported, signed denial, meals still paid | "When the excuse is real, like this fog in Milan, the AI agrees, but it still can't deny anyone. A duty manager signs the denial with reasons, and the meals and hotel are paid anyway." |
 | 2:30-2:45 | Refund, then closing card with URL and repo | "Refunds go straight back to the original PayPal payment. New EU rules will soon require airlines to tell passengers how to claim within days and pay within thirty. Groundside does it on the night. Try it at the link below." |
 

@@ -36,7 +36,7 @@
     "expected": "HUMAN_REVIEW",
     "approvedCents": 0,
     "why": "faded print: the total and amounts cannot be read with confidence",
-    "typicalPassenger": "HUMAN_REVIEW (or REJECTED for the allowance once a person reads it)"
+    "typicalPassenger": "HUMAN_REVIEW (a person reads it, then approves within the meal allowance left)"
   },
   "readingMayBeUncertain": true
 }

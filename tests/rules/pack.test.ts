@@ -47,8 +47,8 @@ describe("rule pack (SPEC 6)", () => {
     const policy = airlinePolicySchema.parse(
       JSON.parse(readFileSync(path.join(process.cwd(), "data", "policy", "demo-air.json"), "utf8")),
     );
-    expect(byId.get("POL-MEALS")?.excerpt).toContain(`${policy.mealAllowanceFirstEur} EUR when the care trigger`);
-    expect(byId.get("POL-MEALS")?.excerpt).toContain(`at most ${policy.mealAllowanceMaxPer24hEur} EUR per 24 hours`);
+    expect(byId.get("POL-MEALS")?.excerpt).toContain(`${policy.mealAllowanceFlatEur} EUR paid at once when the care trigger`);
+    expect(byId.get("POL-MEALS")?.excerpt).toContain(`at most ${policy.mealAllowanceMaxPer24hEur} EUR per 24 hours of waiting in total`);
     expect(byId.get("POL-HOTEL")?.excerpt).toContain(`${policy.hotelCapPerNightEur} EUR per night`);
     expect(byId.get("POL-TRANSPORT")?.excerpt).toContain(`${policy.groundTransportCapEachWayEur} EUR each way`);
     expect(byId.get("POL-RECEIPTS")?.excerpt).toContain(`${policy.receiptWindowBeforeSchedDepMinutes} minutes before`);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { computePassenger, reconcile, type StoredEntitlement } from "@/lib/engine";
-import { mealAllowanceCents } from "@/lib/engine/care";
+import { mealAllowanceCents, mealMaxCents } from "@/lib/engine/care";
 import { addMin, cites, ctx, delayed, ent, eur, pax, policy, rules, scenarioA, t } from "./helpers";
 
 const scenarioARerouting = { offered: true, accepted: true, dep: t("2026-01-16T09:15:00Z"), arrFinal: t("2026-01-16T15:20:00Z") };
@@ -19,7 +19,7 @@ describe("care triggers (Art 5(1)(b), 6(1))", () => {
   it("REG-5-1-B: scenario A cancellation re-routed next morning gets meals, one hotel night and transport", () => {
     const d = scenarioA();
     const r = computePassenger(d, pax(d, { rerouting: scenarioARerouting, choice: "REROUTING" }), ctx);
-    expect(eur(r, "MEAL_ALLOWANCE")).toBe(60);
+    expect(eur(r, "MEAL_ALLOWANCE")).toBe(15);
     expect(eur(r, "HOTEL_REIMBURSEMENT_CAP")).toBe(160);
     expect(eur(r, "TRANSPORT_REIMBURSEMENT_CAP")).toBe(80);
     expect(cites(r, "HOTEL_REIMBURSEMENT_CAP", "POL-HOTEL")).toBe(true);
@@ -47,14 +47,25 @@ describe("care triggers (Art 5(1)(b), 6(1))", () => {
     expect(eur(r, "HOTEL_REIMBURSEMENT_CAP")).toBe(160);
   });
 
-  it("POL-MEALS: 15 EUR at the trigger, 15 more per further 4 hours, at most 60 per 24 hours", () => {
-    expect(mealAllowanceCents(0, 0, policy)).toBe(1500);
-    expect(mealAllowanceCents(239, 0, policy)).toBe(1500);
-    expect(mealAllowanceCents(240, 0, policy)).toBe(3000);
-    expect(mealAllowanceCents(745, 0, policy)).toBe(6000);
-    expect(mealAllowanceCents(1400, 0, policy)).toBe(6000);
-    expect(mealAllowanceCents(1500, 0, policy)).toBe(10500);
-    expect(mealAllowanceCents(300, 240, policy)).toBe(1500);
+  it("POL-MEALS: a flat 15 EUR at once, whatever the wait", () => {
+    expect(mealAllowanceCents(policy)).toBe(1500);
+    expect(mealAllowanceCents({ ...policy, mealAllowanceFlatEur: 80 })).toBe(6000);
+  });
+
+  it("POL-MEALS: meals in total are at most 60 EUR for each started 24 hours of waiting, flat allowance included", () => {
+    expect(mealMaxCents(0, policy)).toBe(6000);
+    expect(mealMaxCents(1440, policy)).toBe(6000);
+    expect(mealMaxCents(1441, policy)).toBe(12000);
+  });
+
+  it("POL-MEALS: a scenario A passenger gets 15 EUR now, and the trace says further meals are by receipt", () => {
+    const d = scenarioA();
+    const r = computePassenger(d, pax(d, { rerouting: scenarioARerouting, choice: "REROUTING" }), ctx);
+    expect(eur(r, "MEAL_ALLOWANCE")).toBe(15);
+    const meal = r.entitlements.find((e) => e.kind === "MEAL_ALLOWANCE")!;
+    const polStep = meal.trace.find((t) => t.ruleId === "POL-MEALS")!;
+    expect(polStep.outcome).toContain("Flat meal allowance 15 EUR, paid at once");
+    expect(polStep.outcome).toContain("Further meals by receipt");
   });
 
   it("REG-11: a passenger with reduced mobility is flagged for priority and the care trace says why", () => {
@@ -127,7 +138,8 @@ describe("traceability and re-runs", () => {
     const computed = computePassenger(d, pax(d, { rerouting: scenarioARerouting, choice: "REROUTING" }), ctx).entitlements;
     const stored: StoredEntitlement[] = [
       { id: "e1", kind: "COMPENSATION", status: "PAID", amountCents: 30_000, payoutInFlight: false },
-      { id: "e2", kind: "MEAL_ALLOWANCE", status: "READY", amountCents: 1_500, payoutInFlight: false },
+      // Stored under the earlier meal policy (60 EUR flat); not paid yet, so the re-run updates it to 15 EUR.
+      { id: "e2", kind: "MEAL_ALLOWANCE", status: "READY", amountCents: 6_000, payoutInFlight: false },
       { id: "e3", kind: "HOTEL_REIMBURSEMENT_CAP", status: "OFFERED", amountCents: 16_000, payoutInFlight: true },
     ];
     const actions = reconcile(stored, computed);

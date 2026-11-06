@@ -270,6 +270,7 @@ async function main() {
     expect(hotel.decision === "AUTO_APPROVED", "hotel invoice not auto-approved");
     const cafe = await upload("a-frankfurt-cafe.jpg");
     r.notes.push(`Cafe receipt: ${cafe.decision} - ${cafe.reason}`);
+    expect(cafe.decision === "AUTO_APPROVED", "meal receipt not approved (flat 15 EUR allowance, receipts up to 60 EUR per 24 hours)");
     const again = await upload("a-frankfurt-cafe.jpg");
     r.notes.push(`Cafe receipt again: ${again.decision} - ${again.reason}`);
     expect(again.decision === "REJECTED" && /already submitted/.test(again.reason ?? ""), "duplicate not flagged");

@@ -41,7 +41,7 @@
     "expected": "AUTO_APPROVED",
     "approvedCents": 1580,
     "why": "inside the window, lines add up, food and drinks within the remaining meal allowance",
-    "typicalPassenger": "REJECTED: a typical scenario A passenger's flat 60 EUR meal allowance already reaches the 60 EUR daily maximum (current rule)"
+    "typicalPassenger": "AUTO_APPROVED: a typical scenario A passenger has 45 EUR of meals left after the flat 15 EUR allowance (60 EUR per 24 hours in total)"
   },
   "readingMayBeUncertain": false
 }
