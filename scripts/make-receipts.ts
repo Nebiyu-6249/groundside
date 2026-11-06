@@ -40,7 +40,7 @@ interface Receipt {
 
 const de = (n: number) => n.toFixed(2).replace(".", ",");
 /** Arabic runs in an Arabic font, isolated so mixed lines keep their order. */
-const ar = (s: string) => s.replace(/([\u0600-\u06FF\u0660-\u0669](?:[\u0600-\u06FF\u0660-\u0669\s:%-]*[\u0600-\u06FF\u0660-\u0669:%])?)/g, '<bdi class="ar">$1</bdi>');
+const ar = (s: string) => s.replace(/([\u0600-\u06FF](?:[\u0600-\u06FF0-9.\s:%-]*[\u0600-\u06FF0-9%])?)/g, '<bdi class="ar">$1</bdi>');
 const en = (n: number) => n.toFixed(2);
 
 // Passenger context for the expected decision: one who chose a refund keeps 45 EUR of meal
@@ -104,7 +104,7 @@ const RECEIPTS: Receipt[] = [
   },
   {
     key: "g-dubai-restaurant-aed", label: "Dubai restaurant in AED, before the disruption (Arabic and English)", lang: "ar", dir: "rtl", merchant: "Quiet Oasis Restaurant",
-    header: ["مطعم الواحة الهادئة", "QUIET OASIS RESTAURANT", "دبي - شارع المثال 0", "Dubai, Example Street 0", "TRN 000000000000000", "هاتف / Tel +971 0 000 0000"],
+    header: ["مطعم الواحة الهادئة", "QUIET OASIS RESTAURANT", "دبي، شارع المثال 0", "Dubai, Example Street 0", "رقم التسجيل الضريبي / TRN 000000000000000", "هاتف / Tel +971 0 000 0000"],
     meta: ["فاتورة ضريبية / Tax invoice 0000-0120"], date: "2026-01-20", time: "13:12", dateText: "20/01/2026  13:12", currency: "AED",
     lines: [{ text: "حمص / Hummus", amount: 28, category: "FOOD" }, { text: "دجاج مشوي / Grilled chicken", amount: 54, category: "FOOD" }, { text: "ليمون بالنعناع / Lemon mint", amount: 18, category: "NON_ALCOHOLIC_DRINK" }],
     vatText: ["شامل ضريبة القيمة المضافة 5%: 4.76", "Incl. VAT 5%                4.76"], payment: "بطاقة / Card  **** 0000",
@@ -139,8 +139,8 @@ function html(r: Receipt): string {
     <div class="sep"></div>
     ${rows}
     <div class="sep"></div>
-    ${r.lang === "ar" ? `<div class="row tot"><span>${ar("الإجمالي")}</span><span></span></div>` : ""}
-    <div class="row tot"><span>${r.lang === "de" ? "SUMME EUR" : r.lang === "it" ? "TOTALE EURO" : `TOTAL ${r.currency}`}</span><span>${fmt(total(r))}</span></div>
+
+    <div class="row tot"><span>${r.lang === "de" ? "SUMME EUR" : r.lang === "it" ? "TOTALE EURO" : r.lang === "ar" ? `${ar("الإجمالي")} / TOTAL ${r.currency}` : `TOTAL ${r.currency}`}</span><span>${fmt(total(r))}</span></div>
     ${r.vatText.map((v) => `<div class="small">${ar(v)}</div>`).join("")}
     <div class="sep"></div>
     <div class="small">${ar(r.payment)}</div>

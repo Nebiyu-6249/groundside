@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-06T16:21:53.338Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/g-dubai-restaurant-aed.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "Quiet Oasis Restaurant",
+    "merchantLocation": "Dubai, Example Street 0",
+    "isAtAirport": false,
+    "date": "2026-01-20",
+    "time": "13:12",
+    "currency": "AED",
+    "total": 100,
+    "lineItems": [
+      {
+        "description": "Hummus",
+        "amount": 28,
+        "category": "FOOD"
+      },
+      {
+        "description": "Grilled chicken",
+        "amount": 54,
+        "category": "FOOD"
+      },
+      {
+        "description": "Lemon mint",
+        "amount": 18,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "Arabic and English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "Receipt is clearly printed. It is marked “Sample receipt - Groundside demo.”"
+  }
+}
