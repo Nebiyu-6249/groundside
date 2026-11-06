@@ -1,9 +1,7 @@
 {
   "label": "Demo Air policy (fictional carrier)",
   "currency": "EUR",
-  "mealAllowanceFirstEur": 15,
-  "mealAllowanceEachFurtherHoursEur": 15,
-  "mealAllowanceFurtherEveryHours": 4,
+  "mealAllowanceFlatEur": 15,
   "mealAllowanceMaxPer24hEur": 60,
   "hotelCapPerNightEur": 160,
   "groundTransportCapEachWayEur": 40,

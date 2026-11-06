@@ -1,7 +1,8 @@
 // Receipts end to end (SPEC F11): process the photo, read it with A2, run the code checks,
 // store the outcome, and pay approved amounts with the passenger's existing PayPal consent.
-// Meal receipts reimburse what the flat meal allowance did not cover, up to the Demo Air daily
-// maximum for the wait; hotel and transport receipts draw on their reimbursement caps.
+// Meal receipts reimburse further meals after the flat 15 EUR allowance, up to the Demo Air daily
+// total for the wait (60 EUR per 24 hours, flat allowance included); hotel and transport receipts
+// draw on their reimbursement caps.
 
 import type { PrismaClient } from "@/generated/prisma/client";
 import { aiConfig } from "@/lib/ai/config";

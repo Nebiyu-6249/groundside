@@ -166,9 +166,8 @@ Stored as data (`data/policy/demo-air.json`), shown on screen as policy, editabl
 
 | Key | Default |
 |---|---|
-| `mealAllowanceFirstEur` | 15 when the care trigger is reached |
-| `mealAllowanceEachFurtherHoursEur` | 15 per further 4 hours of waiting |
-| `mealAllowanceMaxPer24hEur` | 60 |
+| `mealAllowanceFlatEur` | 15, paid at once when the care trigger is reached (owner decision 2026-11-06) |
+| `mealAllowanceMaxPer24hEur` | 60 per 24 hours of waiting in total, the flat amount included; further meals are reimbursed by receipt |
 | `hotelCapPerNightEur` | 160 |
 | `groundTransportCapEachWayEur` | 40 |
 | `applyArt7_2Reduction` | true |

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { loadPolicy } from "@/lib/demo/seed";
 import { Suspense } from "react";
 import { CheckCircle2, Circle, Clock } from "lucide-react";
 import { getDb } from "@/lib/db";
@@ -127,6 +128,7 @@ async function PassengerPage({ params }: PageProps<"/p/[token]">) {
             ))}
           </ul>
         ) : null}
+        {care.some((e) => e.kind === "MEAL_ALLOWANCE") && v.choice !== "REFUND" ? <p className="mt-2 text-sm">Further meals: send your receipts below. Meals are covered up to <span className="font-mono tabular">{euros(loadPolicy().mealAllowanceMaxPer24hEur * 100)}</span> per 24 hours of waiting in total, the allowance above included.</p> : null}
         {care.length ? <p className="mt-2 text-xs text-muted">Meal, hotel and transport amounts are Demo Air policy, not set by law.</p> : null}
         <details className="mt-3">
           <summary className="cursor-pointer text-sm">How this was calculated</summary>

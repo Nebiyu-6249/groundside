@@ -55,7 +55,7 @@ const RECEIPTS: Receipt[] = [
     lines: [{ text: "Laugenbrezel", amount: 3.2, category: "FOOD" }, { text: "Kaesebroetchen", amount: 5.9, category: "FOOD" }, { text: "Cappuccino", amount: 3.8, category: "NON_ALCOHOLIC_DRINK" }, { text: "Mineralwasser 0,5 l", amount: 2.9, category: "NON_ALCOHOLIC_DRINK" }],
     vatText: ["Enth. MwSt. 19%          2,52", "Netto                   13,28"], payment: "Kartenzahlung  **** 0000",
     scenario: "A", remainingCents: WITH_ALLOWANCE, expectedDecision: "AUTO_APPROVED", expectedApprovedCents: 1580, expectedReason: "inside the window, lines add up, food and drinks within the remaining meal allowance",
-    typicalPassenger: "REJECTED: a typical scenario A passenger's flat 60 EUR meal allowance already reaches the 60 EUR daily maximum (current rule)",
+    typicalPassenger: "AUTO_APPROVED: a typical scenario A passenger has 45 EUR of meals left after the flat 15 EUR allowance (60 EUR per 24 hours in total)",
   },
   {
     key: "b-frankfurt-restaurant-beer", label: "Frankfurt airport restaurant with a beer (German and English)", lang: "de", merchant: "Bistro Vorfeld Sieben",
@@ -64,7 +64,7 @@ const RECEIPTS: Receipt[] = [
     lines: [{ text: "Schnitzel mit Pommes / Schnitzel with fries", amount: 16.9, category: "FOOD" }, { text: "Apfelschorle 0,4 l / Apple spritzer", amount: 3.9, category: "NON_ALCOHOLIC_DRINK" }, { text: "Pils vom Fass 0,4 l / Draught lager", amount: 5.2, category: "ALCOHOL" }],
     vatText: ["Enth. MwSt. / Incl. VAT 19%   4,15", "Netto / Net                  21,85"], payment: "Karte / Card  **** 0000",
     scenario: "A", remainingCents: WITH_ALLOWANCE, expectedDecision: "AUTO_APPROVED", expectedApprovedCents: 2080, expectedReason: "the beer (5.20 EUR) is excluded; food and soft drink (20.80 EUR) reimbursed",
-    typicalPassenger: "REJECTED: allowance already used (current rule), after excluding the beer",
+    typicalPassenger: "AUTO_APPROVED for the food, after excluding the beer, within the 45 EUR left after the flat allowance",
   },
   {
     key: "c-frankfurt-hotel-invoice", label: "Frankfurt airport-area hotel invoice, one night (English)", lang: "en", merchant: "Hotel Rollfeld Nord",
@@ -82,7 +82,7 @@ const RECEIPTS: Receipt[] = [
     lines: [{ text: "Cornetto", amount: 1.5, category: "FOOD" }, { text: "Cappuccino", amount: 1.8, category: "NON_ALCOHOLIC_DRINK" }, { text: "Acqua naturale 0,5 l", amount: 1.2, category: "NON_ALCOHOLIC_DRINK" }],
     vatText: ["di cui IVA 10%              0,41"], payment: "Pagamento elettronico  **** 0000",
     scenario: "B", remainingCents: WITH_ALLOWANCE, expectedDecision: "AUTO_APPROVED", expectedApprovedCents: 450, expectedReason: "inside the scenario B window; care is paid even after the signed denial of compensation",
-    typicalPassenger: "REJECTED: allowance already used (current rule)",
+    typicalPassenger: "AUTO_APPROVED within the meal allowance left, once the date is readable (scenario B passenger)",
   },
   {
     key: "e-frankfurt-faded", label: "Faded, crumpled Frankfurt receipt (German)", lang: "de", merchant: "Kiosk Steig Null", faded: true,
@@ -91,7 +91,7 @@ const RECEIPTS: Receipt[] = [
     lines: [{ text: "Sandwich Huhn", amount: 6.4, category: "FOOD" }, { text: "Orangensaft 0,33 l", amount: 3.1, category: "NON_ALCOHOLIC_DRINK" }, { text: "Schokoriegel", amount: 1.6, category: "FOOD" }],
     vatText: ["Enth. MwSt. 19%          1,77"], payment: "Kartenzahlung  **** 0000",
     scenario: "A", remainingCents: WITH_ALLOWANCE, expectedDecision: "HUMAN_REVIEW", expectedApprovedCents: 0, expectedReason: "faded print: the total and amounts cannot be read with confidence",
-    typicalPassenger: "HUMAN_REVIEW (or REJECTED for the allowance once a person reads it)",
+    typicalPassenger: "HUMAN_REVIEW (a person reads it, then approves within the meal allowance left)",
   },
   {
     key: "f-frankfurt-total-mismatch", label: "Frankfurt snack bar, lines do not add up (German)", lang: "de", merchant: "Snackbar Terminal Eins",

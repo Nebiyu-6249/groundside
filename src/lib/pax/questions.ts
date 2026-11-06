@@ -2,6 +2,7 @@
 // both messages, and opens a ticket when the passenger asks for a person.
 
 import type { PrismaClient } from "@/generated/prisma/client";
+import { loadPolicy } from "@/lib/demo/seed";
 import { aiConfig } from "@/lib/ai/config";
 import { answerQuestion, type CaseFile } from "@/lib/ai/a4/answer";
 import { openAiCaller } from "@/lib/ai/provider";
@@ -66,6 +67,10 @@ export async function buildCaseFile(db: PrismaClient, passengerId: string): Prom
       lines.push(`- ${x?.merchantName ?? "Receipt"}${x?.total ? ` ${x.total.toFixed(2)}` : ""}: ${r.decision === "AUTO_APPROVED" || r.decision === "APPROVED_BY_HUMAN" ? `approved ${eur(r.approvedCents ?? 0)}` : r.decision === "REJECTED" ? "not reimbursed" : "waiting for a person"}.`);
     }
   }
+  const policy = loadPolicy();
+  lines.push(`Meals (Demo Air policy): a flat ${eur(policy.mealAllowanceFlatEur * 100)} paid at once; further meals are reimbursed by receipt, up to ${eur(policy.mealAllowanceMaxPer24hEur * 100)} per 24 hours of waiting in total, the flat allowance included. Care ends if the passenger chooses a refund.`);
+  amounts.add(policy.mealAllowanceFlatEur * 100);
+  amounts.add(policy.mealAllowanceMaxPer24hEur * 100);
   lines.push("Meal, hotel and transport amounts are Demo Air policy, not set by law.");
   return { text: lines.filter(Boolean).join("\n"), amountsCents: [...amounts] };
 }

@@ -8,13 +8,18 @@ import type { DisruptionInput, EngineContext, EntitlementResult, PassengerInput,
 
 const eur = (cents: number) => `${cents / 100} EUR`;
 
-/** Meal allowance for a wait of `waitMinutes`, starting once the care trigger is reached at `triggerMinutes`. */
-export function mealAllowanceCents(waitMinutes: number, triggerMinutes: number, policy: EngineContext["policy"]): number {
-  const every = policy.mealAllowanceFurtherEveryHours * 60;
-  const further = Math.floor(Math.max(0, waitMinutes - triggerMinutes) / every);
-  const total = policy.mealAllowanceFirstEur + further * policy.mealAllowanceEachFurtherHoursEur;
-  const cap = policy.mealAllowanceMaxPer24hEur * Math.max(1, Math.ceil(waitMinutes / (24 * 60)));
-  return Math.min(total, cap) * 100;
+/**
+ * The flat meal allowance, paid at once when the care trigger is reached, whatever the wait
+ * (Demo Air policy, owner decision 2026-11-06). Further meals are reimbursed by receipt up to
+ * mealAllowanceMaxPer24hEur per 24 hours of waiting in total (src/lib/receipts/service.ts).
+ */
+export function mealAllowanceCents(policy: EngineContext["policy"]): number {
+  return Math.min(policy.mealAllowanceFlatEur, policy.mealAllowanceMaxPer24hEur) * 100;
+}
+
+/** Meals in total for a wait, flat allowance included: the daily maximum for each started 24 hours. */
+export function mealMaxCents(waitMinutes: number, policy: EngineContext["policy"]): number {
+  return policy.mealAllowanceMaxPer24hEur * 100 * Math.max(1, Math.ceil(waitMinutes / (24 * 60)));
 }
 
 interface CareWindow {
@@ -76,23 +81,20 @@ export function computeCare(d: DisruptionInput, p: PassengerInput, shared: Trace
 
   // Meals and refreshments (Art 9(1)(a)), amounts from Demo Air policy.
   const mealTrace = [...base];
-  let mealCents: number;
-  let mealReason: string | null = null;
+  const mealCents = mealAllowanceCents(policy);
+  const mealReason: string | null = null;
   if (refundChosen) {
     mealTrace.push(careEndStep);
-    mealCents = policy.mealAllowanceFirstEur * 100;
-    mealTrace.push(step("POL-MEALS", { firstEur: policy.mealAllowanceFirstEur }, `First allowance only: ${eur(mealCents)}`));
-  } else if (w.waitMinutes === null) {
-    mealCents = policy.mealAllowanceFirstEur * 100;
-    mealReason = "New departure time not known: only the first meal allowance is computed";
-    mealTrace.push(step("POL-MEALS", { firstEur: policy.mealAllowanceFirstEur }, `New departure unknown: first allowance ${eur(mealCents)}`));
+    mealTrace.push(step("POL-MEALS", { flatEur: policy.mealAllowanceFlatEur, amountCents: mealCents }, `Flat meal allowance ${eur(mealCents)}, paid at once (Demo Air policy). Care ends with the refund, so no further meal receipts`));
   } else {
-    mealCents = mealAllowanceCents(w.waitMinutes, w.triggerMinutes, policy);
+    const maxCents = w.waitMinutes === null ? null : mealMaxCents(w.waitMinutes, policy);
     mealTrace.push(
       step(
         "POL-MEALS",
-        { waitMinutes: w.waitMinutes, triggerMinutes: w.triggerMinutes, firstEur: policy.mealAllowanceFirstEur, eachFurtherEur: policy.mealAllowanceEachFurtherHoursEur, everyHours: policy.mealAllowanceFurtherEveryHours, maxPer24hEur: policy.mealAllowanceMaxPer24hEur, amountCents: mealCents },
-        `Wait of ${w.waitMinutes} min: meal allowance ${eur(mealCents)} (Demo Air policy)`,
+        { waitMinutes: w.waitMinutes, flatEur: policy.mealAllowanceFlatEur, maxPer24hEur: policy.mealAllowanceMaxPer24hEur, amountCents: mealCents, mealMaxCents: maxCents },
+        maxCents === null
+          ? `Flat meal allowance ${eur(mealCents)}, paid at once (Demo Air policy). New departure not known yet: further meals by receipt, up to ${policy.mealAllowanceMaxPer24hEur} EUR per 24 hours in total`
+          : `Flat meal allowance ${eur(mealCents)}, paid at once (Demo Air policy). Further meals by receipt, up to ${eur(maxCents)} in total for a wait of ${w.waitMinutes} min (${policy.mealAllowanceMaxPer24hEur} EUR per 24 hours)`,
       ),
     );
   }

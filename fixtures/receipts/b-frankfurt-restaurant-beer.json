@@ -36,7 +36,7 @@
     "expected": "AUTO_APPROVED",
     "approvedCents": 2080,
     "why": "the beer (5.20 EUR) is excluded; food and soft drink (20.80 EUR) reimbursed",
-    "typicalPassenger": "REJECTED: allowance already used (current rule), after excluding the beer"
+    "typicalPassenger": "AUTO_APPROVED for the food, after excluding the beer, within the 45 EUR left after the flat allowance"
   },
   "readingMayBeUncertain": false
 }

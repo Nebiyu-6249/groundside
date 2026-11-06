@@ -6,9 +6,9 @@ import { z } from "zod";
 export const airlinePolicySchema = z.strictObject({
   label: z.string(),
   currency: z.literal("EUR"),
-  mealAllowanceFirstEur: z.number().int().nonnegative(),
-  mealAllowanceEachFurtherHoursEur: z.number().int().nonnegative(),
-  mealAllowanceFurtherEveryHours: z.number().int().positive(),
+  /** Paid at once when the care trigger is reached (owner decision 2026-11-06). */
+  mealAllowanceFlatEur: z.number().int().nonnegative(),
+  /** Meals in total per 24 hours of waiting, the flat allowance included; receipts cover the rest. */
   mealAllowanceMaxPer24hEur: z.number().int().nonnegative(),
   hotelCapPerNightEur: z.number().int().nonnegative(),
   groundTransportCapEachWayEur: z.number().int().nonnegative(),

@@ -25,3 +25,4 @@ Claude Code: these are decisions only the user can make. Use the default until t
 
 - 2026-11-03, Q1 (and scope): No Arabic and no Amharic. The product is English only; no RTL, no language switcher, no `ENABLE_AMHARIC`. Receipts may still be in any language as input data, but no Arabic or Amharic features are built.
 - 2026-11-03, Q6: The sandbox business account (airline) was created with a balance of 100,000 EUR. Size `PAYOUT_DAILY_CAP_EUR` from this and the spike reading.
+- 2026-11-06, Q8 (meal policy) changed by the owner: a flat 15 EUR at once; further meals by receipt up to 60 EUR per 24 hours in total, the flat amount included. The earlier rule (15 EUR plus 15 per further 4 hours, max 60) meant a long-wait passenger's meal receipts were always rejected as "allowance already used".
