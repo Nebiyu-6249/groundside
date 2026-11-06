@@ -48,7 +48,7 @@ Groundside does both on the night.
   - Passenger answers: 8 of 8 eval cases pass, including injection, legal-advice and "add it all up" cases.
   - The AI never approves a receipt and never states an amount that is not in the case file.
 - **Rule pack:** 46 entries (Regulation 261/2004, CJEU judgments, Commission guidelines), each checked word for word against the official text from the EU Publications Office.
-- **Engine:** a pure TypeScript EU261 engine with 64 unit tests, each naming the rule it exercises. The project has 198 tests in all.
+- **Engine:** a pure TypeScript EU261 engine with 64 unit tests, each naming the rule it exercises. The project has 213 tests in all.
 - **Data:** real archived METAR from the Iowa Environmental Mesonet (public domain), for Frankfurt on 2026-01-24 and Milan Malpensa freezing fog on 2026-01-22. Passengers and the airline are synthetic and labelled as demo data.
 - **Stack:** Next.js, TypeScript, Prisma, Postgres on Neon, AG Grid and AG Charts (weather timelines), sharp, Tailwind. Deployed on Render through the Render CLI.
 
@@ -66,6 +66,11 @@ Measured in the PayPal sandbox on the hosted database, 2026-11-04:
 - **Payout outcome:** 14 of 16 payouts reached SUCCESS within 46 s of sending. The other 2 are unclaimed by design (a passenger without a PayPal account).
 - **Webhooks:** all 19 PayPal webhooks delivered to the hosted app passed signature verification.
 - **AI cost:** about 0.002 USD per assessment.
+
+Measured again on 2026-11-06 by an automated walkthrough of the whole demo on the hosted app, in a fresh browser (`docs/GATE4_WALKTHROUGH.md`):
+- **Approval to first passenger paid:** 0.7 min (44 s from the Approve click to a Paid row in the grid).
+- **Money arrived:** PayPal's API reported the 600 EUR payout item as SUCCESS with a transaction ID.
+- **Steps:** 13 of 14 passed without a person; the demo booking needs a person to log in to the PayPal sandbox checkout.
 
 ## What we learned
 
