@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import type { PrismaClient } from "@/generated/prisma/client";
 import { audit } from "@/lib/ops/audit";
 import { PaypalNetworkError } from "@/lib/paypal/http";
+import { paypalAccount } from "@/lib/paypal/account";
 import { createBatchResponseSchema, createPayoutBatch } from "@/lib/paypal/payouts";
 import { applyBatchUpdate, NO_MONEY } from "./transitions";
 import { receiptEntitlementKind } from "@/lib/receipts/service";
@@ -106,7 +107,7 @@ async function sendBatch(db: PrismaClient, batchId: string): Promise<void> {
 
 /** Retries batches that were written but never confirmed by PayPal (crash or unknown outcome). */
 export async function resendStuckBatches(db: PrismaClient, disruptionId: string): Promise<number> {
-  const stuck = await db.payoutBatch.findMany({ where: { paypalBatchId: null, status: "CREATING", createdAt: { lt: new Date(Date.now() - 30_000) }, items: { some: { entitlement: { passenger: { disruptionId } } } } } });
+  const stuck = await db.payoutBatch.findMany({ where: { paypalBatchId: null, status: "CREATING", paypalAccount: paypalAccount(), createdAt: { lt: new Date(Date.now() - 30_000) }, items: { some: { entitlement: { passenger: { disruptionId } } } } } });
   for (const b of stuck) await sendBatch(db, b.id);
   return stuck.length;
 }
@@ -153,7 +154,7 @@ export async function payDisruption(db: PrismaClient, disruptionId: string, sett
       let batchId: string;
       try {
         batchId = await db.$transaction(async (tx) => {
-          const b = await tx.payoutBatch.create({ data: { senderBatchId, kind: kind.batch, status: "CREATING", itemCount: rows.length, totalCents: rows.reduce((s, r) => s + r.e.amountCents, 0) } });
+          const b = await tx.payoutBatch.create({ data: { senderBatchId, paypalAccount: paypalAccount(), kind: kind.batch, status: "CREATING", itemCount: rows.length, totalCents: rows.reduce((s, r) => s + r.e.amountCents, 0) } });
           await tx.payoutItem.createMany({ data: rows.map((r) => ({ id: r.id, senderItemId: r.id, batchId: b.id, entitlementId: r.e.id, receiver: r.e.passenger.payoutReceiver!, amountCents: r.e.amountCents, status: "CREATING" })) });
           await tx.entitlement.updateMany({ where: { id: { in: rows.map((r) => r.e.id) } }, data: { status: "PAYING" } });
           return b.id;
@@ -198,7 +199,7 @@ export async function payDisruption(db: PrismaClient, disruptionId: string, sett
     let batchId: string;
     try {
       batchId = await db.$transaction(async (tx) => {
-        const b = await tx.payoutBatch.create({ data: { senderBatchId, kind: "RECEIPT", status: "CREATING", itemCount: rows.length, totalCents: rows.reduce((s, x) => s + x.r.approvedCents!, 0) } });
+        const b = await tx.payoutBatch.create({ data: { senderBatchId, paypalAccount: paypalAccount(), kind: "RECEIPT", status: "CREATING", itemCount: rows.length, totalCents: rows.reduce((s, x) => s + x.r.approvedCents!, 0) } });
         await tx.payoutItem.createMany({ data: rows.map((x) => ({ id: x.id, senderItemId: x.id, batchId: b.id, entitlementId: x.entitlementId, receiptId: x.r.id, receiver: x.r.passenger.payoutReceiver!, amountCents: x.r.approvedCents!, status: "CREATING" })) });
         return b.id;
       });

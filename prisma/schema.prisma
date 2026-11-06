@@ -480,9 +480,13 @@ model PayoutBatch {
   totalCents    Int
   lastSyncedAt  DateTime?
   lastError     String?
+  /// Fingerprint of the PayPal app that created the batch (src/lib/paypal/account.ts); NULL = an earlier app, archived.
+  paypalAccount String?
   items         PayoutItem[]
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
+
+  @@index([paypalAccount])
 }
 
 model PayoutItem {
