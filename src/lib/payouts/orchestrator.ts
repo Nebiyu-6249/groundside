@@ -9,6 +9,7 @@ import { PaypalNetworkError } from "@/lib/paypal/http";
 import { createBatchResponseSchema, createPayoutBatch } from "@/lib/paypal/payouts";
 import { applyBatchUpdate, NO_MONEY } from "./transitions";
 import { receiptEntitlementKind } from "@/lib/receipts/service";
+import { balancePaused, INSUFFICIENT_FUNDS, sentTodayCents } from "./limits";
 
 const KINDS = [
   { entitlement: "COMPENSATION" as const, batch: "COMPENSATION" as const, note: "EU261 compensation" },
@@ -29,10 +30,7 @@ export function payoutSettings(env: Record<string, string | undefined> = process
 
 /** Sum of payout items created since 00:00 UTC that did not fail before money moved. */
 export async function paidTodayCents(db: PrismaClient): Promise<number> {
-  const start = new Date();
-  start.setUTCHours(0, 0, 0, 0);
-  const agg = await db.payoutItem.aggregate({ _sum: { amountCents: true }, where: { createdAt: { gte: start }, status: { notIn: [...NO_MONEY] } } });
-  return agg._sum.amountCents ?? 0;
+  return sentTodayCents(db);
 }
 
 const newItemId = () => `pi${randomUUID().replace(/-/g, "").slice(0, 22)}`;
@@ -85,7 +83,11 @@ async function sendBatch(db: PrismaClient, batchId: string): Promise<void> {
     }
     // Retry once only when PayPal documents it as safe: after a 5xx or no response.
     if ((status === 0 || status >= 500) && attempt === 0) continue;
-    const message = `PayPal returned ${status || "no response"}${debugId ? ` (debug ${debugId})` : ""}`;
+    // PayPal names the error in the body; insufficient funds pauses payouts (src/lib/payouts/limits.ts).
+    const errorName = (data as { name?: string } | null)?.name ?? "";
+    const message = errorName === INSUFFICIENT_FUNDS
+      ? `${INSUFFICIENT_FUNDS}: the sandbox business balance is too low for this batch (HTTP ${status}${debugId ? `, debug ${debugId}` : ""})`
+      : `PayPal returned ${status || "no response"}${errorName ? ` ${errorName}` : ""}${debugId ? ` (debug ${debugId})` : ""}`;
     if (status === 0 || status >= 500) {
       // Outcome unknown: leave the batch CREATING so reconciliation retries with the same ID.
       await db.payoutBatch.update({ where: { id: batch.id }, data: { lastError: message } });
@@ -97,7 +99,7 @@ async function sendBatch(db: PrismaClient, batchId: string): Promise<void> {
       // Receipt items leave their entitlement alone: it may already be paid by its own payout.
       db.entitlement.updateMany({ where: { id: { in: batch.items.filter((i) => !i.receiptId).map((i) => i.entitlementId) } }, data: { status: "ACCEPTED" } }),
     ]);
-    await audit(db, { actorType: "PAYPAL", action: "PAYOUT_BATCH_FAILED", entityType: "PayoutBatch", entityId: batch.id, summary: message, data });
+    await audit(db, { actorType: "PAYPAL", action: errorName === INSUFFICIENT_FUNDS ? "PAYOUT_BALANCE_OUT" : "PAYOUT_BATCH_FAILED", entityType: "PayoutBatch", entityId: batch.id, summary: message, data });
     return;
   }
 }
@@ -114,6 +116,9 @@ export async function payDisruption(db: PrismaClient, disruptionId: string, sett
   // Compensation stays PENDING_DECISION until then, so it is never selected below.
   const d = await db.disruption.findUniqueOrThrow({ where: { id: disruptionId }, select: { careReleasedAt: true, decisions: { select: { id: true } } } });
   if (d.decisions.length === 0 && !d.careReleasedAt) return { batches: 0, items: 0, skippedForCap: 0 };
+  // After PayPal refused a batch for insufficient funds, wait before trying again: everything stays
+  // queued (ACCEPTED), and the rest of the demo is unaffected.
+  if (await balancePaused(db)) return { batches: 0, items: 0, skippedForCap: 0, heldForBalance: true };
   let remainingCap = settings.dailyCapCents - (await paidTodayCents(db));
   let batches = 0;
   let items = 0;

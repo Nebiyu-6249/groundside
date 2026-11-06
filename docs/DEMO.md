@@ -208,7 +208,7 @@ The user rewrites this in their own words before submitting.
 - [ ] Sandbox business balance checked; `PAYOUT_DAILY_CAP_EUR` set for 2 weeks of judging.
 - [ ] AI budget cap set; fixtures recorded for every scenario so the demo works with AI off.
 - [ ] Render service plan decided for Dec 1 to 15 (`docs/OPEN_QUESTIONS.md`).
-- [ ] Submitted by Thu Nov 12, 18:00 Dubai time (internal deadline; official cut-off is midnight Dubai time).
+- [ ] Submitted by Thu Nov 12, 18:00 Dubai time (internal deadline; official cut-off Thu Nov 12, 12:00 PM PT, which is Fri Nov 13, 00:00 Dubai).
 
 ### Checklist status (2026-11-05, Claude Code)
 

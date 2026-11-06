@@ -11,6 +11,7 @@ import { euros, localTime, utcTime } from "@/lib/format";
 import { disruptionDetail, type DisruptionDetail } from "@/lib/ops/queries";
 import { loadReadiness, type ReadinessCheck } from "@/lib/ops/readiness";
 import { payoutSettings } from "@/lib/payouts/orchestrator";
+import { holdMessage, payoutHold, queuedPayouts } from "@/lib/payouts/limits";
 import { approve, assess, cancelUnclaimedItem, closeTicket, decideReceipt, deny, resetRun, openAsPassenger, releaseCareNow, remindUnclaimed, retryRefund, simulateResponses, syncWithPaypal } from "../../actions";
 import { ActionButton, ApproveForm, DenyForm, LiveRefresh, ReceiptReviewForm } from "./client";
 import { PassengersGrid } from "./passengers-grid";
@@ -403,6 +404,8 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
   const d = await disruptionDetail(db, id);
   if (!d) notFound();
   const readiness = await loadReadiness(db, id);
+  const hold = await payoutHold(db, payoutSettings().dailyCapCents);
+  const queued = hold ? await queuedPayouts(db, id) : { count: 0, cents: 0 };
   const inFlight = d.batches.some((b) => !["SUCCESS", "DENIED", "CANCELED", "FAILED_TO_CREATE"].includes(b.status) || b.items.some((i) => ["CREATING", "PENDING", "ONHOLD", "UNCLAIMED"].includes(i.status)));
   const pending = d.passengers.filter((p) => p.paymentChoice === "NONE").length;
   return (
@@ -419,6 +422,11 @@ async function Detail({ params, searchParams }: PageProps<"/ops/disruptions/[id]
         </aside>
       ) : null}
       <Header d={d} readiness={readiness} />
+      {hold ? (
+        <p role="status" className="mt-3 rounded border border-amber p-3 text-sm">
+          <span className="font-medium">Payouts paused.</span> {holdMessage(hold, queued)}
+        </p>
+      ) : null}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-b border-line">
         <nav aria-label="Disruption sections" className="flex gap-1">
           {TABS.map(([t, label]) => (
