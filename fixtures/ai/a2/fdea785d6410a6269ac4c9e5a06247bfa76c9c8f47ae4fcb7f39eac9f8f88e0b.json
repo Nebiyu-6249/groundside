@@ -1,12 +1,12 @@
 {
-  "recordedAt": "2026-11-06T11:35:41.476Z",
+  "recordedAt": "2026-11-06T16:21:08.199Z",
   "model": "gpt-6-luna",
   "promptVersion": "A2.v2",
   "source": "receipts/a-frankfurt-cafe.jpg",
   "output": {
     "isReceipt": true,
     "merchantName": "CAFE GLEIS NULL",
-    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Halle B, Frankfurt am Main",
+    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Halle B; Musterweg 0, 00000 Frankfurt am Main",
     "isAtAirport": true,
     "date": "2026-01-24",
     "time": "20:41",
@@ -43,6 +43,6 @@
       "total": "HIGH",
       "lineItems": "HIGH"
     },
-    "legibilityNotes": "The receipt is clearly marked “Sample receipt - Groundside demo.”"
+    "legibilityNotes": "All reported fields are legible. The receipt is labeled “Sample receipt - Groundside demo.”"
   }
 }

@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-11-06T11:35:59.571Z",
+  "recordedAt": "2026-11-06T16:21:27.109Z",
   "model": "gpt-6-luna",
   "promptVersion": "A2.v2",
   "source": "receipts/d-malpensa-bar.jpg",
@@ -38,6 +38,6 @@
       "total": "HIGH",
       "lineItems": "HIGH"
     },
-    "legibilityNotes": "Receipt is clearly legible. It is marked “Sample receipt - Groundside demo.”"
+    "legibilityNotes": "The receipt is legible. It is marked “Sample receipt – Groundside demo.”"
   }
 }

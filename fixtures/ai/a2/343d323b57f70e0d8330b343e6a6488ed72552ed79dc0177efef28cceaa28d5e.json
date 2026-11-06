@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-11-06T11:36:09.427Z",
+  "recordedAt": "2026-11-06T16:21:41.263Z",
   "model": "gpt-6-luna",
   "promptVersion": "A2.v2",
   "source": "receipts/e-frankfurt-faded.jpg",
@@ -11,7 +11,7 @@
     "date": null,
     "time": null,
     "currency": "EUR",
-    "total": 21.7,
+    "total": 31.7,
     "lineItems": [],
     "language": "German",
     "confidence": {
@@ -22,6 +22,6 @@
       "total": "LOW",
       "lineItems": "LOW"
     },
-    "legibilityNotes": "The receipt is very faded and creased. The total appears to read 21,70 EUR, but the amount is faint. No date or time is legible, and the item descriptions and amounts cannot be read."
+    "legibilityNotes": "The receipt is heavily faded and creased. The total appears to read 31,70 but is faint. No line item descriptions, date, or time could be read."
   }
 }

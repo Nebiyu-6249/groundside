@@ -1,5 +1,5 @@
 {
-  "recordedAt": "2026-11-06T11:35:35.281Z",
+  "recordedAt": "2026-11-06T16:21:00.508Z",
   "model": "gpt-6-luna",
   "promptVersion": "A2.v2",
   "source": "receipts-synthetic/sum-mismatch.png",
@@ -38,6 +38,6 @@
       "total": "HIGH",
       "lineItems": "HIGH"
     },
-    "legibilityNotes": "The receipt is labeled “SYNTHETIC TEST RECEIPT” and says “Not a real receipt.”"
+    "legibilityNotes": "The receipt states: \"SYNTHETIC TEST RECEIPT\" and \"Not a real receipt.\""
   }
 }
