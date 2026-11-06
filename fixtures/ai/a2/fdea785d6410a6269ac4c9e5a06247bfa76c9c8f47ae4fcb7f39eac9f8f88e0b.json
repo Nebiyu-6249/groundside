@@ -1,0 +1,48 @@
+{
+  "recordedAt": "2026-11-06T11:35:41.476Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/a-frankfurt-cafe.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "CAFE GLEIS NULL",
+    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Halle B, Frankfurt am Main",
+    "isAtAirport": true,
+    "date": "2026-01-24",
+    "time": "20:41",
+    "currency": "EUR",
+    "total": 15.8,
+    "lineItems": [
+      {
+        "description": "Laugenbrezel",
+        "amount": 3.2,
+        "category": "FOOD"
+      },
+      {
+        "description": "Kaesebroetchen",
+        "amount": 5.9,
+        "category": "FOOD"
+      },
+      {
+        "description": "Cappuccino",
+        "amount": 3.8,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Mineralwasser 0,5 l",
+        "amount": 2.9,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "German",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt is clearly marked “Sample receipt - Groundside demo.”"
+  }
+}

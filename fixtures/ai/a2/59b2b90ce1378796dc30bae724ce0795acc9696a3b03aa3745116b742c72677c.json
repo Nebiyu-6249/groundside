@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-06T11:34:31.567Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/e-frankfurt-faded.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "KIOSK STEIG NULL",
+    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Gate A; Musterplatz 0, 00000 Frankfurt am Main",
+    "isAtAirport": true,
+    "date": "2025-01-24",
+    "time": "21:05",
+    "currency": "EUR",
+    "total": 11.1,
+    "lineItems": [
+      {
+        "description": "Sandwich Huhn",
+        "amount": 6.4,
+        "category": "FOOD"
+      },
+      {
+        "description": "Orangensaft 0,33 l",
+        "amount": 3.1,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Schokoriegel",
+        "amount": 1.6,
+        "category": "FOOD"
+      }
+    ],
+    "language": "German",
+    "confidence": {
+      "merchantName": "MEDIUM",
+      "date": "MEDIUM",
+      "time": "MEDIUM",
+      "currency": "MEDIUM",
+      "total": "MEDIUM",
+      "lineItems": "MEDIUM"
+    },
+    "legibilityNotes": "The receipt print is very faint and low-contrast, but the listed details and amounts are readable."
+  }
+}

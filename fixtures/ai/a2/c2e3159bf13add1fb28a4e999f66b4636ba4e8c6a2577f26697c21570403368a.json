@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-06T11:35:48.090Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/b-frankfurt-restaurant-beer.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "BISTRO VORFELD SIEBEN",
+    "merchantLocation": "Flughafen Frankfurt, Terminal 1, Ebene 2; Beispielallee 0, 00000 Frankfurt am Main",
+    "isAtAirport": true,
+    "date": "2026-01-24",
+    "time": "22:18",
+    "currency": "EUR",
+    "total": 26,
+    "lineItems": [
+      {
+        "description": "Schnitzel mit Pommes / Schnitzel with fries",
+        "amount": 16.9,
+        "category": "FOOD"
+      },
+      {
+        "description": "Apfelschorle 0,4 l / Apple spritzer",
+        "amount": 3.9,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Pils vom Fass 0,4 l / Draught lager",
+        "amount": 5.2,
+        "category": "ALCOHOL"
+      }
+    ],
+    "language": "German and English",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "The receipt is clearly legible. It is marked “Sample receipt - Groundside demo.”"
+  }
+}

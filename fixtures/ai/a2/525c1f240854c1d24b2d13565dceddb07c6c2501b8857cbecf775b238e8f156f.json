@@ -1,0 +1,43 @@
+{
+  "recordedAt": "2026-11-06T11:35:59.571Z",
+  "model": "gpt-6-luna",
+  "promptVersion": "A2.v2",
+  "source": "receipts/d-malpensa-bar.jpg",
+  "output": {
+    "isReceipt": true,
+    "merchantName": "BAR PISTA ZERO",
+    "merchantLocation": "Aeroporto di Milano Malpensa, Terminal 1, Via Esempio 0, 00000 Ferno (VA)",
+    "isAtAirport": true,
+    "date": "2026-01-22",
+    "time": "06:47",
+    "currency": "EUR",
+    "total": 4.5,
+    "lineItems": [
+      {
+        "description": "Cornetto",
+        "amount": 1.5,
+        "category": "FOOD"
+      },
+      {
+        "description": "Cappuccino",
+        "amount": 1.8,
+        "category": "NON_ALCOHOLIC_DRINK"
+      },
+      {
+        "description": "Acqua naturale 0,5 l",
+        "amount": 1.2,
+        "category": "NON_ALCOHOLIC_DRINK"
+      }
+    ],
+    "language": "Italian",
+    "confidence": {
+      "merchantName": "HIGH",
+      "date": "HIGH",
+      "time": "HIGH",
+      "currency": "HIGH",
+      "total": "HIGH",
+      "lineItems": "HIGH"
+    },
+    "legibilityNotes": "Receipt is clearly legible. It is marked “Sample receipt - Groundside demo.”"
+  }
+}

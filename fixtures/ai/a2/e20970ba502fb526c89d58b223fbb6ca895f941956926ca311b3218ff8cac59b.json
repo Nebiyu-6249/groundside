@@ -1,7 +1,7 @@
 {
-  "recordedAt": "2026-11-04T20:06:26.960Z",
+  "recordedAt": "2026-11-06T11:35:24.602Z",
   "model": "gpt-6-luna",
-  "promptVersion": "A2.v1",
+  "promptVersion": "A2.v2",
   "source": "receipts-synthetic/dinner-with-beer.png",
   "output": {
     "isReceipt": true,
@@ -38,6 +38,6 @@
       "total": "HIGH",
       "lineItems": "HIGH"
     },
-    "legibilityNotes": "The receipt is clearly legible. It is printed with the labels “SYNTHETIC TEST RECEIPT” and “Not a real receipt.”"
+    "legibilityNotes": "The receipt is clearly marked “SYNTHETIC TEST RECEIPT” and “Not a real receipt.”"
   }
 }

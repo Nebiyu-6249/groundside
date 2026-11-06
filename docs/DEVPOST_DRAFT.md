@@ -44,7 +44,7 @@ Groundside does both on the night.
 
   Code, not the model, maps the result to the recommendation shown. Failures retry once, then fall back to "uncertain, a human decides". A daily spend cap serves a recorded result when reached. Evaluated with 12 cases: 12 of 12 pass on two full runs, including a prompt-injection case.
 - **AI receipts and questions:**
-  - Receipt reading (vision, strict JSON): 5 of 5 synthetic receipts read exactly.
+  - Receipt reading (vision, strict JSON): tested on 12 synthetic sample receipts (not real receipts). Seven are photo-style samples in German, English, Italian and Arabic with English, with invented merchants and zeroed identifiers. All 12 read correctly. The deliberately faded one counts as correct because the model flagged it as low confidence instead of guessing. The code checks reached the expected decision in 8 of 8 cases, including excluding a beer, capping a hotel night, a receipt outside the disruption window, a total that does not add up, and a re-uploaded duplicate.
   - Passenger answers: 8 of 8 eval cases pass, including injection, legal-advice and "add it all up" cases.
   - The AI never approves a receipt and never states an amount that is not in the case file.
 - **Rule pack:** 46 entries (Regulation 261/2004, CJEU judgments, Commission guidelines), each checked word for word against the official text from the EU Publications Office.
