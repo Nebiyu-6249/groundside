@@ -85,7 +85,15 @@ paypal-payouts, paypal-orders, paypal-webhooks, openai, nextjs, typescript, pris
 ## Try it
 
 - **Hosted demo:** https://groundside.onrender.com. On the free plan, the first request after a quiet spell can take up to a minute.
-- **No login needed:** press "Start the judge demo" on the hosted page.
-- **Shared demo login (optional):** `duty.manager@demo.groundside.test`, with the password you choose to publish.
+
+### Testing instructions
+
+<!-- logins:start -->
+- **No login needed:** press **Start the judge demo** on https://groundside.onrender.com for your own copy of a scenario (24 hours).
+- **Shared demo duty manager** (optional, at /login): email `duty.manager@demo.groundside.test`, password `wbSY9KsrlxC1zoC8`.
+- **PayPal sandbox buyer** (for the booking page): to be published.
+- Sandbox only: these accounts hold no real money, and every passenger, booking and the airline are demo data.
+<!-- logins:end -->
+
 - **Code:** https://github.com/Nebiyu-6249/groundside
 - **Video:** to be added in Phase 5.

@@ -5,8 +5,15 @@ When a flight from an EU airport is cancelled or badly delayed, Groundside check
 Built for the PayPal AI Hackathon. **Status: in development (Phase 5: hardening and submission).**
 
 - Live demo: https://groundside.onrender.com (free plan: the first request after a quiet spell can take up to a minute while it wakes)
-- Try it: open the live demo and press **Start the judge demo**. You get your own copy of a scenario (12 synthetic passengers), signed in as its duty manager, for 24 hours. No login needed.
-- Shared demo login and sandbox buyer account for the booking page: to be published here (sandbox only)
+
+### Try it
+
+<!-- logins:start -->
+- **No login needed:** press **Start the judge demo** on https://groundside.onrender.com for your own copy of a scenario (24 hours).
+- **Shared demo duty manager** (optional, at /login): email `duty.manager@demo.groundside.test`, password `wbSY9KsrlxC1zoC8`.
+- **PayPal sandbox buyer** (for the booking page): to be published.
+- Sandbox only: these accounts hold no real money, and every passenger, booking and the airline are demo data.
+<!-- logins:end -->
 
 ## Architecture
 
