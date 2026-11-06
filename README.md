@@ -11,7 +11,7 @@ Built for the PayPal AI Hackathon. **Status: in development (Phase 5: hardening 
 <!-- logins:start -->
 - **No login needed:** press **Start the judge demo** on https://groundside.onrender.com for your own copy of a scenario (24 hours).
 - **Shared demo duty manager** (optional, at /login): email `duty.manager@demo.groundside.test`, password `wbSY9KsrlxC1zoC8`.
-- **PayPal sandbox buyer** (for the booking page): to be published.
+- **PayPal sandbox buyer** (for the booking page, /demo/book): email `sb-40ycm53693429@personal.example.com`, password `Pirs5v>U`.
 - Sandbox only: these accounts hold no real money, and every passenger, booking and the airline are demo data.
 <!-- logins:end -->
 
