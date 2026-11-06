@@ -34,6 +34,7 @@
     "secret-scan": "tsx scripts/secret-scan.ts",
     "screens": "tsx scripts/screens.ts",
     "screens:limits": "tsx --env-file=.env scripts/screens-limits.ts",
+    "publish-logins": "tsx --env-file=.env scripts/publish-logins.ts",
     "smoke": "playwright test",
     "e2e": "tsx --env-file=.env scripts/e2e-flow.ts"
   },
