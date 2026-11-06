@@ -27,7 +27,7 @@ services:
       - key: AI_DAILY_BUDGET_USD
         value: "3"
       - key: PAYOUT_DAILY_CAP_EUR
-        value: "20000"
+        value: "12000"
       - key: PAYOUT_BATCH_SIZE
         value: "20"
       - key: MAX_JUDGE_RUNS_PER_HOUR

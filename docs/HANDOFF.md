@@ -29,14 +29,13 @@ Current state for a fresh session. Read CLAUDE.md first, then this, then `docs/P
 - **Receipts:** seven synthetic photo-style samples in `fixtures/receipts/` (`npm run receipts:make`), labelled as samples everywhere. `npm run eval:a2`: reading 12/12, decisions 8/8 (`docs/EVAL_A2.md`).
 - **Phase 5 in progress.** Next for Claude Code: the Gate 5 checklist (`docs/DEMO.md` section 7): final README, Devpost text, architecture diagram.
 - **Owner to-do:**
-  1. **Render variables (blocks the switch to the new PayPal app).** `.env` has the new PayPal app (client ID, secret, `NEXT_PUBLIC_PAYPAL_CLIENT_ID`, webhook ID) and `PAYOUT_DAILY_CAP_EUR=12000`, but Render still runs the old app. Either add `RENDER_API_KEY` to `.env` and ask Claude Code to run `npm run deploy:render` (it syncs the variables and redeploys, which rebuilds `NEXT_PUBLIC_` values), or change `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `NEXT_PUBLIC_PAYPAL_CLIENT_ID` and `PAYOUT_DAILY_CAP_EUR` in the Render dashboard. Then Claude Code runs the hosted smoke test.
-  2. Delete the old PayPal sandbox app only after Render runs the new one and the smoke test passes (its webhook still points at the hosted URL until then).
-  3. Add `SANDBOX_BUYER_EMAIL` and `SANDBOX_BUYER_PASSWORD` to `.env`, then run `npm run publish-logins` to publish the buyer login next to the demo login (already published).
-  - Secrets (owner decision 2026-11-06): the new PayPal app replaces the leaked PayPal secret. Its own client secret was pasted in chat, and the owner accepted that. The Neon password is not rotated, by owner decision.
-  4. Decide the Render plan for judging (free sleeps when idle; starter is always on).
-  5. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`), record and upload the video (under 3:00), and tick the prizes.
-  6. Put `prize-aggrid.txt` and `prize-render.txt` in the repo root (they were not there on 2026-11-06); Claude Code checks them and deletes them without committing.
-  7. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
+  - **Done 2026-11-06:** Render runs the new PayPal app with `PAYOUT_DAILY_CAP_EUR=12000` (synced by `npm run deploy:render` with the Render CLI's login token, owner permission; `render.yaml` now says 12000). The hosted smoke test passed on the new app. The buyer login is published.
+  1. Delete the old PayPal sandbox app in the developer dashboard: safe now (no payout record from it remains, and every webhook since the switch verified against the new app's webhook).
+  - Secrets (owner decision 2026-11-06): the new PayPal app replaces the leaked PayPal secret. Its own client secret and the sandbox buyer password were pasted in chat, and the owner accepted that. The Neon password is not rotated, by owner decision.
+  2. Decide the Render plan for judging (free sleeps when idle; starter is always on).
+  3. Submit the Devpost draft (`docs/DEVPOST_DRAFT.md`), record and upload the video (under 3:00), and tick the prizes.
+  4. Put `prize-aggrid.txt` and `prize-render.txt` in the repo root (they were not there on 2026-11-06); Claude Code checks them and deletes them without committing.
+  5. Optional: real receipt photos (personal data covered) in `fixtures/receipts/`, then `npm run eval:a2`.
 - **Phase 4 is built (2026-11-05)** (`docs/DEMO.md` section 3). Phases 0 to 3 are approved; the Quick run works on https://groundside.onrender.com.
   - **Phase 4 features:**
     - release care before the decision
